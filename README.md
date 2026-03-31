@@ -200,7 +200,7 @@ MIT License — см. файл [LICENSE](LICENSE) для деталей.
 ## 📧 Контакты
 
 - **GitHub:** [@neverjoskiy](https://github.com/neverjoskiy)
-- **Telegram:** [@neverjoskiy](https://t.me/neverjoskiy)
+- **Telegram:** [@bioneverr](https://t.me/bioneverr)
 
 ---
 
