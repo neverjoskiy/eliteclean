@@ -473,6 +473,39 @@ body {
     line-height: 1.5;
 }
 
+/* Info Cards Small (для главной) */
+.info-cards-small {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 32px;
+    flex-wrap: wrap;
+}
+
+.info-card-small {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 20px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    min-width: 100px;
+}
+
+.info-icon-small {
+    width: 32px;
+    height: 32px;
+    color: var(--accent-primary);
+}
+
+.info-card-small span {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
 /* ============================================
    Logs Section
    ============================================ */
@@ -822,15 +855,6 @@ body {
 
 .tool-icon-wrapper.global-clean .tool-icon {
     color: var(--accent-danger, #ef4444);
-}
-
-.tool-icon-wrapper.javaw-clean {
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(217, 119, 6, 0.2) 100%);
-    border: 1px solid rgba(245, 158, 11, 0.3);
-}
-
-.tool-icon-wrapper.javaw-clean .tool-icon {
-    color: var(--accent-warning, #f59e0b);
 }
 
 .tool-info h3 {

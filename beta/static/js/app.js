@@ -1,5 +1,5 @@
 /**
- * Steam Launcher - Frontend JavaScript
+ * NoxumClean - Frontend JavaScript
  * Обработка взаимодействия с API и управление UI
  */
 
@@ -75,7 +75,7 @@ function addLog(message, type = 'info') {
     logs.push({ timestamp, message, type });
 
     const container = document.getElementById('logsContainer');
-    
+
     // Очищаем placeholder если это первая запись
     if (logs.length === 1) {
         container.innerHTML = '';
@@ -89,7 +89,7 @@ function addLog(message, type = 'info') {
     `;
 
     container.appendChild(logEntry);
-    
+
     // Прокрутка вниз
     container.scrollTop = container.scrollHeight;
 
@@ -123,11 +123,11 @@ async function apiRequest(endpoint, method = 'GET', body = null) {
                 'Content-Type': 'application/json'
             }
         };
-        
+
         if (body) {
             options.body = JSON.stringify(body);
         }
-        
+
         const response = await fetch(`/api${endpoint}`, options);
 
         if (!response.ok) {
@@ -139,10 +139,6 @@ async function apiRequest(endpoint, method = 'GET', body = null) {
         console.error(`API Error (${endpoint}):`, error);
         throw error;
     }
-}
-
-async function launchApp() {
-    return await apiRequest('/launch', 'POST');
 }
 
 async function getStatus() {
@@ -167,10 +163,6 @@ async function cleanTracks() {
 
 async function simulateFolders() {
     return await apiRequest('/tools/simulate', 'POST');
-}
-
-async function cleanJavawMemory() {
-    return await apiRequest('/tools/clean-javaw', 'POST');
 }
 
 async function getToolsStatus() {
@@ -202,7 +194,7 @@ function updateStatusIndicator(status) {
             break;
         case 'running':
             indicator.classList.add('running');
-            statusText.textContent = 'Запуск...';
+            statusText.textContent = 'Работа...';
             break;
         case 'error':
             indicator.classList.add('error');
@@ -213,34 +205,6 @@ function updateStatusIndicator(status) {
     }
 }
 
-function updateFileStatus(exists, size) {
-    const banner = document.getElementById('fileStatusBanner');
-    const text = document.getElementById('fileStatusText');
-    
-    banner.style.display = 'flex';
-    banner.className = 'file-status-banner';
-    
-    if (exists) {
-        const sizeKB = (size / 1024).toFixed(2);
-        text.textContent = `Microsoft.Ink.dll найден (${sizeKB} KB)`;
-        banner.classList.add('success');
-    } else {
-        text.textContent = 'Microsoft.Ink.dll не найден. Будет загружен при запуске.';
-        banner.classList.add('warning');
-    }
-}
-
-function updateLaunchStatus(message, type = 'info') {
-    const statusEl = document.getElementById('launchStatus');
-    statusEl.className = 'launch-status';
-    
-    if (type !== 'info') {
-        statusEl.classList.add(type);
-    }
-    
-    statusEl.querySelector('.status-message').textContent = message;
-}
-
 // ============================================
 // Инструменты - Чистка строк
 // ============================================
@@ -248,7 +212,7 @@ function updateLaunchStatus(message, type = 'info') {
 function resetStepStatus(stepId) {
     const step = document.getElementById(stepId);
     const statusEl = document.getElementById(stepId + 'Status');
-    
+
     step.classList.remove('active', 'completed', 'failed');
     statusEl.innerHTML = '<span class="status-badge pending">Ожидание</span>';
 }
@@ -256,7 +220,7 @@ function resetStepStatus(stepId) {
 function setStepRunning(stepId) {
     const step = document.getElementById(stepId);
     const statusEl = document.getElementById(stepId + 'Status');
-    
+
     step.classList.add('active');
     step.classList.remove('completed', 'failed');
     statusEl.innerHTML = '<span class="status-badge running">Выполнение</span>';
@@ -265,7 +229,7 @@ function setStepRunning(stepId) {
 function setStepCompleted(stepId) {
     const step = document.getElementById(stepId);
     const statusEl = document.getElementById(stepId + 'Status');
-    
+
     step.classList.add('completed');
     step.classList.remove('active', 'failed');
     statusEl.innerHTML = '<span class="status-badge success">Готово</span>';
@@ -274,7 +238,7 @@ function setStepCompleted(stepId) {
 function setStepFailed(stepId) {
     const step = document.getElementById(stepId);
     const statusEl = document.getElementById(stepId + 'Status');
-    
+
     step.classList.add('failed');
     step.classList.remove('active', 'completed');
     statusEl.innerHTML = '<span class="status-badge error">Ошибка</span>';
@@ -295,15 +259,15 @@ function updateProgress(toolName, progress, text) {
     const progressEl = document.getElementById(toolName + 'Progress');
     const fillEl = document.getElementById(toolName + 'ProgressFill');
     const textEl = document.getElementById(toolName + 'ProgressText');
-    
+
     progressEl.style.display = 'block';
-    
+
     if (progress > 0 && progress < 100) {
         progressEl.classList.add('running');
     } else {
         progressEl.classList.remove('running');
     }
-    
+
     fillEl.style.width = progress + '%';
     textEl.textContent = text;
 }
@@ -333,61 +297,6 @@ function setupEventListeners() {
         });
     });
 
-    // Кнопка запуска приложения
-    document.getElementById('launchBtn').addEventListener('click', async () => {
-        const btn = document.getElementById('launchBtn');
-        
-        setButtonLoading(btn, true);
-        updateStatusIndicator('running');
-        updateLaunchStatus('Выполняется запуск...', 'info');
-        addLog('Инициализация запуска приложения', 'info');
-
-        try {
-            const result = await launchApp();
-
-            if (result.success) {
-                updateLaunchStatus('Приложение успешно запущено', 'success');
-                updateStatusIndicator('ready');
-                addLog('Приложение запущено успешно', 'success');
-                showToast('Приложение запущено', 'success');
-            } else {
-                updateLaunchStatus(result.message || 'Ошибка запуска', 'error');
-                updateStatusIndicator('error');
-                addLog(`Ошибка запуска: ${result.message}`, 'error');
-                showToast('Ошибка при запуске: ' + result.message, 'error');
-            }
-
-        } catch (error) {
-            updateLaunchStatus('Ошибка соединения с сервером', 'error');
-            updateStatusIndicator('error');
-            addLog(`Критическая ошибка: ${error.message}`, 'error');
-            showToast('Ошибка соединения: ' + error.message, 'error');
-        } finally {
-            setButtonLoading(btn, false);
-        }
-    });
-
-    // Кнопка инструкции
-    document.getElementById('instructionBtn').addEventListener('click', () => {
-        document.getElementById('instructionModal').style.display = 'flex';
-    });
-
-    // Закрытие модального окна инструкции
-    document.getElementById('instructionCloseBtn').addEventListener('click', () => {
-        document.getElementById('instructionModal').style.display = 'none';
-    });
-
-    document.getElementById('instructionOkBtn').addEventListener('click', () => {
-        document.getElementById('instructionModal').style.display = 'none';
-    });
-
-    // Закрытие по клику вне окна
-    document.getElementById('instructionModal').addEventListener('click', (e) => {
-        if (e.target.id === 'instructionModal') {
-            e.target.style.display = 'none';
-        }
-    });
-
     // Кнопка очистки логов
     document.getElementById('clearLogsBtn').addEventListener('click', async () => {
         try {
@@ -402,35 +311,35 @@ function setupEventListeners() {
     // Кнопка "Чистка строк"
     document.getElementById('cleanStringsBtn').addEventListener('click', async () => {
         const btn = document.getElementById('cleanStringsBtn');
-        
+
         setButtonLoading(btn, true);
         document.getElementById('cleanStringsResult').style.display = 'none';
-        
+
         // Сброс статусов шагов
         resetStepStatus('cleanStringsStep1');
         resetStepStatus('cleanStringsStep2');
-        
+
         addLog('Запуск чистки строк', 'info');
 
         try {
             // Шаг 1: Удаление журнала USN
             setStepRunning('cleanStringsStep1');
             addLog('Шаг 1: Удаление журнала USN...', 'info');
-            
+
             const result = await cleanStrings();
-            
+
             if (result.success) {
                 setStepCompleted('cleanStringsStep1');
-                
+
                 // Шаг 2: Создание журнала USN
                 setStepRunning('cleanStringsStep2');
                 addLog('Шаг 2: Создание журнала USN...', 'info');
-                
+
                 // Имитация задержки для второго шага
                 await new Promise(resolve => setTimeout(resolve, 1000));
-                
+
                 setStepCompleted('cleanStringsStep2');
-                
+
                 showToolResult('cleanStringsResult', 'Очистка строк успешно завершена', 'success');
                 addLog('Чистка строк завершена успешно', 'success');
                 showToast('Очистка строк завершена', 'success');
@@ -454,22 +363,22 @@ function setupEventListeners() {
     // Кнопка "Очистка следов"
     document.getElementById('cleanTracksBtn').addEventListener('click', async () => {
         const btn = document.getElementById('cleanTracksBtn');
-        
+
         setButtonLoading(btn, true);
         document.getElementById('cleanTracksResult').style.display = 'none';
         updateProgress('cleanTracks', 10, 'Запуск...');
-        
+
         addLog('Запуск очистки следов', 'info');
 
         try {
             const result = await cleanTracks();
-            
+
             if (result.success) {
                 updateProgress('cleanTracks', 100, 'Завершено');
                 showToolResult('cleanTracksResult', 'Очистка следов выполнена', 'success');
                 addLog('Очистка следов завершена', 'success');
                 showToast('Очистка следов завершена', 'success');
-                
+
                 setTimeout(() => hideProgress('cleanTracks'), 3000);
             } else {
                 updateProgress('cleanTracks', 100, 'Ошибка');
@@ -491,22 +400,22 @@ function setupEventListeners() {
     // Кнопка "Симуляция открытия папок"
     document.getElementById('simulateBtn').addEventListener('click', async () => {
         const btn = document.getElementById('simulateBtn');
-        
+
         setButtonLoading(btn, true);
         document.getElementById('simulateResult').style.display = 'none';
         updateProgress('simulate', 50, 'Запуск...');
-        
+
         addLog('Запуск симуляции открытия папок', 'info');
 
         try {
             const result = await simulateFolders();
-            
+
             if (result.success) {
                 updateProgress('simulate', 100, 'Запущено');
                 showToolResult('simulateResult', 'Симуляция запущена', 'success');
                 addLog('Симуляция запущена успешно', 'success');
                 showToast('Симуляция запущена', 'success');
-                
+
                 setTimeout(() => hideProgress('simulate'), 3000);
             } else {
                 updateProgress('simulate', 100, 'Ошибка');
@@ -525,53 +434,15 @@ function setupEventListeners() {
         }
     });
 
-    // Очистка памяти javaw.exe
-    document.getElementById('cleanJavawBtn').addEventListener('click', async () => {
-        const btn = document.getElementById('cleanJavawBtn');
-
-        setButtonLoading(btn, true);
-        document.getElementById('cleanJavawResult').style.display = 'none';
-        updateProgress('cleanJavaw', 10, 'Подключение...');
-
-        addLog('Запуск очистки памяти javaw.exe', 'info');
-
-        try {
-            const result = await cleanJavawMemory();
-
-            if (result.success) {
-                updateProgress('cleanJavaw', 100, 'Завершено');
-                const msg = result.message || `Удалено ${result.cleared_count} совпадений`;
-                showToolResult('cleanJavawResult', msg, 'success');
-                addLog(`Очистка javaw завершена: ${msg}`, 'success');
-                showToast('Очистка памяти javaw.exe завершена', 'success');
-
-                setTimeout(() => hideProgress('cleanJavaw'), 3000);
-            } else {
-                updateProgress('cleanJavaw', 100, 'Ошибка');
-                showToolResult('cleanJavawResult', result.message || 'Ошибка при выполнении', 'error');
-                addLog(`Ошибка очистки javaw: ${result.message}`, 'error');
-                showToast('Ошибка: ' + result.message, 'error');
-            }
-
-        } catch (error) {
-            updateProgress('cleanJavaw', 100, 'Ошибка');
-            showToolResult('cleanJavawResult', 'Ошибка соединения с сервером', 'error');
-            addLog(`Критическая ошибка очистки javaw: ${error.message}`, 'error');
-            showToast('Ошибка соединения: ' + error.message, 'error');
-        } finally {
-            setButtonLoading(btn, false);
-        }
-    });
-
     // Глобальная очистка - открытие модального окна
     document.getElementById('globalCleanBtn').addEventListener('click', async () => {
         const modal = document.getElementById('globalCleanModal');
         const optionsContainer = document.getElementById('cleanOptions');
-        
+
         try {
             const data = await getGlobalCleanOptions();
             optionsContainer.innerHTML = '';
-            
+
             for (const [key, option] of Object.entries(data.options)) {
                 const optionEl = document.createElement('label');
                 optionEl.className = 'clean-option';
@@ -584,7 +455,7 @@ function setupEventListeners() {
                 `;
                 optionsContainer.appendChild(optionEl);
             }
-            
+
             modal.style.display = 'flex';
         } catch (error) {
             showToast('Ошибка загрузки опций: ' + error.message, 'error');
@@ -611,40 +482,40 @@ function setupEventListeners() {
     document.getElementById('modalStartBtn').addEventListener('click', async () => {
         const btn = document.getElementById('modalStartBtn');
         const checkboxes = document.querySelectorAll('#cleanOptions input[type="checkbox"]:checked');
-        
+
         if (checkboxes.length === 0) {
             showToast('Выберите хотя бы один компонент', 'warning');
             return;
         }
-        
+
         const options = {};
         checkboxes.forEach(cb => {
             options[cb.value] = true;
         });
-        
+
         setButtonLoading(btn, true);
         document.getElementById('globalCleanModal').style.display = 'none';
         document.getElementById('globalCleanResult').style.display = 'none';
         updateProgress('globalClean', 0, 'Запуск...');
-        
+
         addLog('Запуск глобальной очистки', 'info');
 
         try {
             const result = await runGlobalClean(options);
-            
+
             if (result.success) {
                 updateProgress('globalClean', 100, `Завершено: ${result.completed}/${result.total}`);
                 showToolResult('globalCleanResult', `Очистка завершена: ${result.completed}/${result.total} успешно`, 'success');
                 addLog(`Глобальная очистка: ${result.completed}/${result.total} успешно`, 'success');
                 showToast(`Очистка завершена: ${result.completed}/${result.total}`, 'success');
-                
+
                 // Показать детали
                 let details = '';
                 for (const [key, res] of Object.entries(result.results)) {
                     details += `${res.success ? '✓' : '✗'} ${key}: ${res.message}\n`;
                 }
                 console.log(details);
-                
+
                 setTimeout(() => hideProgress('globalClean'), 5000);
             } else {
                 updateProgress('globalClean', 100, 'Ошибка');
@@ -668,8 +539,7 @@ async function init() {
         // Получаем текущий статус
         const status = await getStatus();
         updateStatusIndicator(status.status || 'ready');
-        updateFileStatus(status.file_exists, status.file_size);
-        
+
         // Загружаем логи если есть
         try {
             const logsData = await getLogs();
@@ -686,8 +556,8 @@ async function init() {
             // Логи не загрузились - не критично
         }
 
-        addLog('Веб-интерфейс инициализирован', 'info');
-        
+        addLog('NoxumClean готов к работе', 'info');
+
     } catch (error) {
         console.error('Init error:', error);
         addLog('Ошибка инициализации: ' + error.message, 'error');
