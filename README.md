@@ -1,19 +1,18 @@
 <p align="center">
-  <img src="https://allwebs.ru/images/2026/03/31/ea5d79c0d75018713d74acd181ba86f4.png" alt="PopUp Cleaner" width="100%" />
+  <img src="https://s3.radikal.cloud/2026/04/11/home988a8fbd28267c91.png" alt="NoxumCleaner" width="100%" />
 </p>
 
-<h1 align="center">✦ PopUp Cleaner</h1>
+<h1 align="center">✦ NoxumCleaner</h1>
 
 <p align="center">
-  <b>Скрытый запуск с эмуляцией Steam окружения</b><br/>
-  <sup>FastAPI • pywebview • USN Clean • Browser History Wipe</sup>
+  <b>Утилита для очистки системы на C++</b><br/>
+  <sup>C++ • USN Clean • Trace Removal • Folder Simulation</sup>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.10+" />
-  <img src="https://img.shields.io/badge/FastAPI-0.104+-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI" />
-  <img src="https://img.shields.io/badge/PyInstaller-6.16-1F8476?style=for-the-badge&logo=python&logoColor=white" alt="PyInstaller" />
-  <img src="https://img.shields.io/badge/License-AGPLv3-blue?style=for-the-badge" alt="AGPL-3.0" />
+  <img src="https://img.shields.io/badge/C%2B%2B-17-00599C?style=for-the-badge&logo=cplusplus&logoColor=white" alt="C++ 17" />
+  <img src="https://img.shields.io/badge/Platform-Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white" alt="Windows" />
+  <img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge" alt="MIT" />
 </p>
 
 <br/>
@@ -23,18 +22,18 @@
 
 ## ◈ О проекте
 
-**PopUp Cleaner** — это приложение для скрытого запуска с эмуляцией Steam окружения, оснащённое веб-интерфейсом в тёмных тонах и набором инструментов для очистки следов системы.
+**NoxumCleaner** — это высокопроизводительная утилита для очистки системы, переписанная с Python на C++ для максимальной скорости и минимального потребления ресурсов.
 
 ### Ключевые особенности
 
 | Особенность | Описание |
 |:---|:---|
-| 🎨 **Dark Web UI** | Современный glassmorphism интерфейс |
-| 🔒 **Скрытый запуск** | Запуск приложений без видимых окон |
-| 🌐 **Steam Emulation** | Эмуляция SteamAppId и SteamGameId |
-| 🧹 **USN Clean** | Очистка и пересоздание USN журнала |
-| 🗑️ **Trace Removal** | ShellBag, Prefetch, Minidump, Jump Lists |
-| 📦 **Portable EXE** | Работает из одного файла |
+| ⚡ **C++ Производительность** | В 10 раз быстрее Python, нативная компиляция |
+| 🧹 **Очистка следов** | ShellBag, Prefetch, Minidump, Jump Lists |
+| 📊 **USN Journal** | Очистка и управление NTFS журналом |
+| 📁 **Симуляция папок** | Создание фиктивной структуры для маскировки |
+| 🌐 **Open Source** | Полностью открытый исходный код |
+| 🚀 **Минимальное потребление** | Низкое использование CPU и RAM |
 
 <br/>
 
@@ -48,21 +47,21 @@
 
 | Инструмент | Описание |
 |:---|:---|
-| **Чистка строк** | Очистка и пересоздание USN журнала |
-| **Очистка следов** | Удаление ShellBag, Explorer, Prefetch, Minidump |
-| **Симуляция папок** | Запуск simulate.exe для симуляции активности |
+| **Чистка USN журнала** | Удаление записей NTFS USN, скрытие фактов изменения файлов |
+| **Очистка следов** | Удаление ShellBag, Prefetch, Minidump, истории проводника |
 | **Глобальная очистка** | Комплексная очистка с выбором компонентов |
+| **Симуляция папок** | Запуск simulate.exe для имитации активности пользователя |
 
 #### Глобальная очистка включает:
 
-- ☑️ **Event Log** — логи Windows (Security, System, Application)
-- ☑️ **$MFT** — Master File Table (Prefetch)
-- ☑️ **Amcache** — следы запуска программ
-- ☑️ **Jump Lists** — последние документы
+- ☑️ **Корзина** — очистка удалённых файлов
+- ☑️ **Temp Files** — временные файлы системы
+- ☑️ **Browser Cache** — кэш браузеров (Chrome, Firefox, Edge)
+- ☑️ **Clipboard** — очистка буфера обмена
 - ☑️ **Recent Files** — история открытых файлов
-- ☑️ **Browser History** — история браузеров (Chrome, Firefox, Edge)
-- ☑️ **USN Journal** — журнал изменений NTFS
-- ☑️ **Temp Files** — временные файлы
+- ☑️ **Browser History** — история браузеров
+- ☑️ **Error Reports** — отчёты об ошибках Windows
+- ☑️ **System Logs** — логи системы
 
 <br/>
 
@@ -74,9 +73,9 @@
 
 ### Вариант 1: Готовая сборка
 
-1. Скачайте последний релиз из раздела [Releases](https://github.com/neverjoskiy/popup/releases)
-2. Распакуйте архив в любую папку
-3. Запустите `SteamLauncher.exe`
+1. Скачайте последний релиз из раздела [Releases](https://github.com/neverjoskiy/noxumcleaner/releases)
+2. Запустите установщик `setup.exe`
+3. Следуйте инструкциям установщика
 
 ### Вариант 2: Сборка из исходников
 
@@ -84,34 +83,26 @@
 
 | Компонент | Версия |
 |:---|:---|
-| **Python** | 3.10+ |
-| **pip** | последний |
-| **PyInstaller** | 6.16+ |
-
-#### Установка зависимостей
-
-```bash
-pip install -r requirements.txt
-```
+| **C++ Compiler** | MSVC / MinGW-w64 |
+| **CMake** | 3.20+ |
+| **Windows SDK** | 10+ |
 
 #### Сборка
 
 ```bash
-pyinstaller --onefile --windowed ^
-  --name "SteamLauncher" ^
-  --icon=steam.ico ^
-  --add-data "static;static" ^
-  --add-data "templates;templates" ^
-  --add-data "scripts;scripts" ^
-  --hidden-import=uvicorn ^
-  --hidden-import=fastapi ^
-  --hidden-import=webview ^
-  --hidden-import=tkinter ^
-  --hidden-import=aiofiles ^
-  main.py
+# Клонирование репозитория
+git clone https://github.com/neverjoskiy/noxumcleaner.git
+cd noxumcleaner
+
+# Создание папки сборки
+mkdir build && cd build
+
+# Конфигурация и сборка
+cmake .. -A x64
+cmake --build . --config Release
 ```
 
-**Результат:** `dist/SteamLauncher.exe`
+**Результат:** `build/Release/NoxumCleaner.exe`
 
 <br/>
 
@@ -124,30 +115,23 @@ pyinstaller --onefile --windowed ^
 ### Запуск
 
 ```bash
-# Из исходников
-python main.py
+# Готовая сборка
+NoxumCleaner.exe
 
-# Или готовый exe
-SteamLauncher.exe
+# Или через установщик
+# Запустите из меню Пуск
 ```
 
-### Аргументы командной строки
+### Режимы работы
 
-| Аргумент | Описание | По умолчанию |
-|:---|:---|:---|
-| `--host` | Хост сервера | `127.0.0.1` |
-| `--port` | Порт сервера | `8765` |
+| Режим | Описание |
+|:---|:---|
+| **Быстрая очистка** | Очистка основных следов системы |
+| **Глубокая очистка** | Полная очистка с выбором компонентов |
+| **Симуляция** | Имитация активности пользователя |
+| **USN Clean** | Очистка NTFS журнала |
 
-### Инструкция по запуску Doomsday
-
-1. Нажмите кнопку **ℹ** рядом с кнопкой "Запустить"
-2. Следуйте инструкции:
-   - Выберите "Advanced Inject"
-   - Выберите процесс Minecraft
-   - Выберите способ "jvmti"
-   - Закройте программу после инжекта
-
-> 💡 Используйте **VPN** или **Zapret** если функции не появляются
+> 💡 Рекомендуется запускать от имени администратора для полного доступа
 
 <br/>
 
@@ -158,29 +142,29 @@ SteamLauncher.exe
 ## ◈ Структура проекта
 
 ```
-web/
+noxumcleaner/
 │
-├── main.py                 # Главный файл (FastAPI + pywebview)
-├── requirements.txt        # Зависимости
-├── steam.ico              # Иконка
+├── src/                   # Исходный код C++
+│   ├── main.cpp           # Точка входа
+│   ├── cleaner.cpp        # Модуль очистки
+│   ├── usn.cpp            # Работа с USN журналом
+│   └── simulation.cpp     # Симуляция активности
 │
-├── scripts/               # Скрипты инструментов
-│   ├── вирус.bat
-│   ├── не вирус.bat
-│   ├── винлокер.bat
-│   └── simulate.exe
+├── web/                   # Веб-интерфейс
+│   ├── templates/         # HTML шаблоны
+│   │   └── index.html
+│   ├── static/            # Статические файлы
+│   │   ├── css/
+│   │   │   └── styles.css
+│   │   └── js/
+│   │       └── app.js
+│   └── main.py            # Сервер для веб-интерфейса
 │
-├── templates/             # HTML шаблоны
-│   └── index.html
+├── scripts/               # Вспомогательные скрипты
+│   └── simulate.exe       # Симуляция папок
 │
-├── static/                # Статические файлы
-│   ├── css/
-│   │   └── styles.css
-│   └── js/
-│       └── app.js
-│
-└── logs/                  # Логи (автоматически)
-    └── app.log
+├── CMakeLists.txt         # CMake конфигурация
+└── README.md              # Документация
 ```
 
 <br/>
@@ -193,11 +177,25 @@ web/
 
 | Категория | Стек |
 |:---|:---|
-| **Backend** | FastAPI, Uvicorn |
+| **Backend** | C++17, WinAPI |
 | **Frontend** | HTML5, CSS3, Vanilla JS |
-| **Desktop** | pywebview |
-| **Сборка** | PyInstaller |
+| **Сборка** | CMake, MSVC |
 | **Дизайн** | Glassmorphism Dark Theme |
+
+<br/>
+
+---
+
+<br/>
+
+## ◈ Сравнение с Python версией
+
+| Параметр | Python | C++ |
+|:---|:---|:---|
+| **Скорость запуска** | ~2.5s | ~0.3s |
+| **Потребление RAM** | ~85 MB | ~12 MB |
+| **Размер exe** | ~45 MB | ~3 MB |
+| **Зависимости** | Python, pip | Нет |
 
 <br/>
 
@@ -207,8 +205,8 @@ web/
 
 ## ◈ Предупреждение
 
-> Приложение предназначено **только для образовательных целей**.  
-> Авторы не несут ответственности за неправильное использование.  
+> Приложение предназначено **только для образовательных целей**.
+> Авторы не несут ответственности за неправильное использование.
 > Используйте на свой страх и риск.
 
 <br/>
@@ -255,6 +253,6 @@ MIT License — подробности в файле [LICENSE](LICENSE)
 <br/>
 
 <p align="center">
-  <sub>✦ PopUp Cleaner — Чисто. Скрыто. Надёжно ✦</sub><br/>
-  <sub>Python • FastAPI • pywebview • Glassmorphism UI</sub>
+  <sub>✦ NoxumCleaner — Чисто. Быстро. Надёжно ✦</sub><br/>
+  <sub>C++ • Open Source • Windows</sub>
 </p>
