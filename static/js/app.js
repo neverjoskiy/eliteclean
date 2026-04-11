@@ -318,13 +318,13 @@ function hideProgress(toolName) {
 // ============================================
 
 function setupEventListeners() {
-    // Переключение вкладок
-    document.querySelectorAll('.tab-btn').forEach(btn => {
+    // Переключение вкладок из sidebar
+    document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             const tabId = btn.dataset.tab;
 
             // Убираем активный класс у всех кнопок и контента
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
 
             // Добавляем активный класс текущим

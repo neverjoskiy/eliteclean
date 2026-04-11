@@ -1,60 +1,76 @@
-# 🚀 PopUp Cleaner
+<p align="center">
+  <img src="https://allwebs.ru/images/2026/03/31/ea5d79c0d75018713d74acd181ba86f4.png" alt="PopUp Cleaner" width="100%" />
+</p>
 
-**PopUp Cleaner** — это приложение для скрытого запуска doomsday с эмуляцией Steam окружения, оснащённое веб-интерфейсом в тёмных тонах и набором инструментов для очистки следов системы.
+<h1 align="center">✦ PopUp Cleaner</h1>
 
-![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-009688?style=for-the-badge&logo=fastapi&logoColor=white)
-![PyInstaller](https://img.shields.io/badge/PyInstaller-6.16-1F8476?style=for-the-badge&logo=python&logoColor=white)
-![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
+<p align="center">
+  <b>Скрытый запуск с эмуляцией Steam окружения</b><br/>
+  <sup>FastAPI • pywebview • USN Clean • Browser History Wipe</sup>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.10+" />
+  <img src="https://img.shields.io/badge/FastAPI-0.104+-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI" />
+  <img src="https://img.shields.io/badge/PyInstaller-6.16-1F8476?style=for-the-badge&logo=python&logoColor=white" alt="PyInstaller" />
+  <img src="https://img.shields.io/badge/License-AGPLv3-blue?style=for-the-badge" alt="AGPL-3.0" />
+</p>
+
+<br/>
+---
+
+<br/>
+
+## ◈ О проекте
+
+**PopUp Cleaner** — это приложение для скрытого запуска с эмуляцией Steam окружения, оснащённое веб-интерфейсом в тёмных тонах и набором инструментов для очистки следов системы.
+
+### Ключевые особенности
+
+| Особенность | Описание |
+|:---|:---|
+| 🎨 **Dark Web UI** | Современный glassmorphism интерфейс |
+| 🔒 **Скрытый запуск** | Запуск приложений без видимых окон |
+| 🌐 **Steam Emulation** | Эмуляция SteamAppId и SteamGameId |
+| 🧹 **USN Clean** | Очистка и пересоздание USN журнала |
+| 🗑️ **Trace Removal** | ShellBag, Prefetch, Minidump, Jump Lists |
+| 📦 **Portable EXE** | Работает из одного файла |
+
+<br/>
 
 ---
 
-## ✨ Особенности
+<br/>
 
-- 🎨 **Красивый веб-интерфейс** — современный дизайн в тёмных тонах
-- 🔒 **Скрытый запуск** — запуск приложений без видимых окон
-- 🛠️ **Набор инструментов** — очистка следов системы, USN журнала, браузеров
-- 📦 **Портативность** — работает из одного .exe файла
-- 🌐 **Веб-доступ** — управление через браузер или встроенное окно
-
----
-
-## 📸 Скриншоты
-
-### Главная страница
-![Главная](https://allwebs.ru/images/2026/03/31/ea5d79c0d75018713d74acd181ba86f4.png)
----
-
-## 🔧 Функционал
-
-### Запуск приложения
-- Скрытый запуск целевого приложения
-- Эмуляция Steam окружения (SteamAppId, SteamGameId)
-- Автоматическая загрузка Microsoft.Ink.dll если отсутствует
-- Инструкция по использованию Doomsday
+## ◈ Функционал
 
 ### Инструменты
 
 | Инструмент | Описание |
-|------------|----------|
+|:---|:---|
 | **Чистка строк** | Очистка и пересоздание USN журнала |
 | **Очистка следов** | Удаление ShellBag, Explorer, Prefetch, Minidump |
 | **Симуляция папок** | Запуск simulate.exe для симуляции активности |
 | **Глобальная очистка** | Комплексная очистка с выбором компонентов |
 
 #### Глобальная очистка включает:
-- ☑️ Event Log — логи Windows (Security, System, Application)
-- ☑️ $MFT — Master File Table (Prefetch)
-- ☑️ Amcache — следы запуска программ
-- ☑️ Jump Lists — последние документы
-- ☑️ Recent Files — история открытых файлов
-- ☑️ Browser History — история браузеров (Chrome, Firefox, Edge)
-- ☑️ USN Journal — журнал изменений NTFS
-- ☑️ Temp Files — временные файлы
+
+- ☑️ **Event Log** — логи Windows (Security, System, Application)
+- ☑️ **$MFT** — Master File Table (Prefetch)
+- ☑️ **Amcache** — следы запуска программ
+- ☑️ **Jump Lists** — последние документы
+- ☑️ **Recent Files** — история открытых файлов
+- ☑️ **Browser History** — история браузеров (Chrome, Firefox, Edge)
+- ☑️ **USN Journal** — журнал изменений NTFS
+- ☑️ **Temp Files** — временные файлы
+
+<br/>
 
 ---
 
-## 📥 Установка
+<br/>
+
+## ◈ Установка
 
 ### Вариант 1: Готовая сборка
 
@@ -65,8 +81,12 @@
 ### Вариант 2: Сборка из исходников
 
 #### Требования
-- Python 3.10+
-- pip
+
+| Компонент | Версия |
+|:---|:---|
+| **Python** | 3.10+ |
+| **pip** | последний |
+| **PyInstaller** | 6.16+ |
 
 #### Установка зависимостей
 
@@ -74,7 +94,7 @@
 pip install -r requirements.txt
 ```
 
-#### Сборка через PyInstaller
+#### Сборка
 
 ```bash
 pyinstaller --onefile --windowed ^
@@ -91,11 +111,15 @@ pyinstaller --onefile --windowed ^
   main.py
 ```
 
-Готовый файл: `dist/SteamLauncher.exe`
+**Результат:** `dist/SteamLauncher.exe`
+
+<br/>
 
 ---
 
-## 🚀 Использование
+<br/>
+
+## ◈ Использование
 
 ### Запуск
 
@@ -109,12 +133,8 @@ SteamLauncher.exe
 
 ### Аргументы командной строки
 
-```bash
-python main.py --host 127.0.0.1 --port 8765
-```
-
 | Аргумент | Описание | По умолчанию |
-|----------|----------|--------------|
+|:---|:---|:---|
 | `--host` | Хост сервера | `127.0.0.1` |
 | `--port` | Порт сервера | `8765` |
 
@@ -129,58 +149,85 @@ python main.py --host 127.0.0.1 --port 8765
 
 > 💡 Используйте **VPN** или **Zapret** если функции не появляются
 
+<br/>
+
 ---
 
-## 📁 Структура проекта
+<br/>
+
+## ◈ Структура проекта
 
 ```
 web/
-├── main.py                 # Главный файл
+│
+├── main.py                 # Главный файл (FastAPI + pywebview)
 ├── requirements.txt        # Зависимости
 ├── steam.ico              # Иконка
+│
 ├── scripts/               # Скрипты инструментов
 │   ├── вирус.bat
 │   ├── не вирус.bat
 │   ├── винлокер.bat
 │   └── simulate.exe
+│
 ├── templates/             # HTML шаблоны
 │   └── index.html
+│
 ├── static/                # Статические файлы
 │   ├── css/
 │   │   └── styles.css
 │   └── js/
 │       └── app.js
-└── logs/                  # Логи (создаётся автоматически)
+│
+└── logs/                  # Логи (автоматически)
     └── app.log
 ```
 
----
-
-## 🛠️ Технологии
-
-- **Backend:** FastAPI, Uvicorn
-- **Frontend:** HTML5, CSS3, Vanilla JavaScript
-- **Desktop:** pywebview
-- **Сборка:** PyInstaller
-- **Дизайн:** Glassmorphism Dark Theme
+<br/>
 
 ---
 
-## ⚠️ Предупреждение
+<br/>
+
+## ◈ Технологии
+
+| Категория | Стек |
+|:---|:---|
+| **Backend** | FastAPI, Uvicorn |
+| **Frontend** | HTML5, CSS3, Vanilla JS |
+| **Desktop** | pywebview |
+| **Сборка** | PyInstaller |
+| **Дизайн** | Glassmorphism Dark Theme |
+
+<br/>
+
+---
+
+<br/>
+
+## ◈ Предупреждение
 
 > Приложение предназначено **только для образовательных целей**.  
 > Авторы не несут ответственности за неправильное использование.  
 > Используйте на свой страх и риск.
 
----
-
-## 📝 Лицензия
-
-MIT License — см. файл [LICENSE](LICENSE) для деталей.
+<br/>
 
 ---
 
-## 🤝 Вклад
+<br/>
+
+## ◈ Лицензия
+
+MIT License — подробности в файле [LICENSE](LICENSE)
+
+<br/>
+
+---
+
+<br/>
+
+## ◈ Вклад
 
 1. Fork репозиторий
 2. Создайте ветку (`git checkout -b feature/AmazingFeature`)
@@ -188,25 +235,26 @@ MIT License — см. файл [LICENSE](LICENSE) для деталей.
 4. Push в ветку (`git push origin feature/AmazingFeature`)
 5. Откройте Pull Request
 
----
-
-## 📧 Контакты
-
-- **GitHub:** [@neverjoskiy](https://github.com/neverjoskiy)
-- **Telegram:** [@bioneverr](https://t.me/bioneverr)
+<br/>
 
 ---
 
-## ⭐ Поддержка
+<br/>
 
-Если проект был полезен — поставьте звезду! ⭐
+## ◈ Контакты
 
-[![Star History](https://api.star-history.com/svg?repos=neverjoskiy/steam-launcher&type=Date)](https://star-history.com/#neverjoskiy/steam-launcher&Date)
+| Платформа | Ссылка |
+|:---|:---|
+| **GitHub** | [@neverjoskiy](https://github.com/neverjoskiy) |
+| **Telegram** | [@bioneverr](https://t.me/bioneverr) |
+
+<br/>
 
 ---
 
-<div align="center">
+<br/>
 
-**Made with ❤️ by neverjoskiy**
-
-</div>
+<p align="center">
+  <sub>✦ PopUp Cleaner — Чисто. Скрыто. Надёжно ✦</sub><br/>
+  <sub>Python • FastAPI • pywebview • Glassmorphism UI</sub>
+</p>
