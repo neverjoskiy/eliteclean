@@ -1,1 +1,0 @@
-powershell -Command "Start-Process cmd -ArgumentList '/c fsutil usn createjournal m=67108864 a=8388608' -Verb RunAs"
