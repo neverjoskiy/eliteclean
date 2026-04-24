@@ -1051,8 +1051,8 @@ impl CleanupService {
         use std::path::PathBuf;
         
         let temp_dirs: Vec<PathBuf> = [
-            env::var("TEMP").ok(),
-            env::var("TMP").ok(),
+            env::var("TEMP").ok().map(PathBuf::from),
+            env::var("TMP").ok().map(PathBuf::from),
             env::var("WINDIR").ok().map(|w| PathBuf::from(w).join("Temp")),
         ]
         .into_iter()
