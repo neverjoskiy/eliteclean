@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noxum Cleaner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <!-- Noise Overlay -->
+    <div class="noise-overlay"></div>
+
+    <!-- Grid Background -->
+    <div class="grid-bg"></div>
+
+    <!-- Ambient Glow -->
+    <div class="ambient-glow"></div>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="#" class="logo-link">
+                    <div class="logo-mark">Nx</div>
+                    <span class="logo-text">noxum</span>
+                </a>
+            </div>
+
+            <nav class="sidebar-nav">
+                <button class="nav-btn active" data-tab="dashboard">
+                    <span class="nav-number">01</span>
+                    <span class="nav-label">главная</span>
+                </button>
+                <button class="nav-btn" data-tab="tools">
+                    <span class="nav-number">02</span>
+                    <span class="nav-label">инструменты</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="status-indicator" id="statusIndicator">
+                    <span class="status-dot"></span>
+                    <span class="status-text">готов</span>
+                </div>
+                <div class="file-status-sidebar" id="fileStatusBanner" style="display: none;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="17 8 12 3 7 8"/>
+                        <line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                    <span class="file-status-text" id="fileStatusText">проверка...</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <div class="main-wrapper">
+            <main class="content">
+                <!-- Dashboard Tab -->
+                <div class="tab-content active" id="dashboard">
+                    <div class="dashboard-layout">
+                        <!-- Section Header -->
+                        <div class="section-header">
+                            <div class="section-number">01</div>
+                            <h2 class="section-title">запуск приложения</h2>
+                            <p class="section-desc">запускает doomsday в скрытом режиме с эмуляцией steam окружения</p>
+                        </div>
+
+                        <!-- Launch Card -->
+                        <div class="glass-card launch-card">
+                            <div class="corner-decor tl"></div>
+                            <div class="corner-decor br"></div>
+                            <div class="launch-content">
+                                <div class="launch-terminal">
+                                    <div class="terminal-header">
+                                        <div class="terminal-dots">
+                                            <span class="dot red"></span>
+                                            <span class="dot yellow"></span>
+                                            <span class="dot green"></span>
+                                        </div>
+                                        <span class="terminal-title">noxum — launcher</span>
+                                    </div>
+                                    <div class="terminal-body">
+                                        <div class="terminal-line">
+                                            <span class="terminal-prompt">❯</span>
+                                            <span class="terminal-cmd">noxum --launch --hidden</span>
+                                        </div>
+                                        <div class="terminal-line">
+                                            <span class="terminal-ok">✓</span>
+                                            <span class="terminal-output">steam env initialized</span>
+                                        </div>
+                                        <div class="terminal-line">
+                                            <span class="terminal-ok">✓</span>
+                                            <span class="terminal-output">process started</span>
+                                        </div>
+                                        <div class="terminal-line terminal-cursor">
+                                            <span class="terminal-prompt">❯</span>
+                                            <span class="terminal-blink">_</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="launch-actions">
+                                    <button class="btn-primary" id="launchBtn">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                                            <polygon points="5 3 19 12 5 21 5 3"/>
+                                        </svg>
+                                        <span class="btn-text">запустить</span>
+                                    </button>
+                                    <button class="btn-secondary" id="instructionBtn" title="инструкция">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                                            <circle cx="12" cy="12" r="10"/>
+                                            <line x1="12" y1="16" x2="12" y2="12"/>
+                                            <line x1="12" y1="8" x2="12.01" y2="8"/>
+                                        </svg>
+                                        <span class="btn-text">инструкция</span>
+                                    </button>
+                                </div>
+                                <div class="launch-status" id="launchStatus">
+                                    <span class="status-message">ожидание запуска...</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Info Grid -->
+                        <div class="info-grid">
+                            <div class="glass-card info-card">
+                                <div class="corner-decor tl"></div>
+                                <div class="corner-decor br"></div>
+                                <div class="info-badge">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <line x1="12" y1="16" x2="12" y2="12"/>
+                                        <line x1="12" y1="8" x2="12.01" y2="8"/>
+                                    </svg>
+                                    <span class="badge-text">скрытый режим</span>
+                                </div>
+                                <h3 class="info-title">без видимых окон</h3>
+                                <p class="info-desc">скрытый запуск без создания видимых окон процесса</p>
+                            </div>
+                            <div class="glass-card info-card">
+                                <div class="corner-decor tl"></div>
+                                <div class="corner-decor br"></div>
+                                <div class="info-badge">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                                        <rect x="2" y="2" width="20" height="8" rx="2" ry="2"/>
+                                        <rect x="2" y="14" width="20" height="8" rx="2" ry="2"/>
+                                        <line x1="6" y1="6" x2="6.01" y2="6"/>
+                                        <line x1="6" y1="18" x2="6.01" y2="18"/>
+                                    </svg>
+                                    <span class="badge-text">steam env</span>
+                                </div>
+                                <h3 class="info-title">steam переменные</h3>
+                                <p class="info-desc">эмуляция переменных окружения steamappid и steamgameid</p>
+                            </div>
+                            <div class="glass-card info-card">
+                                <div class="corner-decor tl"></div>
+                                <div class="corner-decor br"></div>
+                                <div class="info-badge">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                                    </svg>
+                                    <span class="badge-text">безопасно</span>
+                                </div>
+                                <h3 class="info-title">изолированный запуск</h3>
+                                <p class="info-desc">автоматическая очистка процесса после завершения</p>
+                            </div>
+                        </div>
+
+                        <!-- Logs Section -->
+                        <div class="glass-card logs-card">
+                            <div class="corner-decor tl"></div>
+                            <div class="corner-decor br"></div>
+                            <div class="logs-header">
+                                <div class="logs-header-left">
+                                    <span class="logs-section-number">03</span>
+                                    <h3 class="logs-title">журнал событий</h3>
+                                </div>
+                                <button class="btn-clear" id="clearLogsBtn">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                                        <polyline points="3 6 5 6 21 6"/>
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                    </svg>
+                                    очистить
+                                </button>
+                            </div>
+                            <div class="logs-container" id="logsContainer">
+                                <div class="log-entry info">
+                                    <span class="log-time">--:--:--</span>
+                                    <span class="log-message">ожидание событий...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tools Tab -->
+                <div class="tab-content" id="tools">
+                    <div class="tools-layout">
+                        <!-- Section Header -->
+                        <div class="section-header tools-section-header">
+                            <div class="section-number">02</div>
+                            <h2 class="section-title">инструменты</h2>
+                            <p class="section-desc">мощные инструменты для продвинутой работы с системой</p>
+                        </div>
+
+                        <!-- Clean Strings Tool -->
+                        <div class="glass-card tool-card">
+                            <div class="corner-decor tl"></div>
+                            <div class="corner-decor br"></div>
+                            <div class="tool-header">
+                                <div class="tool-badge">
+                                    <span class="badge-label">usn journal</span>
+                                </div>
+                                <div class="tool-info">
+                                    <h3>чистка строк</h3>
+                                    <p>очистка журнала usn и создание нового с заданными параметрами</p>
+                                </div>
+                            </div>
+                            <div class="tool-steps">
+                                <div class="step" id="cleanStringsStep1">
+                                    <div class="step-indicator">
+                                        <span class="step-num">1</span>
+                                    </div>
+                                    <div class="step-content">
+                                        <span class="step-title">удаление журнала usn</span>
+                                        <span class="step-desc">fsutil usn deletejournal /d /c:</span>
+                                    </div>
+                                    <div class="step-status" id="cleanStringsStep1Status">
+                                        <span class="status-badge pending">ожидание</span>
+                                    </div>
+                                </div>
+                                <div class="step" id="cleanStringsStep2">
+                                    <div class="step-indicator">
+                                        <span class="step-num">2</span>
+                                    </div>
+                                    <div class="step-content">
+                                        <span class="step-title">создание журнала usn</span>
+                                        <span class="step-desc">fsutil usn createjournal m=64mb a=8mb</span>
+                                    </div>
+                                    <div class="step-status" id="cleanStringsStep2Status">
+                                        <span class="status-badge pending">ожидание</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="btn-tool" id="cleanStringsBtn">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                                    <polygon points="5 3 19 12 5 21 5 3"/>
+                                </svg>
+                                <span class="btn-text">запустить очистку</span>
+                            </button>
+                            <div class="tool-result" id="cleanStringsResult" style="display: none;">
+                                <span class="result-message"></span>
+                            </div>
+                        </div>
+
+                        <!-- Clean Tracks Tool -->
+                        <div class="glass-card tool-card">
+                            <div class="corner-decor tl"></div>
+                            <div class="corner-decor br"></div>
+                            <div class="tool-header">
+                                <div class="tool-badge">
+                                    <span class="badge-label">tracks</span>
+                                </div>
+                                <div class="tool-info">
+                                    <h3>очистка следов</h3>
+                                    <p>удаление следов активности системы: shellbag, explorer, prefetch, minidump</p>
+                                </div>
+                            </div>
+                            <div class="tool-progress" id="cleanTracksProgress" style="display: none;">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="cleanTracksProgressFill" style="width: 0%"></div>
+                                </div>
+                                <span class="progress-text" id="cleanTracksProgressText">запуск...</span>
+                            </div>
+                            <button class="btn-tool" id="cleanTracksBtn">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                                    <polyline points="3 6 5 6 21 6"/>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                </svg>
+                                <span class="btn-text">запустить очистку следов</span>
+                            </button>
+                            <div class="tool-result" id="cleanTracksResult" style="display: none;">
+                                <span class="result-message"></span>
+                            </div>
+                        </div>
+
+                        <!-- Clean Javaw Memory Tool -->
+                        <div class="glass-card tool-card">
+                            <div class="corner-decor tl"></div>
+                            <div class="corner-decor br"></div>
+                            <div class="tool-header">
+                                <div class="tool-badge javaw">
+                                    <span class="badge-label">memory</span>
+                                </div>
+                                <div class="tool-info">
+                                    <h3>очистка памяти javaw.exe</h3>
+                                    <p>поиск и удаление целевых строк из памяти процесса java</p>
+                                </div>
+                            </div>
+                            <div class="tool-progress" id="cleanJavawProgress" style="display: none;">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="cleanJavawProgressFill" style="width: 0%"></div>
+                                </div>
+                                <span class="progress-text" id="cleanJavawProgressText">сканирование...</span>
+                            </div>
+                            <button class="btn-tool javaw" id="cleanJavawBtn">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                                    <polyline points="3 6 5 6 21 6"/>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                </svg>
+                                <span class="btn-text">очистить память</span>
+                            </button>
+                            <div class="tool-result" id="cleanJavawResult" style="display: none;">
+                                <span class="result-message"></span>
+                            </div>
+                        </div>
+
+                        <!-- Simulate Folders Tool -->
+                        <div class="glass-card tool-card">
+                            <div class="corner-decor tl"></div>
+                            <div class="corner-decor br"></div>
+                            <div class="tool-header">
+                                <div class="tool-badge third-party">
+                                    <span class="badge-label">third-party</span>
+                                </div>
+                                <div class="tool-info">
+                                    <h3>симуляция открытия папок</h3>
+                                    <p>запускает симуляцию открытия папок через внешний инструмент</p>
+                                </div>
+                            </div>
+                            <div class="tool-progress" id="simulateProgress" style="display: none;">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="simulateProgressFill" style="width: 0%"></div>
+                                </div>
+                                <span class="progress-text" id="simulateProgressText">запуск...</span>
+                            </div>
+                            <button class="btn-tool third-party" id="simulateBtn">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                                    <polygon points="5 3 19 12 5 21 5 3"/>
+                                </svg>
+                                <span class="btn-text">запустить симуляцию</span>
+                            </button>
+                            <div class="tool-result" id="simulateResult" style="display: none;">
+                                <span class="result-message"></span>
+                            </div>
+                        </div>
+
+                        <!-- Global Clean Tool -->
+                        <div class="glass-card tool-card global-clean">
+                            <div class="corner-decor tl"></div>
+                            <div class="corner-decor br"></div>
+                            <div class="tool-header">
+                                <div class="tool-badge global">
+                                    <span class="badge-label">global</span>
+                                </div>
+                                <div class="tool-info">
+                                    <h3>глобальная очистка</h3>
+                                    <p>комплексная очистка следов системы с выбором компонентов</p>
+                                </div>
+                            </div>
+                            <button class="btn-tool global" id="globalCleanBtn">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                                </svg>
+                                <span class="btn-text">выбрать очистку</span>
+                            </button>
+                            <div class="tool-progress" id="globalCleanProgress" style="display: none;">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="globalCleanProgressFill" style="width: 0%"></div>
+                                </div>
+                                <span class="progress-text" id="globalCleanProgressText">запуск...</span>
+                            </div>
+                            <div class="tool-result" id="globalCleanResult" style="display: none;">
+                                <span class="result-message"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal for Global Clean -->
+    <div class="modal-overlay" id="globalCleanModal" style="display: none;">
+        <div class="modal">
+            <div class="corner-decor tl"></div>
+            <div class="corner-decor br"></div>
+            <div class="modal-header">
+                <h2>глобальная очистка</h2>
+                <button class="modal-close" id="modalCloseBtn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-description">выберите компоненты для очистки:</p>
+                <div class="clean-options" id="cleanOptions"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="modalCancelBtn">отмена</button>
+                <button class="btn-primary" id="modalStartBtn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                        <polygon points="5 3 19 12 5 21 5 3"/>
+                    </svg>
+                    начать очистку
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Instruction -->
+    <div class="modal-overlay" id="instructionModal" style="display: none;">
+        <div class="modal">
+            <div class="corner-decor tl"></div>
+            <div class="corner-decor br"></div>
+            <div class="modal-header">
+                <h2>инструкция по запуску</h2>
+                <button class="modal-close" id="instructionCloseBtn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="instruction-steps">
+                    <div class="instruction-step">
+                        <div class="step-number">1</div>
+                        <div class="step-text">после запуска doomsday, выберите <strong>"advanced inject"</strong></div>
+                    </div>
+                    <div class="instruction-step">
+                        <div class="step-number">2</div>
+                        <div class="step-text">выберите процесс с иконкой <strong>minecraft</strong></div>
+                    </div>
+                    <div class="instruction-step">
+                        <div class="step-number">3</div>
+                        <div class="step-text">выберите способ инжекта <strong>"jvmti"</strong></div>
+                    </div>
+                    <div class="instruction-step">
+                        <div class="step-number">4</div>
+                        <div class="step-text">после успешного инжекта закройте программу</div>
+                    </div>
+                </div>
+                <div class="instruction-note">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                        <line x1="12" y1="9" x2="12" y2="13"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                    <p>воспользуйтесь <strong>vpn</strong> или <strong>zapret</strong> если не работает</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary" id="instructionOkBtn">понятно</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
