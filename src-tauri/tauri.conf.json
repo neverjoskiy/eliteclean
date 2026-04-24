@@ -5,7 +5,7 @@
   "identifier": "com.noxum.launcher",
   "build": {
     "frontendDist": "../static",
-    "devUrl": "tauri://localhost",
+    "devUrl": "http://localhost:1420",
     "beforeDevCommand": "",
     "beforeBuildCommand": ""
   },
