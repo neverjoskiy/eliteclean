@@ -1,80 +1,47 @@
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-pip-wheel-metadata/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
+```
+# Build artifacts
+target/
+**/target/
 
-# PyInstaller
-*.manifest
-*.spec
+# Rust-specific
+Cargo.lock
+**/Cargo.lock
+**/Cargo.toml.orig
 
-# Installer
-*.msi
-*.exe
+# Dependencies
+vendor/
+**/vendor/
 
-# Виртуальное окружение
-venv/
-env/
-ENV/
-.venv
+# Tauri-specific
+**/tauri-build/
+**/tauri-cli/
+**/tauri-utils/
+
+# Temporary files
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
+*.env
 
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
-*~
 
-# Логи
-logs/
-*.log
-
-# OS
-.DS_Store
-Thumbs.db
-desktop.ini
-
-# Временные файлы
-*.tmp
-*.temp
-~$*
-
-# Тесты
-.pytest_cache/
-.coverage
+# Coverage
+coverage/
 htmlcov/
-.tox/
-.nox/
+.coverage
 
-# Jupyter
-.ipynb_checkpoints
-
-# mypy
+# MyPy
 .mypy_cache/
-.dmypy.json
-dmypy.json
-
-# Pyre
-.pyre/
-beta
-release
-screen
+```
