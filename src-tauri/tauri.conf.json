@@ -5,8 +5,8 @@
   "identifier": "com.noxum.launcher",
   "build": {
     "frontendDist": "../static",
-    "devUrl": "",
-    "beforeDevCommand": "",
+    "devUrl": "http://localhost:1420",
+    "beforeDevCommand": "python3 -m http.server 1420 --directory ../static",
     "beforeBuildCommand": ""
   },
   "app": {
