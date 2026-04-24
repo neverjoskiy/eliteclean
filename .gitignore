@@ -2,29 +2,14 @@
 # Tauri build artifacts
 src-tauri/target/
 src-tauri/node_modules/
-
-# Rust compilation artifacts
 **/*.rs.bk
 Cargo.lock
 
-# OS specific files
-.DS_Store
-Thumbs.db
-
-# Logs
-*.log
-
-# Environment
-.env
-.env.local
-.env.*
-
-# Editor
-.vscode/
-.idea/
-*.swp
-*.swo
-*.tmp
+# Rust build artifacts
+target/
+**/*.so
+**/*.dylib
+**/*.dll
 
 # Dependencies
 node_modules/
@@ -32,9 +17,23 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Build outputs
-dist/
-build/
-coverage/
-*.out
+# Environment variables
+.env
+.env.local
+.env.*
+!src-tauri/tauri.conf.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.tmp
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
 ```
