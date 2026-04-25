@@ -1,7 +1,7 @@
 //! Утилиты: работа с путями, логирование, общие функции
 
 use std::path::{Path, PathBuf};
-use log::info;
+use log::{info, warn};
 
 /// Получить базовый путь (для сборки и обычной работы)
 /// Аналог get_base_path() из Python

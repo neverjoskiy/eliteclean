@@ -2,7 +2,7 @@
 //! Каждая функция экспортируется как команда для вызова из JavaScript через invoke()
 
 use tauri::State;
-use log::info;
+use log::{info, warn};
 use crate::state::SharedAppState;
 use crate::models::*;
 use crate::services::{LauncherService, CleanupService};
@@ -50,10 +50,10 @@ pub async fn launch_app(state: State<'_, SharedAppState>) -> Result<ApiResponse,
     // Запускаем в отдельном потоке чтобы не блокировать UI
     let state_clone = state.inner().clone();
     
-    tokio::task::spawn_blocking(move || {
+    tokio::spawn(async move {
         let result = LauncherService::launch_stealth(&state_clone);
         
-        let mut app_state = state_clone.write().unwrap();
+        let mut app_state = state_clone.write().await;
         app_state.add_log(
             format!("Результат запуска: {}", if result.success { "успешно" } else { "неудачно" }),
             if result.success { "success" } else { "error" }.to_string(),

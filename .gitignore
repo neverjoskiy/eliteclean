@@ -13,15 +13,15 @@ src-tauri/target/
 
 # Temporary files
 *.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# Logs
 *.log
 
-# Environment
+# Environment variables
 .env
 .env.local
-*.env.*
-
-# IDE
-.vscode/
-.idea/
-*.swp
+*.env
 ```
