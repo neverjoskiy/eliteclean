@@ -1,7 +1,7 @@
 //! Утилиты: работа с путями, логирование, общие функции
 
 use std::path::{Path, PathBuf};
-use log::{info, warn, error};
+use log::{info, warn};
 
 /// Получить базовый путь (для сборки и обычной работы)
 /// Аналог get_base_path() из Python
@@ -85,7 +85,7 @@ pub fn init_logging() {
     let log_file = log_dir.join("app.log");
     
     // Создаём файл лога
-    let file_appender = tracing_appender::rolling::never(&log_dir, "app.log");
+    let _file_appender = tracing_appender::rolling::never(&log_dir, "app.log");
     
     // Настраиваем env_logger как fallback
     env_logger::Builder::from_env(

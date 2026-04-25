@@ -288,7 +288,6 @@ pub struct CleanupService;
 impl CleanupService {
     /// Чистка строк (USN Journal)
     pub async fn clean_strings(state: State<'_, SharedAppState>) -> Result<CleanStringsResponse, String> {
-        use tokio::time::sleep;
         
         {
             let mut app_state = state.write().unwrap();
@@ -369,7 +368,6 @@ impl CleanupService {
     
     /// Очистка следов
     pub async fn clean_tracks(state: State<'_, SharedAppState>) -> Result<ApiResponse, String> {
-        use tokio::time::sleep;
         
         {
             let mut app_state = state.write().unwrap();
@@ -491,7 +489,6 @@ impl CleanupService {
         state: State<'_, SharedAppState>,
         params: GlobalCleanParams,
     ) -> Result<GlobalCleanResponse, String> {
-        use tokio::time::sleep;
         
         // Собираем выбранные опции
         let mut selected = Vec::new();
@@ -1061,7 +1058,8 @@ impl CleanupService {
         
         let mut deleted = 0;
         
-        for temp_dir in temp_dirs {
+        for temp_dir_path in temp_dirs {
+            let temp_dir = PathBuf::from(&temp_dir_path);
             if !temp_dir.exists() {
                 continue;
             }

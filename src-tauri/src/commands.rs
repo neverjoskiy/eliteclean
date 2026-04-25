@@ -2,15 +2,15 @@
 //! Каждая функция экспортируется как команда для вызова из JavaScript через invoke()
 
 use tauri::State;
-use log::{info, warn, error};
-use crate::state::{AppState, SharedAppState};
+use log::{info, warn};
+use crate::state::SharedAppState;
 use crate::models::*;
 use crate::services::{LauncherService, CleanupService};
 
 /// GET /api/status - Получить текущий статус приложения
 #[tauri::command]
 pub fn get_status(state: State<SharedAppState>) -> Result<StatusResponse, String> {
-    let app_state = state.read().map_err(|e| e.to_string())?;
+    let app_state = state.read().await.map_err(|e| e.to_string())?;
     
     let target_path = crate::utils::get_target_jar_path();
     let file_exists = target_path.exists();
@@ -33,7 +33,7 @@ pub fn get_status(state: State<SharedAppState>) -> Result<StatusResponse, String
 /// POST /api/launch - Запуск целевого приложения
 #[tauri::command]
 pub async fn launch_app(state: State<'_, SharedAppState>) -> Result<ApiResponse, String> {
-    let mut app_state = state.write().map_err(|e| e.to_string())?;
+    let mut app_state = state.write().await.map_err(|e| e.to_string())?;
     
     if app_state.status == AppStatus::Running {
         return Ok(ApiResponse {
@@ -50,10 +50,10 @@ pub async fn launch_app(state: State<'_, SharedAppState>) -> Result<ApiResponse,
     // Запускаем в отдельном потоке чтобы не блокировать UI
     let state_clone = state.inner().clone();
     
-    tokio::task::spawn_blocking(move || {
+    tokio::spawn(async move {
         let result = LauncherService::launch_stealth(&state_clone);
         
-        let mut app_state = state_clone.write().unwrap();
+        let mut app_state = state_clone.write().await;
         app_state.add_log(
             format!("Результат запуска: {}", if result.success { "успешно" } else { "неудачно" }),
             if result.success { "success" } else { "error" }.to_string(),
@@ -75,7 +75,7 @@ pub async fn launch_app(state: State<'_, SharedAppState>) -> Result<ApiResponse,
 /// GET /api/logs - Получить логи
 #[tauri::command]
 pub fn get_logs(state: State<SharedAppState>, lines: Option<usize>) -> Result<LogsResponse, String> {
-    let app_state = state.read().map_err(|e| e.to_string())?;
+    let app_state = state.read().await.map_err(|e| e.to_string())?;
     let logs = app_state.get_logs(lines.unwrap_or(50));
     
     Ok(LogsResponse { logs })
@@ -84,7 +84,7 @@ pub fn get_logs(state: State<SharedAppState>, lines: Option<usize>) -> Result<Lo
 /// POST /api/logs/clear - Очистить логи
 #[tauri::command]
 pub fn clear_logs(state: State<SharedAppState>) -> Result<ApiResponse, String> {
-    let mut app_state = state.write().map_err(|e| e.to_string())?;
+    let mut app_state = state.write().await.map_err(|e| e.to_string())?;
     app_state.clear_logs();
     
     info!("Логи очищены");
@@ -138,7 +138,7 @@ pub async fn clean_javaw_memory(state: State<'_, SharedAppState>) -> Result<Clea
 /// GET /api/tools/status - Получить статус инструментов
 #[tauri::command]
 pub fn get_tools_status(state: State<SharedAppState>) -> Result<ToolsStatusResponse, String> {
-    let app_state = state.read().map_err(|e| e.to_string())?;
+    let app_state = state.read().await.map_err(|e| e.to_string())?;
     
     Ok(ToolsStatusResponse {
         tools: app_state.tool_states.clone(),
