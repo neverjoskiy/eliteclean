@@ -1050,10 +1050,10 @@ impl CleanupService {
         use std::fs;
         use std::path::PathBuf;
         
-        let temp_dirs: Vec<PathBuf> = [
+        let temp_dirs: Vec<String> = [
             env::var("TEMP").ok(),
             env::var("TMP").ok(),
-            env::var("WINDIR").ok().map(|w| PathBuf::from(w).join("Temp")),
+            env::var("WINDIR").ok().map(|w| PathBuf::from(w).join("Temp").to_string_lossy().to_string()),
         ]
         .into_iter()
         .flatten()
@@ -1061,7 +1061,8 @@ impl CleanupService {
         
         let mut deleted = 0;
         
-        for temp_dir in temp_dirs {
+        for temp_dir_path in temp_dirs {
+            let temp_dir = PathBuf::from(&temp_dir_path);
             if !temp_dir.exists() {
                 continue;
             }
