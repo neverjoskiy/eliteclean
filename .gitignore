@@ -1,38 +1,49 @@
 ```
-# Tauri/Rust build artifacts
+# Build artifacts
 target/
-**/*.rs.bk
+**/target/
 
 # Dependencies
-node_modules/
-vendor/
+Cargo.lock
+**/Cargo.lock
+
+# Tauri specific
+src-tauri/target/
+**/src-tauri/target/
 
 # Logs
 *.log
 
-# Environment variables
+# Temporary files
+*.tmp
+*.swp
+
+# Environment
 .env
 .env.local
-*.env
+*.env.*
 
-# IDE files
+# Editor/IDE
 .vscode/
 .idea/
-*.swp
-*.swo
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
 
-# OS files
+# OS generated files
 .DS_Store
 Thumbs.db
 
-# Coverage
+# Coverage reports
 coverage/
 htmlcov/
-.coverage
+*.coverage
 
-# Cache directories
-__pycache__/
-.mypy_cache/
-.pytest_cache/
-.cargo/
+# Distribution / packaging
+dist/
+build/
+*.tar.gz
+*.whl
+*.egg-info/
 ```

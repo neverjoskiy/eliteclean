@@ -9,8 +9,8 @@ use crate::services::{LauncherService, CleanupService};
 
 /// GET /api/status - Получить текущий статус приложения
 #[tauri::command]
-pub fn get_status(state: State<SharedAppState>) -> Result<StatusResponse, String> {
-    let app_state = state.read().await.map_err(|e| e.to_string())?;
+pub async fn get_status(state: State<'_, SharedAppState>) -> Result<StatusResponse, String> {
+    let app_state = state.read().await;
     
     let target_path = crate::utils::get_target_jar_path();
     let file_exists = target_path.exists();
@@ -33,7 +33,7 @@ pub fn get_status(state: State<SharedAppState>) -> Result<StatusResponse, String
 /// POST /api/launch - Запуск целевого приложения
 #[tauri::command]
 pub async fn launch_app(state: State<'_, SharedAppState>) -> Result<ApiResponse, String> {
-    let mut app_state = state.write().await.map_err(|e| e.to_string())?;
+    let mut app_state = state.write().await;
     
     if app_state.status == AppStatus::Running {
         return Ok(ApiResponse {

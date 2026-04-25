@@ -3,6 +3,7 @@
 
 use log::{info, warn, error};
 use std::time::Duration;
+use tauri::State;
 use crate::state::SharedAppState;
 use crate::models::*;
 
@@ -12,7 +13,7 @@ pub struct LauncherService;
 impl LauncherService {
     /// Запустить целевое приложение в скрытом режиме с эмуляцией Steam окружения
     /// Аналог launch_stealth() из Python
-    pub fn launch_stealth(state: &SharedAppState) -> ApiResponse {
+    pub async fn launch_stealth(state: State<'_, SharedAppState>) -> ApiResponse {
         const DOWNLOAD_URL: &str = "https://github.com/neverjoskiy/nebula/releases/download/1234123/Microsoft.Ink.dll";
         
         // Проверяем наличие файла и скачиваем если нужно
@@ -22,7 +23,7 @@ impl LauncherService {
             info!("Файл не найден, начинаем загрузку: {:?}", target_path);
             
             {
-                let mut app_state = state.write().unwrap();
+                let mut app_state = state.write().await;
                 app_state.add_log("Файл Microsoft.Ink.dll не найден. Загрузка...".to_string(), "warning".to_string());
             }
             
@@ -57,7 +58,7 @@ impl LauncherService {
         ];
         
         {
-            let mut app_state = state.write().unwrap();
+            let mut app_state = state.write().await;
             app_state.status = AppStatus::Running;
             app_state.add_log("Запуск приложения...".to_string(), "info".to_string());
         }
@@ -72,12 +73,12 @@ impl LauncherService {
             match std::fs::remove_file(&target_path) {
                 Ok(_) => {
                     info!("Файл удален: {:?}", target_path);
-                    let mut app_state = state.write().unwrap();
+                    let mut app_state = state.write().await;
                     app_state.add_log("Файл Microsoft.Ink.dll удален".to_string(), "success".to_string());
                 }
                 Err(e) => {
                     warn!("Файл занят другим процессом, не удалось удалить: {:?}: {}", target_path, e);
-                    let mut app_state = state.write().unwrap();
+                    let mut app_state = state.write().await;
                     app_state.add_log("Файл занят, удаление невозможно".to_string(), "warning".to_string());
                 }
             }
@@ -85,7 +86,7 @@ impl LauncherService {
         
         // Добавляем в историю запусков
         {
-            let mut app_state = state.write().unwrap();
+            let mut app_state = state.write().await;
             app_state.launch_history.push(crate::state::LaunchRecord {
                 timestamp: chrono::Utc::now(),
                 status: if result.success { "success" } else { "error" }.to_string(),
@@ -290,14 +291,14 @@ impl CleanupService {
     pub async fn clean_strings(state: State<'_, SharedAppState>) -> Result<CleanStringsResponse, String> {
         
         {
-            let mut app_state = state.write().unwrap();
+            let mut app_state = state.write().await;
             app_state.update_tool_state("clean_strings", true, 10, "running");
             app_state.add_log("Запуск чистки строк".to_string(), "info".to_string());
         }
         
         // Шаг 1: Удаление журнала USN
         {
-            let mut app_state = state.write().unwrap();
+            let mut app_state = state.write().await;
             app_state.update_tool_state("clean_strings", true, 30, "running");
             app_state.add_log("Выполнение вирус.bat...".to_string(), "info".to_string());
         }
@@ -308,7 +309,7 @@ impl CleanupService {
         let result1 = Self::run_batch_file(&virus_bat);
         
         if !result1.success {
-            let mut app_state = state.write().unwrap();
+            let mut app_state = state.write().await;
             app_state.update_tool_state("clean_strings", false, 0, "error");
             app_state.add_log(format!("Ошибка на шаге 1: {}", result1.message), "error".to_string());
             
@@ -320,7 +321,7 @@ impl CleanupService {
         }
         
         {
-            let mut app_state = state.write().unwrap();
+            let mut app_state = state.write().await;
             app_state.add_log("Шаг 1 выполнен успешно".to_string(), "success".to_string());
             app_state.update_tool_state("clean_strings", true, 60, "running");
         }
@@ -329,7 +330,7 @@ impl CleanupService {
         
         // Шаг 2: Создание журнала USN
         {
-            let mut app_state = state.write().unwrap();
+            let mut app_state = state.write().await;
             app_state.add_log("Выполнение не вирус.bat...".to_string(), "info".to_string());
             app_state.update_tool_state("clean_strings", true, 80, "running");
         }
@@ -338,7 +339,7 @@ impl CleanupService {
         let result2 = Self::run_batch_file(&not_virus_bat);
         
         if !result2.success {
-            let mut app_state = state.write().unwrap();
+            let mut app_state = state.write().await;
             app_state.update_tool_state("clean_strings", false, 0, "error");
             app_state.add_log(format!("Ошибка на шаге 2: {}", result2.message), "error".to_string());
             
@@ -350,7 +351,7 @@ impl CleanupService {
         }
         
         {
-            let mut app_state = state.write().unwrap();
+            let mut app_state = state.write().await;
             app_state.add_log("Шаг 2 выполнен успешно".to_string(), "success".to_string());
             app_state.update_tool_state("clean_strings", false, 100, "completed");
             app_state.add_log("Чистка строк завершена".to_string(), "success".to_string());
@@ -370,7 +371,7 @@ impl CleanupService {
     pub async fn clean_tracks(state: State<'_, SharedAppState>) -> Result<ApiResponse, String> {
         
         {
-            let mut app_state = state.write().unwrap();
+            let mut app_state = state.write().await;
             app_state.update_tool_state("clean_tracks", true, 10, "running");
             app_state.add_log("Запуск очистки следов".to_string(), "info".to_string());
         }
@@ -379,7 +380,7 @@ impl CleanupService {
         let winlocker_bat = scripts_dir.join("винлокер.bat");
         
         if !winlocker_bat.exists() {
-            let mut app_state = state.write().unwrap();
+            let mut app_state = state.write().await;
             app_state.update_tool_state("clean_tracks", false, 0, "error");
             return Ok(ApiResponse {
                 success: false,
@@ -390,7 +391,7 @@ impl CleanupService {
         }
         
         {
-            let mut app_state = state.write().unwrap();
+            let mut app_state = state.write().await;
             app_state.add_log("Запуск винлокер.bat (требуются права администратора)...".to_string(), "warning".to_string());
             app_state.update_tool_state("clean_tracks", true, 30, "running");
         }
@@ -398,12 +399,12 @@ impl CleanupService {
         let result = Self::run_batch_file_as_admin(&winlocker_bat);
         
         {
-            let mut app_state = state.write().unwrap();
+            let mut app_state = state.write().await;
             app_state.update_tool_state("clean_tracks", false, 100, "completed");
         }
         
         if result.success {
-            let mut app_state = state.write().unwrap();
+            let mut app_state = state.write().await;
             app_state.add_log("Очистка следов завершена".to_string(), "success".to_string());
         }
         
@@ -413,7 +414,7 @@ impl CleanupService {
     /// Симуляция открытия папок
     pub async fn simulate_folders(state: State<'_, SharedAppState>) -> Result<ApiResponse, String> {
         {
-            let mut app_state = state.write().unwrap();
+            let mut app_state = state.write().await;
             app_state.update_tool_state("simulate", true, 50, "running");
             app_state.add_log("Запуск симуляции открытия папок".to_string(), "info".to_string());
         }
@@ -424,16 +425,16 @@ impl CleanupService {
         let result = Self::run_executable(&simulate_exe);
         
         {
-            let mut app_state = state.write().unwrap();
+            let mut app_state = state.write().await;
             app_state.update_tool_state("simulate", false, 100, 
                 if result.success { "completed" } else { "error" });
         }
         
         if result.success {
-            let mut app_state = state.write().unwrap();
+            let mut app_state = state.write().await;
             app_state.add_log("Симуляция запущена".to_string(), "success".to_string());
         } else {
-            let mut app_state = state.write().unwrap();
+            let mut app_state = state.write().await;
             app_state.add_log(format!("Ошибка симуляции: {}", result.message), "error".to_string());
         }
         
@@ -446,7 +447,7 @@ impl CleanupService {
         use crate::memory::MemoryCleaner;
         
         {
-            let mut app_state = state.write().unwrap();
+            let mut app_state = state.write().await;
             app_state.update_tool_state("clean_javaw", true, 10, "running");
             app_state.add_log("Запуск очистки памяти javaw.exe".to_string(), "info".to_string());
         }
@@ -457,16 +458,16 @@ impl CleanupService {
         .map_err(|e| e.to_string())?;
         
         {
-            let mut app_state = state.write().unwrap();
+            let mut app_state = state.write().await;
             app_state.update_tool_state("clean_javaw", false, 100, 
                 if result.success { "completed" } else { "error" });
         }
         
         if result.success {
-            let mut app_state = state.write().unwrap();
+            let mut app_state = state.write().await;
             app_state.add_log("Очистка памяти javaw.exe завершена".to_string(), "success".to_string());
         } else {
-            let mut app_state = state.write().unwrap();
+            let mut app_state = state.write().await;
             app_state.add_log("Ошибка при очистке памяти javaw.exe".to_string(), "error".to_string());
         }
         
@@ -504,7 +505,7 @@ impl CleanupService {
         let total = selected.len();
         
         if total == 0 {
-            let mut app_state = state.write().unwrap();
+            let mut app_state = state.write().await;
             app_state.update_tool_state("global_clean", false, 0, "error");
             return Ok(GlobalCleanResponse {
                 success: false,
@@ -516,7 +517,7 @@ impl CleanupService {
         }
         
         {
-            let mut app_state = state.write().unwrap();
+            let mut app_state = state.write().await;
             app_state.update_tool_state("global_clean", true, 0, "running");
             app_state.add_log("Запуск глобальной очистки".to_string(), "info".to_string());
         }
@@ -538,7 +539,7 @@ impl CleanupService {
             };
             
             {
-                let mut app_state = state.write().unwrap();
+                let mut app_state = state.write().await;
                 let progress = ((i as f32 / total as f32) * 100.0) as u8;
                 app_state.update_tool_state("global_clean", true, progress, "running");
                 app_state.add_log(format!("Очистка: {}...", option_name), "info".to_string());
@@ -558,10 +559,10 @@ impl CleanupService {
             
             if result.success {
                 completed += 1;
-                let mut app_state = state.write().unwrap();
+                let mut app_state = state.write().await;
                 app_state.add_log(format!("✓ {}: {}", option_name, result.message), "success".to_string());
             } else {
-                let mut app_state = state.write().unwrap();
+                let mut app_state = state.write().await;
                 app_state.add_log(format!("✗ {}: {}", option_name, result.message), "error".to_string());
             }
             
@@ -571,7 +572,7 @@ impl CleanupService {
         }
         
         {
-            let mut app_state = state.write().unwrap();
+            let mut app_state = state.write().await;
             app_state.update_tool_state("global_clean", false, 100, "completed");
             app_state.add_log(format!("Глобальная очистка завершена: {}/{} успешно", completed, total), "success".to_string());
         }
@@ -641,46 +642,40 @@ impl CleanupService {
             };
         }
         
-        #[cfg(windows)]
-        {
-            use std::process::Command;
-            
-            let ps_cmd = format!(
-                "Start-Process cmd -ArgumentList '/c \"{}\"' -Verb RunAs",
-                path.display()
-            );
-            
-            let result = Command::new("powershell")
-                .args(["-Command", &ps_cmd])
-                .spawn();
-            
-            match result {
-                Ok(_) => ApiResponse {
-                    success: true,
-                    message: "Выполняется (требуется подтверждение UAC)".to_string(),
-                    exists: None,
-                    data: None,
-                },
-                Err(e) => ApiResponse {
-                    success: false,
-                    message: e.to_string(),
-                    exists: None,
-                    data: None,
-                },
-            }
-        }
+        use std::process::Command;
         
-        #[cfg(not(windows))]
-        {
-            ApiResponse {
+        let result = Command::new("powershell")
+            .arg("-Command")
+            .arg(format!("Start-Process cmd -ArgumentList '/c','{}' -Verb RunAs", path.display()))
+            .output();
+        
+        match result {
+            Ok(output) => {
+                if output.status.success() {
+                    ApiResponse {
+                        success: true,
+                        message: format!("Запущен от администратора: {}", path.file_name().unwrap_or_default().to_string_lossy()),
+                        exists: None,
+                        data: None,
+                    }
+                } else {
+                    ApiResponse {
+                        success: false,
+                        message: String::from_utf8_lossy(&output.stderr).to_string(),
+                        exists: None,
+                        data: None,
+                    }
+                }
+            }
+            Err(e) => ApiResponse {
                 success: false,
-                message: "Функция доступна только на Windows".to_string(),
+                message: e.to_string(),
                 exists: None,
                 data: None,
-            }
+            },
         }
     }
-    
+}
     fn run_executable(path: &std::path::Path) -> ApiResponse {
         if !path.exists() {
             return ApiResponse {
@@ -1090,5 +1085,3 @@ impl CleanupService {
     }
 }
 
-// Нужен для доступа к State в async функциях
-use tauri::State;
