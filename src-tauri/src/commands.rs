@@ -3,7 +3,7 @@
 
 use tauri::State;
 use log::info;
-use crate::state::{AppState, SharedAppState};
+use crate::state::SharedAppState;
 use crate::models::*;
 use crate::services::{LauncherService, CleanupService};
 

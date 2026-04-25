@@ -1,31 +1,27 @@
 ```
-# Tauri/Rust build artifacts
-src-tauri/target/
-**/*.rs.bk
+# Build artifacts
+target/
+**/target/
 
 # Dependencies
-node_modules/
-vendor/
+Cargo.lock
+**/Cargo.lock
 
-# Logs
+# Tauri specific
+src-tauri/target/
+**/src-tauri/target/
+
+# Temporary files
+*.tmp
 *.log
 
 # Environment
 .env
 .env.local
-*.env
+*.env.*
 
-# Editor/IDE
+# IDE
 .vscode/
 .idea/
 *.swp
-*.swo
-*~
-.DS_Store
-Thumbs.db
-
-# Build outputs
-dist/
-build/
-out/
 ```
