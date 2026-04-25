@@ -1,38 +1,21 @@
 ```
-# Tauri/Rust build artifacts
-target/
-**/*.rs.bk
-
 # Dependencies
-node_modules/
-vendor/
+target/
+Cargo.lock
 
-# Logs
+# Logs and temp files
 *.log
+*.tmp
 
-# Environment variables
+# Environment
 .env
 .env.local
-*.env
+*.env.*
 
-# IDE files
+# Editors
 .vscode/
 .idea/
-*.swp
-*.swo
 
-# OS files
-.DS_Store
-Thumbs.db
-
-# Coverage
-coverage/
-htmlcov/
-.coverage
-
-# Cache directories
-__pycache__/
-.mypy_cache/
-.pytest_cache/
-.cargo/
+# Rust-specific
+**/*.rs.bk
 ```
