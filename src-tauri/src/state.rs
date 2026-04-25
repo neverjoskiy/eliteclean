@@ -73,7 +73,13 @@ impl Default for AppState {
 }
 
 /// Обёртка для потокобезопасного доступа к состоянию
-pub type SharedAppState = RwLock<AppState>;
+pub type SharedAppState = Arc<RwLock<AppState>>;
+
+impl SharedAppState {
+    pub fn new(state: AppState) -> Self {
+        Arc::new(RwLock::new(state))
+    }
+}
 
 impl AppState {
     /// Создать новое состояние

@@ -1,21 +1,11 @@
 ```
-# Build artifacts
+# Tauri/Rust build artifacts
 target/
-**/target/
+**/*.rs.bk
 
 # Dependencies
-Cargo.lock
-**/Cargo.lock
-
-# Tauri specific
-src-tauri/target/
-**/src-tauri/target/
-
-# Temporary files
-*.tmp
-*.temp
-.DS_Store
-Thumbs.db
+node_modules/
+vendor/
 
 # Logs
 *.log
@@ -24,4 +14,25 @@ Thumbs.db
 .env
 .env.local
 *.env
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Coverage
+coverage/
+htmlcov/
+.coverage
+
+# Cache directories
+__pycache__/
+.mypy_cache/
+.pytest_cache/
+.cargo/
 ```
