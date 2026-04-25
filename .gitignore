@@ -1,93 +1,31 @@
 ```
-# Dependencies
-target/
-**/target/
-
-# Rust specific
-Cargo.lock
-**/Cargo.lock
-*.rs.bk
+# Tauri/Rust build artifacts
+src-tauri/target/
 **/*.rs.bk
 
-# Tauri specific
-src-tauri/target/
-**/src-tauri/target/
-**/tauri.conf.json
-**/tauri icons/
-
-# Temporary files
-*.tmp
-**/*.tmp
-*.swp
-**/*.swp
+# Dependencies
+node_modules/
+vendor/
 
 # Logs
 *.log
-**/*.log
 
-# Environment variables
+# Environment
 .env
-**/.env
 .env.local
-**/.env.local
 *.env
-**/*.env
 
-# IDE specific
+# Editor/IDE
 .vscode/
-**/.vscode/
 .idea/
-**/.idea/
-
-# OS generated files
+*.swp
+*.swo
+*~
 .DS_Store
-**/.DS_Store
 Thumbs.db
-**/Thumbs.db
 
-# Python (if applicable)
-__pycache__/
-**/__pycache__/
-*.pyc
-**/*.pyc
-*.pyo
-**/*.pyo
-*.pyd
-**/*.pyd
-.Python
-**/.Python
-
-# Node.js (if applicable)
-node_modules/
-**/node_modules/
-npm-debug.log*
-**/npm-debug.log*
-yarn-debug.log*
-**/yarn-debug.log*
-yarn-error.log*
-**/yarn-error.log*
-
-# Build outputs (if any)
+# Build outputs
 dist/
-**/dist/
 build/
-**/build/
-*.min.js
-**/*.min.js
-*.min.css
-**/*.min.css
-
-# Coverage reports
-coverage/
-**/coverage/
-*.lcov
-**/*.lcov
-
-# Testing
-.mypy_cache/
-**/.mypy_cache/
-.pytest_cache/
-**/.pytest_cache/
-.cargo/
-**/.cargo/
+out/
 ```

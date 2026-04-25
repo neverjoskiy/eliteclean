@@ -15,9 +15,7 @@ fn main() {
     info!("Noxum Launcher starting...");
     
     // Создаём глобальное состояние
-    let app_state = noxum_launcher_lib::state::SharedAppState::new(
-        std::sync::Arc::new(std::sync::RwLock::new(AppState::new()))
-    );
+    let app_state = noxum_launcher_lib::state::SharedAppState::new(AppState::new());
     
     // Запускаем Tauri приложение
     tauri::Builder::default()

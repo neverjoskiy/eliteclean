@@ -2,7 +2,8 @@
 //! Используется Arc<RwLock<>> для потокобезопасности
 
 use std::collections::HashMap;
-use std::sync::{Arc, RwLock};
+use std::sync::Arc;
+use tokio::sync::RwLock;
 use chrono::{DateTime, Utc};
 use crate::models::{AppStatus, LogEntry, ToolState};
 
@@ -72,7 +73,7 @@ impl Default for AppState {
 }
 
 /// Обёртка для потокобезопасного доступа к состоянию
-pub type SharedAppState = Arc<RwLock<AppState>>;
+pub type SharedAppState = RwLock<AppState>;
 
 impl AppState {
     /// Создать новое состояние
