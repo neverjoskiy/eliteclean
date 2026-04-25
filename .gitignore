@@ -1,49 +1,21 @@
 ```
-# Build artifacts
-target/
-**/target/
-
 # Dependencies
+target/
 Cargo.lock
-**/Cargo.lock
 
-# Tauri specific
-src-tauri/target/
-**/src-tauri/target/
-
-# Logs
+# Logs and temp files
 *.log
-
-# Temporary files
 *.tmp
-*.swp
 
 # Environment
 .env
 .env.local
 *.env.*
 
-# Editor/IDE
+# Editors
 .vscode/
 .idea/
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
 
-# OS generated files
-.DS_Store
-Thumbs.db
-
-# Coverage reports
-coverage/
-htmlcov/
-*.coverage
-
-# Distribution / packaging
-dist/
-build/
-*.tar.gz
-*.whl
-*.egg-info/
+# Rust-specific
+**/*.rs.bk
 ```
