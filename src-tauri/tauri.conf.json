@@ -11,10 +11,10 @@
     "windows": [
       {
         "title": "1337 Cleaner",
-        "width": 1200,
-        "height": 800,
-        "minWidth": 900,
-        "minHeight": 600,
+        "width": 780,
+        "height": 580,
+        "minWidth": 680,
+        "minHeight": 480,
         "resizable": true,
         "fullscreen": false,
         "decorations": true,
