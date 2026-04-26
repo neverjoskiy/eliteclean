@@ -1,0 +1,19 @@
+# Rust build artifacts
+target/
+
+# Editors
+.vscode/
+.idea/
+.kiro/
+
+# Logs and temp
+*.log
+*.tmp
+.env
+.env.*
+
+# Rust backup files
+**/*.rs.bk
+
+# Release binary (опционально — убери эту строку если хочешь пушить release/)
+release/elite-cleaner.exe
