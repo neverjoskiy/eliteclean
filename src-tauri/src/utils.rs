@@ -82,17 +82,13 @@ pub fn get_scripts_dir() -> PathBuf {
 /// Инициализация логирования
 pub fn init_logging() {
     let log_dir = get_log_dir();
-    let log_file = log_dir.join("app.log");
     
-    // Создаём файл лога
-    let _file_appender = tracing_appender::rolling::never(&log_dir, "app.log");
-    
-    // Настраиваем env_logger как fallback
+    // Настраиваем env_logger
     env_logger::Builder::from_env(
         env_logger::Env::default().default_filter_or("info")
     ).init();
     
-    info!("Логирование инициализировано. Лог-файл: {:?}", log_file);
+    info!("Логирование инициализировано. Лог-директория: {:?}", log_dir);
 }
 
 /// Проверка существования файла

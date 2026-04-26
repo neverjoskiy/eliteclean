@@ -404,12 +404,14 @@ impl CleanupService {
         
         {
             let mut app_state = state.write().await;
-            app_state.update_tool_state("clean_tracks", false, 100, "completed");
-        }
-        
-        if result.success {
-            let mut app_state = state.write().await;
-            app_state.add_log("Очистка следов завершена".to_string(), "success".to_string());
+            let status = if result.success { "completed" } else { "error" };
+            app_state.update_tool_state("clean_tracks", false, 100, status);
+            let msg = if result.success {
+                "Очистка следов завершена".to_string()
+            } else {
+                format!("Ошибка очистки следов: {}", result.message)
+            };
+            app_state.add_log(msg, if result.success { "success" } else { "error" }.to_string());
         }
         
         Ok(result)
@@ -1016,16 +1018,30 @@ impl CleanupService {
             use std::time::Duration;
             
             // Удаление журнала
-            let _ = Command::new("fsutil")
+            let del = Command::new("fsutil")
                 .args(["usn", "deletejournal", "/D", "C:"])
                 .output();
+            
+            if del.map(|o| !o.status.success()).unwrap_or(true) {
+                return GlobalCleanResultItem {
+                    success: false,
+                    message: "Не удалось удалить USN журнал (требуются права администратора)".to_string(),
+                };
+            }
             
             thread::sleep(Duration::from_secs(1));
             
             // Создание нового
-            let _ = Command::new("fsutil")
+            let create = Command::new("fsutil")
                 .args(["usn", "createjournal", "m=67108864", "a=8388608"])
                 .output();
+            
+            if create.map(|o| !o.status.success()).unwrap_or(true) {
+                return GlobalCleanResultItem {
+                    success: false,
+                    message: "Не удалось создать USN журнал".to_string(),
+                };
+            }
             
             GlobalCleanResultItem {
                 success: true,

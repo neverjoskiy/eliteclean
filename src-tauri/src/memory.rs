@@ -70,7 +70,9 @@ impl MemoryCleaner {
         unsafe {
             if Process32FirstW(snapshot, &mut entry).is_ok() {
                 loop {
-                    let exe_name = String::from_utf16_lossy(&entry.szExeFile);
+                    let exe_name = String::from_utf16_lossy(
+                        &entry.szExeFile[..entry.szExeFile.iter().position(|&c| c == 0).unwrap_or(entry.szExeFile.len())]
+                    );
                     if exe_name.to_lowercase() == "javaw.exe" {
                         javaw_pid = Some(entry.th32ProcessID);
                         break;
@@ -171,74 +173,76 @@ impl MemoryCleaner {
                     
                     // Ищем паттерны
                     for pattern in &TARGET_STRINGS {
+                        use rand::Rng;
+
                         // UTF-8 вариант
                         let mut start = 0;
-                        while let Some(idx) = region_data.windows(pattern.len()).position(|w| w == *pattern) {
-                            if idx < start {
-                                break;
+                        while start + pattern.len() <= region_data.len() {
+                            match region_data[start..].windows(pattern.len()).position(|w| w == *pattern) {
+                                None => break,
+                                Some(rel_idx) => {
+                                    let idx = start + rel_idx;
+                                    let target_addr = current_address + idx;
+                                    log::info!("Найден паттерн по адресу 0x{:X}", target_addr);
+
+                                    let mut rng = rand::thread_rng();
+                                    let random_bytes: Vec<u8> = (0..pattern.len()).map(|_| rng.gen()).collect();
+
+                                    let write_result = unsafe {
+                                        WriteProcessMemory(
+                                            process_handle,
+                                            target_addr as *const _,
+                                            random_bytes.as_ptr() as *const _,
+                                            random_bytes.len(),
+                                            None,
+                                        )
+                                    };
+
+                                    if write_result.is_ok() {
+                                        cleared_count += 1;
+                                        found_in_region += 1;
+                                    }
+
+                                    start = idx + pattern.len();
+                                }
                             }
-                            
-                            let target_addr = current_address + idx;
-                            log::info!("Найден паттерн по адресу 0x{:X}", target_addr);
-                            
-                            // Генерируем случайные байты для замены
-                            use rand::Rng;
-                            let mut rng = rand::thread_rng();
-                            let random_bytes: Vec<u8> = (0..pattern.len()).map(|_| rng.gen()).collect();
-                            
-                            // Записываем случайные байты
-                            let write_result = unsafe {
-                                WriteProcessMemory(
-                                    process_handle,
-                                    target_addr as *const _,
-                                    random_bytes.as_ptr() as *const _,
-                                    random_bytes.len(),
-                                    None,
-                                )
-                            };
-                            
-                            if write_result.is_ok() {
-                                cleared_count += 1;
-                                found_in_region += 1;
-                            }
-                            
-                            start = idx + pattern.len();
                         }
-                        
+
                         // UTF-16 LE вариант
                         let pattern_utf16: Vec<u8> = pattern.iter()
                             .flat_map(|&c| (c as u16).to_le_bytes())
                             .collect();
-                        
-                        start = 0;
-                        while let Some(idx) = region_data.windows(pattern_utf16.len()).position(|w| w == pattern_utf16.as_slice()) {
-                            if idx < start {
-                                break;
+
+                        let mut start = 0;
+                        while start + pattern_utf16.len() <= region_data.len() {
+                            match region_data[start..].windows(pattern_utf16.len()).position(|w| w == pattern_utf16.as_slice()) {
+                                None => break,
+                                Some(rel_idx) => {
+                                    let idx = start + rel_idx;
+                                    let target_addr = current_address + idx;
+                                    log::info!("Найден UTF-16 паттерн по адресу 0x{:X}", target_addr);
+
+                                    let mut rng = rand::thread_rng();
+                                    let random_bytes: Vec<u8> = (0..pattern_utf16.len()).map(|_| rng.gen()).collect();
+
+                                    let write_result = unsafe {
+                                        WriteProcessMemory(
+                                            process_handle,
+                                            target_addr as *const _,
+                                            random_bytes.as_ptr() as *const _,
+                                            random_bytes.len(),
+                                            None,
+                                        )
+                                    };
+
+                                    if write_result.is_ok() {
+                                        cleared_count += 1;
+                                        found_in_region += 1;
+                                    }
+
+                                    start = idx + pattern_utf16.len();
+                                }
                             }
-                            
-                            let target_addr = current_address + idx;
-                            log::info!("Найден UTF-16 паттерн по адресу 0x{:X}", target_addr);
-                            
-                            use rand::Rng;
-                            let mut rng = rand::thread_rng();
-                            let random_bytes: Vec<u8> = (0..pattern_utf16.len()).map(|_| rng.gen()).collect();
-                            
-                            let write_result = unsafe {
-                                WriteProcessMemory(
-                                    process_handle,
-                                    target_addr as *const _,
-                                    random_bytes.as_ptr() as *const _,
-                                    random_bytes.len(),
-                                    None,
-                                )
-                            };
-                            
-                            if write_result.is_ok() {
-                                cleared_count += 1;
-                                found_in_region += 1;
-                            }
-                            
-                            start = idx + pattern_utf16.len();
                         }
                     }
                     

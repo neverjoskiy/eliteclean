@@ -39,8 +39,7 @@
     "shortDescription": "EliteCleaner — 1337 system cleanup tool",
     "longDescription": "EliteCleaner (1337 Cleaner) — advanced desktop tool for hidden Java app launch with Steam environment emulation and system cleanup.",
     "resources": [
-      "../scripts/**/*",
-      "../templates/**/*"
+      "../scripts/**/*"
     ]
   },
   "plugins": {

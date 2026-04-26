@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EliteClean — Профессиональная очистка системы</title>
+    <meta name="description" content="EliteClean — мощная утилита для очистки системы на Rust + Tauri. Очистка следов, USN журнал, управление памятью.">
+    <meta name="keywords" content="eliteclean, очистка системы, USN journal, windows utility, rust cleaner, tauri">
+    <meta name="author" content="neverjoskiy">
+    <meta property="og:title" content="EliteClean — Профессиональная очистка системы">
+    <meta property="og:description" content="Мощная утилита для очистки системы на Rust + Tauri. Максимальная производительность.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://github.com/neverjoskiy/eliteclean">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23050505' width='100' height='100' rx='12'/><text y='.9em' font-size='72' fill='%2300d4ff' font-family='monospace' x='10'>E</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        bg: { primary: '#050505', secondary: '#0a0a0f', tertiary: '#0f0f1a', elevated: '#141420' },
+                        accent: { DEFAULT: '#00d4ff', dim: 'rgba(0,212,255,0.12)', glow: 'rgba(0,212,255,0.35)' },
+                        purple: { DEFAULT: '#7c3aed', dim: 'rgba(124,58,237,0.12)' },
+                        border: { light: '#1a1a2e', mid: '#252540' }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Inter', system-ui, sans-serif; background: #050505; color: #e8e8f0; line-height: 1.7; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+        ::selection { background: rgba(0,212,255,0.2); color: #fff; }
+        .skip-link { position: absolute; top: -100%; left: 50%; transform: translateX(-50%); padding: 12px 24px; background: #00d4ff; color: #050505; font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; z-index: 10000; transition: top 0.2s; text-decoration: none; }
+        .skip-link:focus { top: 12px; }
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+        *:focus-visible { outline: 2px solid #00d4ff; outline-offset: 2px; }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #050505; }
+        ::-webkit-scrollbar-thumb { background: #1a1a2e; border-radius: 0; }
+        ::-webkit-scrollbar-thumb:hover { background: #00d4ff; }
+
+        /* Background */
+        .bg-grid {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2;
+            background-image: linear-gradient(rgba(0,212,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(0,212,255,0.025) 1px, transparent 1px);
+            background-size: 48px 48px;
+            mask-image: radial-gradient(ellipse 80% 70% at 50% 30%, black 20%, transparent 100%);
+            -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 30%, black 20%, transparent 100%);
+        }
+        .bg-glow-1 { position: fixed; top: -30%; left: -10%; width: 70vw; height: 70vw; max-width: 800px; max-height: 800px; background: radial-gradient(circle, rgba(0,212,255,0.05) 0%, transparent 65%); z-index: -1; pointer-events: none; filter: blur(60px); animation: drift1 14s ease-in-out infinite; }
+        .bg-glow-2 { position: fixed; bottom: -20%; right: -10%; width: 60vw; height: 60vw; max-width: 700px; max-height: 700px; background: radial-gradient(circle, rgba(124,58,237,0.06) 0%, transparent 65%); z-index: -1; pointer-events: none; filter: blur(80px); animation: drift2 18s ease-in-out infinite; }
+        @keyframes drift1 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(40px,-30px); } }
+        @keyframes drift2 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(-30px,20px); } }
+        @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+        @keyframes pulse-ring { 0% { transform: scale(1); opacity: 0.6; } 100% { transform: scale(1.8); opacity: 0; } }
+
+        /* Cards */
+        .card {
+            background: rgba(10,10,15,0.8);
+            border: 1px solid #1a1a2e;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            transition: border-color 0.3s ease, transform 0.4s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s ease;
+            position: relative; overflow: hidden;
+        }
+        .card::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(0,212,255,0.03) 0%, transparent 60%); opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+        .card:hover { border-color: rgba(0,212,255,0.2); transform: translateY(-4px); box-shadow: 0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,212,255,0.04); }
+        .card:hover::after { opacity: 1; }
+
+        /* Reveal */
+        .reveal { opacity: 0; transform: translateY(32px); transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1); }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+        .reveal-delay-1 { transition-delay: 0.08s; }
+        .reveal-delay-2 { transition-delay: 0.16s; }
+        .reveal-delay-3 { transition-delay: 0.24s; }
+        .reveal-delay-4 { transition-delay: 0.32s; }
+
+        /* Buttons */
+        .btn-primary { position: relative; display: inline-flex; align-items: center; gap: 9px; padding: 13px 28px; background: #00d4ff; color: #050505; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 14px; letter-spacing: -0.01em; border: none; cursor: pointer; transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s; text-decoration: none; overflow: hidden; }
+        .btn-primary::before { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent); transform: translateX(-100%); transition: transform 0.5s; }
+        .btn-primary:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 8px 32px rgba(0,212,255,0.3); }
+        .btn-primary:hover::before { transform: translateX(100%); }
+        .btn-primary:active { transform: translateY(1px) scale(0.97); transition-duration: 0.1s; }
+        .btn-secondary { display: inline-flex; align-items: center; gap: 9px; padding: 13px 28px; background: transparent; color: #888; font-family: 'Inter', sans-serif; font-weight: 500; font-size: 14px; border: 1px solid #1a1a2e; cursor: pointer; transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1), color 0.2s, border-color 0.2s, background 0.2s; text-decoration: none; }
+        .btn-secondary:hover { color: #e8e8f0; border-color: rgba(0,212,255,0.25); background: rgba(0,212,255,0.04); transform: translateY(-2px); }
+        .btn-secondary:active { transform: translateY(1px); transition-duration: 0.1s; }
+
+        /* Nav */
+        .nav-scrolled { background: rgba(5,5,5,0.92); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-bottom: 1px solid #1a1a2e; }
+        .nav-link { position: relative; color: #666; text-decoration: none; font-weight: 500; font-size: 14px; transition: color 0.2s; }
+        .nav-link::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 1px; background: #00d4ff; transition: width 0.3s; }
+        .nav-link:hover, .nav-link.active { color: #e8e8f0; }
+        .nav-link:hover::after, .nav-link.active::after { width: 100%; }
+        .mobile-menu { transform: translateX(100%); transition: transform 0.4s cubic-bezier(0.16,1,0.3,1); }
+        .mobile-menu.active { transform: translateX(0); }
+
+        /* Badge */
+        .badge { display: inline-flex; align-items: center; gap: 8px; padding: 5px 14px; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 500; color: #00d4ff; letter-spacing: 0.06em; text-transform: uppercase; background: rgba(0,212,255,0.07); border: 1px solid rgba(0,212,255,0.15); }
+        .badge-purple { color: #a78bfa; background: rgba(124,58,237,0.08); border-color: rgba(124,58,237,0.2); }
+
+        /* Feature icon */
+        .feat-icon { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: rgba(0,212,255,0.07); border: 1px solid rgba(0,212,255,0.12); flex-shrink: 0; transition: all 0.3s; }
+        .card:hover .feat-icon { background: rgba(0,212,255,0.12); border-color: rgba(0,212,255,0.22); }
+
+        /* Stat */
+        .stat-num { font-family: 'JetBrains Mono', monospace; font-size: 38px; font-weight: 700; color: #00d4ff; letter-spacing: -0.04em; line-height: 1; }
+
+        /* Accordion */
+        .acc-item { border: 1px solid #1a1a2e; transition: border-color 0.3s; }
+        .acc-item:hover { border-color: rgba(0,212,255,0.18); }
+        .acc-header { padding: 18px 22px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.01); transition: background 0.2s; }
+        .acc-header:hover { background: rgba(0,212,255,0.02); }
+        .acc-content { max-height: 0; overflow: hidden; transition: max-height 0.45s cubic-bezier(0.16,1,0.3,1); }
+        .acc-content.open { max-height: 500px; }
+        .acc-icon { transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+        .acc-icon.open { transform: rotate(180deg); }
+
+        /* Screenshot slider */
+        .ss-slider { display: flex; gap: 18px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -ms-overflow-style: none; padding: 16px 0; }
+        .ss-slider::-webkit-scrollbar { display: none; }
+        .ss-item { flex: 0 0 auto; scroll-snap-align: center; border: 1px solid #1a1a2e; transition: border-color 0.3s, transform 0.3s; }
+        .ss-item:hover { border-color: rgba(0,212,255,0.2); transform: scale(1.01); }
+
+        /* Tool chip */
+        .chip { padding: 8px 12px; background: rgba(255,255,255,0.02); border: 1px solid #1a1a2e; transition: all 0.2s; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #666; }
+        .chip:hover { background: rgba(0,212,255,0.04); border-color: rgba(0,212,255,0.15); color: #00d4ff; }
+
+        /* Divider */
+        .divider { height: 1px; background: linear-gradient(90deg, transparent, #1a1a2e 20%, #1a1a2e 80%, transparent); }
+
+        /* Status dot */
+        .status-dot { width: 7px; height: 7px; background: #00d4ff; border-radius: 50%; position: relative; }
+        .status-dot::after { content: ''; position: absolute; inset: -3px; border-radius: 50%; background: rgba(0,212,255,0.3); animation: pulse-ring 1.8s ease-out infinite; }
+
+        /* Corner brackets */
+        .bracket-tl, .bracket-br { position: absolute; width: 14px; height: 14px; pointer-events: none; }
+        .bracket-tl { top: -1px; left: -1px; border-top: 1px solid rgba(0,212,255,0.35); border-left: 1px solid rgba(0,212,255,0.35); }
+        .bracket-br { bottom: -1px; right: -1px; border-bottom: 1px solid rgba(0,212,255,0.35); border-right: 1px solid rgba(0,212,255,0.35); }
+
+        /* Toggle */
+        .toggle-on { width: 44px; height: 24px; background: #00d4ff; display: flex; align-items: center; justify-content: flex-end; padding-right: 2px; border: 1px solid rgba(0,212,255,0.4); }
+        .toggle-on .knob { width: 20px; height: 20px; background: #050505; }
+        .toggle-off { width: 44px; height: 24px; background: #1a1a2e; display: flex; align-items: center; padding-left: 2px; border: 1px solid #252540; }
+        .toggle-off .knob { width: 20px; height: 20px; background: #444; }
+
+        @media (max-width: 768px) {
+            .hero-title { font-size: 2.4rem !important; }
+            .hero-btns { flex-direction: column; width: 100%; }
+            .hero-btns .btn-primary, .hero-btns .btn-secondary { width: 100%; justify-content: center; }
+            .stats-row { grid-template-columns: repeat(3,1fr) !important; }
+            .stat-num { font-size: 26px !important; }
+        }
+    </style>
+</head>
+<body>
+    <a href="#main" class="skip-link">Перейти к контенту</a>
+    <div class="bg-grid"></div>
+    <div class="bg-glow-1"></div>
+    <div class="bg-glow-2"></div>
+
+    <!-- Header -->
+    <header id="header" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+        <nav class="max-w-[1280px] mx-auto px-6 lg:px-8">
+            <div class="flex items-center justify-between h-[68px]">
+                <a href="#" class="flex items-center gap-3 group">
+                    <div class="w-8 h-8 bg-[#00d4ff] flex items-center justify-center font-mono font-bold text-[#050505] text-xs group-hover:scale-105 transition-transform">EC</div>
+                    <span class="text-base font-semibold tracking-tight text-[#e8e8f0]">elite<span class="text-[#00d4ff]">clean</span></span>
+                </a>
+                <div class="hidden md:flex items-center gap-9">
+                    <a href="#home" class="nav-link active">Главная</a>
+                    <a href="#features" class="nav-link">Возможности</a>
+                    <a href="#tools" class="nav-link">Инструменты</a>
+                    <a href="#download" class="nav-link">Скачать</a>
+                </div>
+                <div class="hidden md:flex items-center gap-3">
+                    <a href="https://github.com/neverjoskiy/eliteclean" target="_blank" class="btn-secondary" style="padding:8px 18px;font-size:13px;">
+                        <i class="ph ph-github-logo"></i> GitHub
+                    </a>
+                </div>
+                <button id="mob-btn" class="md:hidden p-2 text-[#666] hover:text-[#e8e8f0] transition-colors">
+                    <i class="ph ph-list" style="font-size:22px;"></i>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Mobile Menu -->
+    <div id="mob-menu" class="mobile-menu fixed top-0 right-0 h-full w-72 bg-[#050505] border-l border-[#1a1a2e] z-50 md:hidden">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-10">
+                <span class="font-mono text-xs text-[#444] uppercase tracking-widest">Меню</span>
+                <button id="mob-close" class="p-2 text-[#666] hover:text-[#e8e8f0] transition-colors"><i class="ph ph-x" style="font-size:20px;"></i></button>
+            </div>
+            <div class="flex flex-col gap-1">
+                <a href="#home" class="mob-link text-[#666] hover:text-[#e8e8f0] py-3 text-sm transition-colors border-b border-[#1a1a2e]">Главная</a>
+                <a href="#features" class="mob-link text-[#666] hover:text-[#e8e8f0] py-3 text-sm transition-colors border-b border-[#1a1a2e]">Возможности</a>
+                <a href="#tools" class="mob-link text-[#666] hover:text-[#e8e8f0] py-3 text-sm transition-colors border-b border-[#1a1a2e]">Инструменты</a>
+                <a href="#download" class="mob-link text-[#666] hover:text-[#e8e8f0] py-3 text-sm transition-colors">Скачать</a>
+                <a href="https://github.com/neverjoskiy/eliteclean" target="_blank" class="btn-primary justify-center mt-8" style="font-size:13px;padding:12px 20px;">
+                    <i class="ph ph-github-logo"></i> GitHub
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero -->
+    <section id="home" class="min-h-screen flex items-center pt-[68px]">
+        <div id="main" class="sr-only"></div>
+        <div class="max-w-[1280px] mx-auto px-6 lg:px-8 py-24">
+            <div class="grid lg:grid-cols-[1.1fr_0.9fr] gap-16 items-center">
+                <div class="reveal">
+                    <div class="inline-flex items-center gap-2 badge mb-8">
+                        <div class="status-dot"></div>
+                        Rust + Tauri v2
+                    </div>
+                    <h1 class="hero-title text-[clamp(2.6rem,5.5vw,4.8rem)] font-black mb-6 leading-[0.92] tracking-tighter" style="text-wrap:balance;">
+                        elite<span class="text-[#00d4ff]">clean</span>
+                    </h1>
+                    <p class="text-lg text-[#888] mb-4 max-w-md leading-relaxed" style="text-wrap:balance;">
+                        Профессиональная утилита для очистки системы. Написана на Rust — быстро, надёжно, без лишнего.
+                    </p>
+                    <p class="text-sm text-[#444] mb-10 max-w-md font-mono" style="text-wrap:balance;">
+                        <span class="text-[#00d4ff]">//</span> очистка следов · USN журнал · управление памятью javaw
+                    </p>
+                    <div class="hero-btns flex flex-wrap gap-3 mb-14">
+                        <a href="https://github.com/neverjoskiy/eliteclean/releases/download/setupus/setup.exe" target="_blank" class="btn-primary">
+                            <i class="ph ph-download-simple"></i> Скачать
+                        </a>
+                        <a href="https://github.com/neverjoskiy/eliteclean" target="_blank" class="btn-secondary">
+                            Репозиторий <i class="ph ph-arrow-up-right" style="font-size:13px;"></i>
+                        </a>
+                    </div>
+                    <div class="stats-row grid grid-cols-3 gap-6">
+                        <div class="reveal-delay-1">
+                            <div class="stat-num">rust</div>
+                            <div class="text-[#444] text-xs mt-2 font-mono tracking-wider uppercase">Язык</div>
+                        </div>
+                        <div class="reveal-delay-2">
+                            <div class="stat-num">v2</div>
+                            <div class="text-[#444] text-xs mt-2 font-mono tracking-wider uppercase">Tauri</div>
+                        </div>
+                        <div class="reveal-delay-3">
+                            <div class="stat-num">0</div>
+                            <div class="text-[#444] text-xs mt-2 font-mono tracking-wider uppercase">Следов</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Terminal -->
+                <div class="reveal reveal-delay-4 flex justify-center lg:justify-end">
+                    <div class="relative w-full max-w-md" style="animation: float 8s ease-in-out infinite;">
+                        <div class="card p-0">
+                            <div class="bracket-tl"></div>
+                            <div class="bracket-br"></div>
+                            <div class="flex items-center justify-between px-5 py-3 border-b border-[#1a1a2e]">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-2.5 h-2.5 bg-[#ff5f56]"></div>
+                                    <div class="w-2.5 h-2.5 bg-[#ffbd2e]"></div>
+                                    <div class="w-2.5 h-2.5 bg-[#27c93f]"></div>
+                                </div>
+                                <span class="font-mono text-xs text-[#444]">eliteclean — bash</span>
+                                <div class="w-16"></div>
+                            </div>
+                            <div class="p-6 font-mono text-sm space-y-4">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[#00d4ff]">❯</span>
+                                    <span class="text-[#e8e8f0]">eliteclean --scan --deep</span>
+                                </div>
+                                <div class="space-y-2 text-[#555] text-xs">
+                                    <div class="flex items-center gap-2"><span class="text-[#27c93f]">✓</span><span>scanning system traces...</span></div>
+                                    <div class="flex items-center gap-2"><span class="text-[#27c93f]">✓</span><span>found 1,247 artifacts</span></div>
+                                    <div class="flex items-center gap-2"><span class="text-[#27c93f]">✓</span><span>usn journal wiped</span></div>
+                                    <div class="flex items-center gap-2"><span class="text-[#27c93f]">✓</span><span>shellbag cleaned</span></div>
+                                    <div class="flex items-center gap-2"><span class="text-[#27c93f]">✓</span><span>javaw memory freed</span></div>
+                                </div>
+                                <div class="border-t border-[#1a1a2e] pt-4 flex items-center gap-2">
+                                    <span class="text-[#00d4ff]">❯</span>
+                                    <span class="animate-pulse text-[#e8e8f0]">_</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Floating badge -->
+                        <div class="absolute -bottom-4 -left-4 card px-4 py-3 z-10">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 bg-[#00d4ff]/10 border border-[#00d4ff]/20 flex items-center justify-center">
+                                    <i class="ph ph-lightning" style="color:#00d4ff;font-size:15px;"></i>
+                                </div>
+                                <div>
+                                    <div class="text-xs text-[#444] font-mono">время</div>
+                                    <div class="text-sm font-semibold font-mono text-[#e8e8f0]">0.31s</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section id="features" class="py-32">
+        <div class="divider mb-32"></div>
+        <div class="max-w-[1280px] mx-auto px-6 lg:px-8">
+            <div class="mb-20 reveal" style="max-width:600px;">
+                <div class="font-mono text-xs text-[#00d4ff] tracking-widest uppercase mb-4">01 — возможности</div>
+                <h2 class="text-[clamp(2rem,4vw,3.2rem)] font-black tracking-tighter mb-5 leading-[0.93]" style="text-wrap:balance;">всё что нужно.<br>ничего лишнего.</h2>
+                <p class="text-[#888] text-lg leading-relaxed" style="text-wrap:balance;">Написан на Rust — нативная скорость, минимальное потребление памяти, никаких зависимостей.</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-4">
+                <div class="md:col-span-2 card p-8 reveal reveal-delay-1">
+                    <div class="flex items-start gap-5">
+                        <div class="feat-icon"><i class="ph ph-rocket-launch" style="color:#00d4ff;font-size:20px;"></i></div>
+                        <div>
+                            <h3 class="text-base font-semibold mb-2 tracking-tight">Rust производительность</h3>
+                            <p class="text-[#888] text-sm leading-relaxed max-w-md" style="text-wrap:balance;">Нативная компиляция, нулевые накладные расходы. Работает быстрее любого интерпретируемого аналога — без рантайма, без зависимостей.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card p-8 reveal reveal-delay-2">
+                    <div class="flex items-start gap-5">
+                        <div class="feat-icon"><i class="ph ph-eye-closed" style="color:#00d4ff;font-size:20px;"></i></div>
+                        <div>
+                            <h3 class="text-base font-semibold mb-2 tracking-tight">Скрытый режим</h3>
+                            <p class="text-[#888] text-sm leading-relaxed">Без видимых окон, не отображается в диспетчере задач</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card p-8 reveal reveal-delay-3">
+                    <div class="flex items-start gap-5">
+                        <div class="feat-icon"><i class="ph ph-broom" style="color:#00d4ff;font-size:20px;"></i></div>
+                        <div>
+                            <h3 class="text-base font-semibold mb-2 tracking-tight">Очистка следов</h3>
+                            <p class="text-[#888] text-sm leading-relaxed">Автоматическое удаление логов, истории и следов активности</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card p-8 reveal reveal-delay-4">
+                    <div class="flex items-start gap-5">
+                        <div class="feat-icon"><i class="ph ph-database" style="color:#00d4ff;font-size:20px;"></i></div>
+                        <div>
+                            <h3 class="text-base font-semibold mb-2 tracking-tight">USN Journal</h3>
+                            <p class="text-[#888] text-sm leading-relaxed">Управление NTFS журналом — очистка или полное отключение</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card p-8 reveal reveal-delay-4">
+                    <div class="flex items-start gap-5">
+                        <div class="feat-icon" style="background:rgba(124,58,237,0.08);border-color:rgba(124,58,237,0.15);"><i class="ph ph-cpu" style="color:#a78bfa;font-size:20px;"></i></div>
+                        <div>
+                            <h3 class="text-base font-semibold mb-2 tracking-tight">Память javaw</h3>
+                            <p class="text-[#888] text-sm leading-relaxed">Сканирование и очистка памяти процессов javaw.exe</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tools -->
+    <section id="tools" class="py-32">
+        <div class="divider mb-32"></div>
+        <div class="max-w-[1280px] mx-auto px-6 lg:px-8">
+            <div class="mb-20 reveal" style="max-width:600px;">
+                <div class="font-mono text-xs text-[#00d4ff] tracking-widest uppercase mb-4">02 — инструменты</div>
+                <h2 class="text-[clamp(2rem,4vw,3.2rem)] font-black tracking-tighter mb-5 leading-[0.93]" style="text-wrap:balance;">под капотом</h2>
+                <p class="text-[#888] text-lg leading-relaxed" style="text-wrap:balance;">Мощные инструменты EliteClean для продвинутой работы с системой</p>
+            </div>
+            <div class="grid lg:grid-cols-[1.2fr_0.8fr] gap-6">
+                <!-- Accordion -->
+                <div class="space-y-3 reveal">
+                    <div class="acc-item">
+                        <div class="acc-header" onclick="toggleAcc(this)">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 bg-[#00d4ff]/5 border border-[#00d4ff]/10 flex items-center justify-center"><i class="ph ph-file-text" style="color:#00d4ff;font-size:16px;"></i></div>
+                                <span class="font-medium text-sm tracking-tight">Чистка USN журнала</span>
+                            </div>
+                            <i class="ph ph-caret-down acc-icon" style="color:#444;font-size:16px;"></i>
+                        </div>
+                        <div class="acc-content">
+                            <div class="px-5 pb-5 text-[#888] text-sm leading-relaxed">Удаление записей из журнала NTFS USN. Скрывает факты создания, изменения или удаления файлов на диске.</div>
+                        </div>
+                    </div>
+                    <div class="acc-item">
+                        <div class="acc-header" onclick="toggleAcc(this)">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 bg-[#00d4ff]/5 border border-[#00d4ff]/10 flex items-center justify-center"><i class="ph ph-folder-search" style="color:#00d4ff;font-size:16px;"></i></div>
+                                <span class="font-medium text-sm tracking-tight">Очистка следов</span>
+                            </div>
+                            <i class="ph ph-caret-down acc-icon" style="color:#444;font-size:16px;"></i>
+                        </div>
+                        <div class="acc-content">
+                            <div class="px-5 pb-5 text-[#888] text-sm leading-relaxed">
+                                Комплексная очистка:
+                                <ul class="mt-3 space-y-2 text-xs">
+                                    <li class="flex items-center gap-2"><span class="text-[#00d4ff]">→</span><span>ShellBag — история папок в проводнике</span></li>
+                                    <li class="flex items-center gap-2"><span class="text-[#00d4ff]">→</span><span>Prefetch — данные о запущенных программах</span></li>
+                                    <li class="flex items-center gap-2"><span class="text-[#00d4ff]">→</span><span>Minidump — файлы отладки при сбоях</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="acc-item">
+                        <div class="acc-header" onclick="toggleAcc(this)">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 bg-[#00d4ff]/5 border border-[#00d4ff]/10 flex items-center justify-center"><i class="ph ph-broom" style="color:#00d4ff;font-size:16px;"></i></div>
+                                <span class="font-medium text-sm tracking-tight">Глобальная очистка</span>
+                            </div>
+                            <i class="ph ph-caret-down acc-icon" style="color:#444;font-size:16px;"></i>
+                        </div>
+                        <div class="acc-content">
+                            <div class="px-5 pb-5 text-[#888] text-sm leading-relaxed">
+                                Полная очистка с выбором компонентов:
+                                <div class="grid grid-cols-2 gap-2 mt-3">
+                                    <div class="chip">🗑️ корзина</div>
+                                    <div class="chip">📝 temp</div>
+                                    <div class="chip">🌐 кэш браузеров</div>
+                                    <div class="chip">📋 clipboard</div>
+                                    <div class="chip">📁 recent</div>
+                                    <div class="chip">🔍 history</div>
+                                    <div class="chip">📊 error reports</div>
+                                    <div class="chip">🔧 логи</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="acc-item">
+                        <div class="acc-header" onclick="toggleAcc(this)">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 bg-[rgba(124,58,237,0.08)] border border-[rgba(124,58,237,0.15)] flex items-center justify-center"><i class="ph ph-cpu" style="color:#a78bfa;font-size:16px;"></i></div>
+                                <span class="font-medium text-sm tracking-tight">Очистка памяти javaw</span>
+                            </div>
+                            <i class="ph ph-caret-down acc-icon" style="color:#444;font-size:16px;"></i>
+                        </div>
+                        <div class="acc-content">
+                            <div class="px-5 pb-5 text-[#888] text-sm leading-relaxed">Сканирование процессов javaw.exe и освобождение занятой памяти. Полезно для Minecraft и других Java-приложений.</div>
+                        </div>
+                    </div>
+                    <div class="acc-item">
+                        <div class="acc-header" onclick="toggleAcc(this)">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 bg-[#00d4ff]/5 border border-[#00d4ff]/10 flex items-center justify-center"><i class="ph ph-folder-tree" style="color:#00d4ff;font-size:16px;"></i></div>
+                                <span class="font-medium text-sm tracking-tight">Симуляция папок</span>
+                            </div>
+                            <i class="ph ph-caret-down acc-icon" style="color:#444;font-size:16px;"></i>
+                        </div>
+                        <div class="acc-content">
+                            <div class="px-5 pb-5 text-[#888] text-sm leading-relaxed">Создание фиктивной структуры папок и файлов для имитации активности пользователя. Маскировка реальных действий.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Side Panel -->
+                <div class="space-y-4 reveal reveal-delay-2">
+                    <div class="card p-5">
+                        <h3 class="text-xs font-mono text-[#444] uppercase tracking-widest mb-4 flex items-center gap-2">
+                            <i class="ph ph-terminal-window" style="color:#00d4ff;font-size:14px;"></i> Консоль
+                        </h3>
+                        <div class="p-4 bg-[#050505] font-mono text-xs text-[#555] space-y-2">
+                            <div class="flex items-center gap-2"><span class="text-[#00d4ff]">❯</span><span class="text-[#e8e8f0]">eliteclean --clean</span></div>
+                            <div class="text-[#27c93f]">✓ system scan complete</div>
+                            <div class="text-[#27c93f]">✓ cleaned 1,247 traces</div>
+                            <div class="text-[#27c93f]">✓ usn journal cleared</div>
+                            <div class="flex items-center gap-2 pt-1 border-t border-[#1a1a2e]"><span class="text-[#00d4ff]">❯</span><span class="animate-pulse text-[#e8e8f0]">_</span></div>
+                        </div>
+                    </div>
+                    <div class="card p-5">
+                        <h3 class="text-xs font-mono text-[#444] uppercase tracking-widest mb-4 flex items-center gap-2">
+                            <i class="ph ph-shield-check" style="color:#00d4ff;font-size:14px;"></i> Защита
+                        </h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-[#888]">Автозапуск</span>
+                                <div class="toggle-on"><div class="knob"></div></div>
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-[#888]">Самозащита</span>
+                                <div class="toggle-on"><div class="knob"></div></div>
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-[#888]">Логирование</span>
+                                <div class="toggle-off"><div class="knob"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card p-5">
+                        <h3 class="text-xs font-mono text-[#444] uppercase tracking-widest mb-4 flex items-center gap-2">
+                            <i class="ph ph-lightning" style="color:#00d4ff;font-size:14px;"></i> Статус
+                        </h3>
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between text-xs font-mono">
+                                <span class="text-[#555]">cpu</span><span class="text-[#00d4ff]">1.8%</span>
+                            </div>
+                            <div class="flex items-center justify-between text-xs font-mono">
+                                <span class="text-[#555]">ram</span><span class="text-[#00d4ff]">9 mb</span>
+                            </div>
+                            <div class="flex items-center justify-between text-xs font-mono">
+                                <span class="text-[#555]">статус</span><span class="text-[#27c93f]">● активен</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Screenshots -->
+    <section class="py-32">
+        <div class="divider mb-32"></div>
+        <div class="max-w-[1280px] mx-auto px-6 lg:px-8">
+            <div class="mb-16 reveal" style="max-width:600px;">
+                <div class="font-mono text-xs text-[#00d4ff] tracking-widest uppercase mb-4">03 — интерфейс</div>
+                <h2 class="text-[clamp(2rem,4vw,3.2rem)] font-black tracking-tighter mb-5 leading-[0.93]" style="text-wrap:balance;">выглядит просто.<br>работает точно.</h2>
+            </div>
+            <div class="reveal">
+                <div class="ss-slider">
+                    <!-- Dashboard -->
+                    <div class="ss-item w-[520px]">
+                        <div class="p-5">
+                            <div class="aspect-video bg-[#050505] border border-[#1a1a2e] overflow-hidden">
+                                <div class="flex items-center justify-between px-4 py-2 bg-[#0a0a0f] border-b border-[#1a1a2e]">
+                                    <div class="flex items-center gap-2"><div class="w-2 h-2 bg-[#ff5f56]"></div><div class="w-2 h-2 bg-[#ffbd2e]"></div><div class="w-2 h-2 bg-[#27c93f]"></div></div>
+                                    <div class="text-[10px] font-mono text-[#444]">eliteclean — dashboard</div>
+                                    <div class="w-12"></div>
+                                </div>
+                                <div class="p-4 space-y-3">
+                                    <div class="flex items-center justify-between">
+                                        <div class="text-xs font-mono text-[#444]">статус</div>
+                                        <div class="text-xs font-mono text-[#27c93f]">● активен</div>
+                                    </div>
+                                    <div class="grid grid-cols-3 gap-2">
+                                        <div class="p-2 bg-[#0a0a0f] border border-[#1a1a2e]"><div class="text-[9px] font-mono text-[#444]">следов</div><div class="text-sm font-mono font-bold text-[#00d4ff]">1,247</div></div>
+                                        <div class="p-2 bg-[#0a0a0f] border border-[#1a1a2e]"><div class="text-[9px] font-mono text-[#444]">время</div><div class="text-sm font-mono font-bold text-[#00d4ff]">0.31s</div></div>
+                                        <div class="p-2 bg-[#0a0a0f] border border-[#1a1a2e]"><div class="text-[9px] font-mono text-[#444]">память</div><div class="text-sm font-mono font-bold text-[#00d4ff]">9mb</div></div>
+                                    </div>
+                                    <div class="h-1 bg-[#1a1a2e]"><div class="h-full bg-[#00d4ff]" style="width:73%;"></div></div>
+                                    <div class="text-[9px] font-mono text-[#444]">очистка: 73% завершено</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Settings -->
+                    <div class="ss-item w-[520px]">
+                        <div class="p-5">
+                            <div class="aspect-video bg-[#050505] border border-[#1a1a2e] overflow-hidden">
+                                <div class="flex items-center justify-between px-4 py-2 bg-[#0a0a0f] border-b border-[#1a1a2e]">
+                                    <div class="flex items-center gap-2"><div class="w-2 h-2 bg-[#ff5f56]"></div><div class="w-2 h-2 bg-[#ffbd2e]"></div><div class="w-2 h-2 bg-[#27c93f]"></div></div>
+                                    <div class="text-[10px] font-mono text-[#444]">eliteclean — настройки</div>
+                                    <div class="w-12"></div>
+                                </div>
+                                <div class="p-4 space-y-3">
+                                    <div class="flex items-center justify-between text-xs"><span class="text-[#888]">глубокая очистка</span><div class="w-10 h-5 bg-[#00d4ff] flex items-center justify-end pr-0.5"><div class="w-4 h-4 bg-[#050505]"></div></div></div>
+                                    <div class="flex items-center justify-between text-xs"><span class="text-[#888]">скрытый режим</span><div class="w-10 h-5 bg-[#00d4ff] flex items-center justify-end pr-0.5"><div class="w-4 h-4 bg-[#050505]"></div></div></div>
+                                    <div class="flex items-center justify-between text-xs"><span class="text-[#888]">автозапуск</span><div class="w-10 h-5 bg-[#1a1a2e] flex items-center pl-0.5"><div class="w-4 h-4 bg-[#444]"></div></div></div>
+                                    <div class="pt-2 border-t border-[#1a1a2e]"><div class="text-[9px] font-mono text-[#444] mb-1">игнорировать</div><div class="flex gap-1"><div class="px-2 py-1 bg-[#0a0a0f] border border-[#1a1a2e] text-[9px] font-mono text-[#444]">*.tmp</div><div class="px-2 py-1 bg-[#0a0a0f] border border-[#1a1a2e] text-[9px] font-mono text-[#444]">*.log</div></div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Monitor -->
+                    <div class="ss-item w-[520px]">
+                        <div class="p-5">
+                            <div class="aspect-video bg-[#050505] border border-[#1a1a2e] overflow-hidden">
+                                <div class="flex items-center justify-between px-4 py-2 bg-[#0a0a0f] border-b border-[#1a1a2e]">
+                                    <div class="flex items-center gap-2"><div class="w-2 h-2 bg-[#ff5f56]"></div><div class="w-2 h-2 bg-[#ffbd2e]"></div><div class="w-2 h-2 bg-[#27c93f]"></div></div>
+                                    <div class="text-[10px] font-mono text-[#444]">eliteclean — мониторинг</div>
+                                    <div class="w-12"></div>
+                                </div>
+                                <div class="p-4 font-mono space-y-1.5">
+                                    <div class="flex items-center gap-2 text-[10px]"><span class="text-[#27c93f]">✓</span><span class="text-[#555]">shellbag cleaned</span></div>
+                                    <div class="flex items-center gap-2 text-[10px]"><span class="text-[#27c93f]">✓</span><span class="text-[#555]">prefetch cleared</span></div>
+                                    <div class="flex items-center gap-2 text-[10px]"><span class="text-[#27c93f]">✓</span><span class="text-[#555]">usn journal wiped</span></div>
+                                    <div class="flex items-center gap-2 text-[10px]"><span class="text-[#00d4ff]">⟩</span><span class="text-[#e8e8f0] animate-pulse">cleaning temp...</span></div>
+                                    <div class="h-1 bg-[#1a1a2e] mt-2"><div class="h-full bg-[#00d4ff] animate-pulse" style="width:45%;"></div></div>
+                                    <div class="text-[9px] text-[#444] pt-1">cpu: 1.8% · ram: 9mb</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-left text-[#444] mt-5 text-xs font-mono"><span class="text-[#00d4ff]">←</span> скролл для просмотра <span class="text-[#00d4ff]">→</span></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Download -->
+    <section id="download" class="py-32">
+        <div class="divider mb-32"></div>
+        <div class="max-w-[1280px] mx-auto px-6 lg:px-8">
+            <div class="mb-16 reveal" style="max-width:600px;">
+                <div class="font-mono text-xs text-[#00d4ff] tracking-widest uppercase mb-4">04 — загрузка</div>
+                <h2 class="text-[clamp(2rem,4vw,3.2rem)] font-black tracking-tighter mb-5 leading-[0.93]" style="text-wrap:balance;">забери.</h2>
+            </div>
+            <div class="grid md:grid-cols-2 gap-4 reveal">
+                <div class="card p-8">
+                    <div class="flex items-start justify-between mb-6">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-[#00d4ff] flex items-center justify-center"><i class="ph ph-download-simple" style="color:#050505;font-size:20px;"></i></div>
+                            <div>
+                                <h3 class="font-semibold text-lg tracking-tight">EliteClean</h3>
+                                <p class="text-[#444] text-xs font-mono">v1.0 · rust + tauri</p>
+                            </div>
+                        </div>
+                    </div>
+                    <ul class="space-y-3 text-sm text-[#888] mb-8">
+                        <li class="flex items-center gap-3"><span class="text-[#00d4ff] text-xs">→</span>написан на Rust</li>
+                        <li class="flex items-center gap-3"><span class="text-[#00d4ff] text-xs">→</span>нативная производительность</li>
+                        <li class="flex items-center gap-3"><span class="text-[#00d4ff] text-xs">→</span>открытый исходный код</li>
+                    </ul>
+                    <a href="https://github.com/neverjoskiy/eliteclean/releases/download/setupus/setup.exe" target="_blank" class="btn-primary w-full justify-center">
+                        <i class="ph ph-download-simple"></i> Скачать
+                    </a>
+                </div>
+                <div class="card p-8">
+                    <div class="flex items-start justify-between mb-6">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-[#0a0a0f] border border-[#00d4ff]/20 flex items-center justify-center"><i class="ph ph-code" style="color:#00d4ff;font-size:20px;"></i></div>
+                            <div>
+                                <h3 class="font-semibold text-lg tracking-tight">Исходный код</h3>
+                                <p class="text-[#444] text-xs font-mono">rust · open source</p>
+                            </div>
+                        </div>
+                    </div>
+                    <ul class="space-y-3 text-sm text-[#888] mb-8">
+                        <li class="flex items-center gap-3"><span class="text-[#00d4ff] text-xs">→</span>полностью открыт</li>
+                        <li class="flex items-center gap-3"><span class="text-[#00d4ff] text-xs">→</span>Tauri v2 архитектура</li>
+                        <li class="flex items-center gap-3"><span class="text-[#00d4ff] text-xs">→</span>комьюнити вклад</li>
+                    </ul>
+                    <a href="https://github.com/neverjoskiy/eliteclean" target="_blank" class="btn-secondary w-full justify-center">
+                        <i class="ph ph-github-logo"></i> Репозиторий
+                    </a>
+                </div>
+            </div>
+            <div class="mt-10 card p-8 reveal reveal-delay-2">
+                <h3 class="text-xs font-mono text-[#444] uppercase tracking-widest mb-6 flex items-center gap-2">
+                    <i class="ph ph-cpu" style="color:#00d4ff;font-size:14px;"></i> Системные требования
+                </h3>
+                <div class="grid md:grid-cols-3 gap-6 text-sm">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 bg-[#050505] border border-[#1a1a2e] flex items-center justify-center"><i class="ph ph-monitor" style="color:#444;font-size:16px;"></i></div>
+                        <div><div class="text-[#444] text-xs font-mono">ОС</div><div class="text-sm font-medium">Windows 10/11</div></div>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 bg-[#050505] border border-[#1a1a2e] flex items-center justify-center"><i class="ph ph-cpu" style="color:#444;font-size:16px;"></i></div>
+                        <div><div class="text-[#444] text-xs font-mono">Процессор</div><div class="text-sm font-medium">Intel Core i3 / AMD</div></div>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 bg-[#050505] border border-[#1a1a2e] flex items-center justify-center"><i class="ph ph-memory" style="color:#444;font-size:16px;"></i></div>
+                        <div><div class="text-[#444] text-xs font-mono">Память</div><div class="text-sm font-medium">4 GB RAM</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-16 border-t border-[#1a1a2e]">
+        <div class="max-w-[1280px] mx-auto px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-8">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-[#00d4ff] flex items-center justify-center font-mono font-bold text-[#050505] text-xs">EC</div>
+                    <span class="text-sm font-medium tracking-tight">elite<span class="text-[#00d4ff]">clean</span></span>
+                </div>
+                <div class="flex items-center gap-8">
+                    <a href="https://github.com/neverjoskiy/eliteclean" target="_blank" class="text-[#444] hover:text-[#e8e8f0] transition-colors flex items-center gap-2 text-sm">
+                        <i class="ph ph-github-logo" style="font-size:16px;"></i> GitHub
+                    </a>
+                    <a href="https://t.me/bioneverr" target="_blank" class="text-[#444] hover:text-[#e8e8f0] transition-colors flex items-center gap-2 text-sm">
+                        <i class="ph ph-paper-plane-tilt" style="font-size:16px;"></i> Telegram
+                    </a>
+                </div>
+                <div class="text-[#444] text-xs font-mono">by <span class="text-[#e8e8f0]">neverjoskiy</span></div>
+            </div>
+            <div class="mt-10 pt-8 border-t border-[#1a1a2e] flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-[#333] font-mono">
+                <p>© 2026 eliteclean</p>
+                <p>rust + tauri v2 · open source</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu
+        const mobBtn = document.getElementById('mob-btn');
+        const mobClose = document.getElementById('mob-close');
+        const mobMenu = document.getElementById('mob-menu');
+        mobBtn.addEventListener('click', () => { mobMenu.classList.add('active'); document.body.style.overflow = 'hidden'; });
+        mobClose.addEventListener('click', () => { mobMenu.classList.remove('active'); document.body.style.overflow = ''; });
+        document.querySelectorAll('.mob-link').forEach(l => l.addEventListener('click', () => { mobMenu.classList.remove('active'); document.body.style.overflow = ''; }));
+
+        // Header scroll
+        const header = document.getElementById('header');
+        window.addEventListener('scroll', () => { header.classList.toggle('nav-scrolled', window.scrollY > 50); });
+
+        // Active nav
+        const sections = document.querySelectorAll('section[id]');
+        const navLinks = document.querySelectorAll('.nav-link');
+        window.addEventListener('scroll', () => {
+            let cur = '';
+            sections.forEach(s => { if (window.scrollY >= s.offsetTop - 200) cur = s.id; });
+            navLinks.forEach(l => { l.classList.toggle('active', l.getAttribute('href') === '#' + cur); });
+        });
+
+        // Reveal
+        function reveal() {
+            document.querySelectorAll('.reveal').forEach(el => {
+                if (el.getBoundingClientRect().top < window.innerHeight - 120) el.classList.add('active');
+            });
+        }
+        window.addEventListener('scroll', reveal);
+        reveal();
+
+        // Accordion
+        function toggleAcc(header) {
+            const content = header.nextElementSibling;
+            const icon = header.querySelector('.acc-icon');
+            const isOpen = content.classList.contains('open');
+            document.querySelectorAll('.acc-content').forEach(el => el.classList.remove('open'));
+            document.querySelectorAll('.acc-icon').forEach(el => el.classList.remove('open'));
+            if (!isOpen) { content.classList.add('open'); icon.classList.add('open'); }
+        }
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(a => {
+            a.addEventListener('click', e => {
+                e.preventDefault();
+                const t = document.querySelector(a.getAttribute('href'));
+                if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+
+        // Hero parallax
+        let ticking = false;
+        window.addEventListener('scroll', () => {
+            if (!ticking) {
+                requestAnimationFrame(() => {
+                    const scrolled = window.scrollY;
+                    const hero = document.getElementById('home');
+                    if (hero && scrolled < 800) {
+                        hero.style.opacity = Math.max(0, 1 - scrolled / 700);
+                        hero.style.transform = `translateY(${scrolled * 0.12}px)`;
+                    }
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        });
+    </script>
+</body>
+</html>
