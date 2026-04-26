@@ -189,22 +189,6 @@ function updateStatusIndicator(status) {
     }
 }
 
-function updateFileStatus(exists, size) {
-    const banner = document.getElementById('fileStatusBanner');
-    const text = document.getElementById('fileStatusText');
-    
-    banner.style.display = 'flex';
-    banner.className = 'file-status-sidebar';
-    
-    if (exists) {
-        const sizeKB = (size / 1024).toFixed(2);
-        text.textContent = `Microsoft.Ink.dll найден (${sizeKB} KB)`;
-        banner.classList.add('success');
-    } else {
-        text.textContent = 'Microsoft.Ink.dll не найден. Будет загружен при запуске.';
-        banner.classList.add('warning');
-    }
-}
 
 function updateLaunchStatus(message, type = 'info') {
     const statusEl = document.getElementById('launchStatus');
@@ -644,7 +628,6 @@ async function init() {
         // Получаем текущий статус
         const status = await getStatus();
         updateStatusIndicator(status.status || 'ready');
-        updateFileStatus(status.file_exists, status.file_size);
         
         // Загружаем логи если есть
         try {
