@@ -47,6 +47,7 @@
     </aside>
     <main class="main">
         <div class="tab active" id="dashboard">
+            <!-- Запуск -->
             <div class="card launch-card">
                 <div class="launch-left">
                     <div class="mono-block">
@@ -74,6 +75,175 @@
                 <div class="info-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/></svg><span>steam env</span></div>
                 <div class="info-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span>автоочистка</span></div>
             </div>
+
+            <!-- Обзор разделов -->
+            <div class="home-sections">
+                <!-- Инструменты -->
+                <div class="card home-section-card">
+                    <div class="home-section-head">
+                        <span class="home-section-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                        </span>
+                        <span class="home-section-title">инструменты</span>
+                        <button class="home-section-goto" data-tab="tools">открыть →</button>
+                    </div>
+                    <div class="home-quick-list">
+                        <div class="hql-item">
+                            <span class="hql-tag">usn</span><span class="hql-name">чистка строк</span>
+                            <button class="hql-btn" id="hq-cleanStrings">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                            </button>
+                            <span class="hql-status" id="hq-cleanStrings-status"></span>
+                        </div>
+                        <div class="hql-item">
+                            <span class="hql-tag">tracks</span><span class="hql-name">очистка следов</span>
+                            <button class="hql-btn" id="hq-cleanTracks">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                            </button>
+                            <span class="hql-status" id="hq-cleanTracks-status"></span>
+                        </div>
+                        <div class="hql-item">
+                            <span class="hql-tag">memory</span><span class="hql-name">javaw.exe</span>
+                            <button class="hql-btn" id="hq-cleanJavaw">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                            </button>
+                            <span class="hql-status" id="hq-cleanJavaw-status"></span>
+                        </div>
+                        <div class="hql-item">
+                            <span class="hql-tag">global</span><span class="hql-name">глобальная очистка</span>
+                            <button class="hql-btn" id="hq-globalClean">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                            </button>
+                            <span class="hql-status" id="hq-globalClean-status"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Сеть -->
+                <div class="card home-section-card">
+                    <div class="home-section-head">
+                        <span class="home-section-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                        </span>
+                        <span class="home-section-title">сеть</span>
+                        <button class="home-section-goto" data-tab="network">открыть →</button>
+                    </div>
+                    <div class="home-quick-list">
+                        <div class="hql-item">
+                            <span class="hql-tag">dns</span><span class="hql-name">сброс DNS кэша</span>
+                            <button class="hql-btn" id="hq-flushDns">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                            </button>
+                            <span class="hql-status" id="hq-flushDns-status"></span>
+                        </div>
+                        <div class="hql-item">
+                            <span class="hql-tag">arp</span><span class="hql-name">очистка ARP</span>
+                            <button class="hql-btn" id="hq-clearArp">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                            </button>
+                            <span class="hql-status" id="hq-clearArp-status"></span>
+                        </div>
+                        <div class="hql-item">
+                            <span class="hql-tag">netbios</span><span class="hql-name">очистка NetBIOS</span>
+                            <button class="hql-btn" id="hq-clearNetbios">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                            </button>
+                            <span class="hql-status" id="hq-clearNetbios-status"></span>
+                        </div>
+                        <div class="hql-item">
+                            <span class="hql-tag">reset</span><span class="hql-name">полный сброс сети</span>
+                            <button class="hql-btn" id="hq-resetNetwork">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                            </button>
+                            <span class="hql-status" id="hq-resetNetwork-status"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Система -->
+                <div class="card home-section-card">
+                    <div class="home-section-head">
+                        <span class="home-section-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+                        </span>
+                        <span class="home-section-title">система</span>
+                        <button class="home-section-goto" data-tab="system">открыть →</button>
+                    </div>
+                    <div class="home-quick-list">
+                        <div class="hql-item">
+                            <span class="hql-tag">reg</span><span class="hql-name">очистка реестра</span>
+                            <button class="hql-btn" id="hq-cleanRegistry">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                            </button>
+                            <span class="hql-status" id="hq-cleanRegistry-status"></span>
+                        </div>
+                        <div class="hql-item">
+                            <span class="hql-tag">dump</span><span class="hql-name">дампы памяти</span>
+                            <button class="hql-btn" id="hq-cleanDumps">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                            </button>
+                            <span class="hql-status" id="hq-cleanDumps-status"></span>
+                        </div>
+                        <div class="hql-item">
+                            <span class="hql-tag">wu</span><span class="hql-name">кэш обновлений</span>
+                            <button class="hql-btn" id="hq-cleanWu">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                            </button>
+                            <span class="hql-status" id="hq-cleanWu-status"></span>
+                        </div>
+                        <div class="hql-item">
+                            <span class="hql-tag">thumb</span><span class="hql-name">thumbnail кэш</span>
+                            <button class="hql-btn" id="hq-cleanThumbs">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                            </button>
+                            <span class="hql-status" id="hq-cleanThumbs-status"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Приватность -->
+                <div class="card home-section-card">
+                    <div class="home-section-head">
+                        <span class="home-section-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        </span>
+                        <span class="home-section-title">приватность</span>
+                        <button class="home-section-goto" data-tab="privacy">открыть →</button>
+                    </div>
+                    <div class="home-quick-list">
+                        <div class="hql-item">
+                            <span class="hql-tag">clip</span><span class="hql-name">буфер обмена</span>
+                            <button class="hql-btn" id="hq-clearClipboard">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                            </button>
+                            <span class="hql-status" id="hq-clearClipboard-status"></span>
+                        </div>
+                        <div class="hql-item">
+                            <span class="hql-tag">icon</span><span class="hql-name">кэш иконок</span>
+                            <button class="hql-btn" id="hq-cleanIconCache">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                            </button>
+                            <span class="hql-status" id="hq-cleanIconCache-status"></span>
+                        </div>
+                        <div class="hql-item">
+                            <span class="hql-tag">search</span><span class="hql-name">история поиска</span>
+                            <button class="hql-btn" id="hq-cleanSearch">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                            </button>
+                            <span class="hql-status" id="hq-cleanSearch-status"></span>
+                        </div>
+                        <div class="hql-item">
+                            <span class="hql-tag">run</span><span class="hql-name">история запуска</span>
+                            <button class="hql-btn" id="hq-cleanRun">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                            </button>
+                            <span class="hql-status" id="hq-cleanRun-status"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Журнал -->
             <div class="card logs-card">
                 <div class="logs-head">
                     <span class="label">журнал</span>

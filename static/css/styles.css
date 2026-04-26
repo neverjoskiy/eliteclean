@@ -254,3 +254,71 @@ body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color
     border-bottom: 1px solid var(--bg3);
 }
 .detail-item:last-child { border-bottom: none; }
+
+/* ── Home sections grid ── */
+.home-sections {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+.home-section-card { padding: 10px 12px; }
+.home-section-head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+.home-section-icon { color: var(--tx2); display: flex; align-items: center; }
+.home-section-title { font-size: .72rem; font-weight: 600; color: var(--tx); letter-spacing: .04em; text-transform: lowercase; flex: 1; }
+.home-section-goto {
+    font-size: .65rem;
+    color: var(--tx3);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 3px;
+    transition: color var(--t), background var(--t);
+}
+.home-section-goto:hover { color: var(--tx2); background: var(--bg3); }
+
+/* ── Quick list items ── */
+.home-quick-list { display: flex; flex-direction: column; gap: 2px; }
+.hql-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 6px;
+    border-radius: 4px;
+    transition: background var(--t);
+}
+.hql-item:hover { background: var(--bg3); }
+.hql-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .6rem;
+    color: var(--tx3);
+    min-width: 44px;
+    flex-shrink: 0;
+}
+.hql-name { font-size: .72rem; color: var(--tx2); flex: 1; }
+.hql-btn {
+    width: 20px; height: 20px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg3); border: 1px solid var(--b);
+    border-radius: 3px; cursor: pointer; color: var(--tx2);
+    transition: background var(--t), color var(--t), border-color var(--t);
+    flex-shrink: 0;
+}
+.hql-btn:hover { background: var(--bh); color: var(--tx); border-color: var(--bh); }
+.hql-btn:disabled { opacity: .4; cursor: not-allowed; }
+.hql-status {
+    font-size: .65rem;
+    font-family: 'JetBrains Mono', monospace;
+    min-width: 14px;
+    text-align: center;
+    flex-shrink: 0;
+}
+.hql-status.ok  { color: var(--ok); }
+.hql-status.err { color: var(--err); }
+.hql-status.run { color: var(--warn); }

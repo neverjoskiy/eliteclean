@@ -464,5 +464,58 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('cleanRunBtn').addEventListener('click', () =>
         runSimpleClean('cleanRunBtn', 'cleanRunResult', api.cleanRun, 'история запуска'));
 
+    // ── Переходы со страницы home ──
+    document.querySelectorAll('.home-section-goto').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tab = btn.dataset.tab;
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`.nav-btn[data-tab="${tab}"]`)?.classList.add('active');
+            document.getElementById(tab)?.classList.add('active');
+        });
+    });
+
+    // ── Быстрые кнопки на главной ──
+    function hqRun(btnId, apiFn, label) {
+        const btn = document.getElementById(btnId);
+        const statusEl = document.getElementById(btnId + '-status');
+        btn.disabled = true;
+        if (statusEl) { statusEl.textContent = '…'; statusEl.className = 'hql-status run'; }
+        addLog(`${label}...`, 'info');
+        apiFn().then(r => {
+            const ok = r.success;
+            if (statusEl) { statusEl.textContent = ok ? '✓' : '✗'; statusEl.className = 'hql-status ' + (ok ? 'ok' : 'err'); }
+            addLog(`${label}: ${r.message}`, ok ? 'success' : 'error');
+            showToast(ok ? `${label} завершено` : r.message, ok ? 'success' : 'error');
+        }).catch(e => {
+            if (statusEl) { statusEl.textContent = '✗'; statusEl.className = 'hql-status err'; }
+            showToast(e.message, 'error');
+        }).finally(() => { btn.disabled = false; });
+    }
+
+    // инструменты
+    document.getElementById('hq-cleanStrings').addEventListener('click', () => hqRun('hq-cleanStrings', api.cleanStrings, 'чистка строк'));
+    document.getElementById('hq-cleanTracks').addEventListener('click', () => hqRun('hq-cleanTracks', api.cleanTracks, 'очистка следов'));
+    document.getElementById('hq-cleanJavaw').addEventListener('click', () => hqRun('hq-cleanJavaw', api.cleanJavaw, 'javaw.exe'));
+    document.getElementById('hq-globalClean').addEventListener('click', () => {
+        // глобальная — открываем модалку
+        document.getElementById('globalCleanBtn').click();
+    });
+    // сеть
+    document.getElementById('hq-flushDns').addEventListener('click', () => hqRun('hq-flushDns', api.flushDns, 'DNS'));
+    document.getElementById('hq-clearArp').addEventListener('click', () => hqRun('hq-clearArp', api.clearArp, 'ARP'));
+    document.getElementById('hq-clearNetbios').addEventListener('click', () => hqRun('hq-clearNetbios', api.clearNetbios, 'NetBIOS'));
+    document.getElementById('hq-resetNetwork').addEventListener('click', () => hqRun('hq-resetNetwork', api.resetNetwork, 'сброс сети'));
+    // система
+    document.getElementById('hq-cleanRegistry').addEventListener('click', () => hqRun('hq-cleanRegistry', api.cleanRegistry, 'реестр'));
+    document.getElementById('hq-cleanDumps').addEventListener('click', () => hqRun('hq-cleanDumps', api.cleanDumps, 'дампы'));
+    document.getElementById('hq-cleanWu').addEventListener('click', () => hqRun('hq-cleanWu', api.cleanWu, 'кэш WU'));
+    document.getElementById('hq-cleanThumbs').addEventListener('click', () => hqRun('hq-cleanThumbs', api.cleanThumbs, 'thumbnails'));
+    // приватность
+    document.getElementById('hq-clearClipboard').addEventListener('click', () => hqRun('hq-clearClipboard', api.clearClipboard, 'буфер обмена'));
+    document.getElementById('hq-cleanIconCache').addEventListener('click', () => hqRun('hq-cleanIconCache', api.cleanIconCache, 'иконки'));
+    document.getElementById('hq-cleanSearch').addEventListener('click', () => hqRun('hq-cleanSearch', api.cleanSearch, 'поиск'));
+    document.getElementById('hq-cleanRun').addEventListener('click', () => hqRun('hq-cleanRun', api.cleanRun, 'история запуска'));
+
     init();
 });
