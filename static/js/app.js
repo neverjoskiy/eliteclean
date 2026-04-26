@@ -119,6 +119,21 @@ const api = {
     cleanJavaw:      () => invoke('clean_javaw_memory'),
     globalOptions:   () => invoke('get_global_clean_options'),
     globalClean:     (p) => invoke('run_global_clean', { params: p }),
+    // сеть
+    flushDns:        () => invoke('flush_dns'),
+    resetNetwork:    () => invoke('reset_network'),
+    clearArp:        () => invoke('clear_arp'),
+    clearNetbios:    () => invoke('clear_netbios'),
+    // система
+    cleanRegistry:   () => invoke('clean_registry'),
+    cleanDumps:      () => invoke('clean_dumps'),
+    cleanWu:         () => invoke('clean_update_cache'),
+    cleanThumbs:     () => invoke('clean_thumbnails'),
+    // приватность
+    clearClipboard:  () => invoke('clear_clipboard'),
+    cleanIconCache:  () => invoke('clean_icon_cache'),
+    cleanSearch:     () => invoke('clean_search_history'),
+    cleanRun:        () => invoke('clean_run_history'),
 };
 
 // ── Init ──
@@ -359,6 +374,95 @@ document.addEventListener('DOMContentLoaded', () => {
             showToast(e.message, 'error');
         } finally { setBtnLoading(btn, false); }
     });
+
+    // ── Helpers for new tabs ──
+    function showDetails(id, items) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.innerHTML = items.map(d => `<div class="detail-item">${d}</div>`).join('');
+        el.classList.remove('hidden');
+    }
+
+    async function runSimpleClean(btnId, resultId, apiFn, label, detailsId) {
+        const btn = document.getElementById(btnId);
+        setBtnLoading(btn, true);
+        hideResult(resultId);
+        if (detailsId) document.getElementById(detailsId)?.classList.add('hidden');
+        addLog(`${label}...`, 'info');
+        try {
+            const r = await apiFn();
+            const type = r.success ? 'success' : 'error';
+            showResult(resultId, r.message, type);
+            addLog(`${label}: ${r.message}`, type);
+            showToast(r.success ? `${label} завершено` : r.message, type);
+            if (detailsId && r.details?.length) showDetails(detailsId, r.details);
+        } catch (e) {
+            showResult(resultId, e.message, 'error');
+            showToast(e.message, 'error');
+        } finally { setBtnLoading(btn, false); }
+    }
+
+    async function runProgressClean(btnId, resultId, progressName, apiFn, label, detailsId) {
+        const btn = document.getElementById(btnId);
+        setBtnLoading(btn, true);
+        hideResult(resultId);
+        if (detailsId) document.getElementById(detailsId)?.classList.add('hidden');
+        showProgress(progressName, 20, 'запуск...');
+        addLog(`${label}...`, 'info');
+        try {
+            const r = await apiFn();
+            const type = r.success ? 'success' : 'error';
+            showProgress(progressName, 100, r.success ? 'завершено' : 'ошибка');
+            showResult(resultId, r.message, type);
+            addLog(`${label}: ${r.message}`, type);
+            showToast(r.success ? `${label} завершено` : r.message, type);
+            if (detailsId && r.details?.length) showDetails(detailsId, r.details);
+            setTimeout(() => hideProgress(progressName), 2500);
+        } catch (e) {
+            showProgress(progressName, 100, 'ошибка');
+            showResult(resultId, e.message, 'error');
+            showToast(e.message, 'error');
+        } finally { setBtnLoading(btn, false); }
+    }
+
+    // ── Сеть ──
+    document.getElementById('flushDnsBtn').addEventListener('click', () =>
+        runSimpleClean('flushDnsBtn', 'flushDnsResult', api.flushDns, 'сброс DNS'));
+
+    document.getElementById('clearArpBtn').addEventListener('click', () =>
+        runSimpleClean('clearArpBtn', 'clearArpResult', api.clearArp, 'очистка ARP'));
+
+    document.getElementById('clearNetbiosBtn').addEventListener('click', () =>
+        runSimpleClean('clearNetbiosBtn', 'clearNetbiosResult', api.clearNetbios, 'очистка NetBIOS'));
+
+    document.getElementById('resetNetworkBtn').addEventListener('click', () =>
+        runProgressClean('resetNetworkBtn', 'resetNetworkResult', 'resetNetwork', api.resetNetwork, 'сброс сети', 'resetNetworkDetails'));
+
+    // ── Система ──
+    document.getElementById('cleanRegistryBtn').addEventListener('click', () =>
+        runSimpleClean('cleanRegistryBtn', 'cleanRegistryResult', api.cleanRegistry, 'очистка реестра', 'cleanRegistryDetails'));
+
+    document.getElementById('cleanDumpsBtn').addEventListener('click', () =>
+        runSimpleClean('cleanDumpsBtn', 'cleanDumpsResult', api.cleanDumps, 'очистка дампов'));
+
+    document.getElementById('cleanWuBtn').addEventListener('click', () =>
+        runProgressClean('cleanWuBtn', 'cleanWuResult', 'cleanWu', api.cleanWu, 'кэш обновлений'));
+
+    document.getElementById('cleanThumbBtn').addEventListener('click', () =>
+        runSimpleClean('cleanThumbBtn', 'cleanThumbResult', api.cleanThumbs, 'thumbnail кэш'));
+
+    // ── Приватность ──
+    document.getElementById('clearClipboardBtn').addEventListener('click', () =>
+        runSimpleClean('clearClipboardBtn', 'clearClipboardResult', api.clearClipboard, 'буфер обмена'));
+
+    document.getElementById('cleanIconBtn').addEventListener('click', () =>
+        runSimpleClean('cleanIconBtn', 'cleanIconResult', api.cleanIconCache, 'кэш иконок'));
+
+    document.getElementById('cleanSearchBtn').addEventListener('click', () =>
+        runSimpleClean('cleanSearchBtn', 'cleanSearchResult', api.cleanSearch, 'история поиска'));
+
+    document.getElementById('cleanRunBtn').addEventListener('click', () =>
+        runSimpleClean('cleanRunBtn', 'cleanRunResult', api.cleanRun, 'история запуска'));
 
     init();
 });

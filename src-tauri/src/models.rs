@@ -146,3 +146,35 @@ pub struct CleanStringsResponse {
     pub message: String,
     pub steps: Vec<CleanStep>,
 }
+
+/// Ответ сетевой очистки
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct NetworkCleanResponse {
+    pub success: bool,
+    pub message: String,
+    pub details: Vec<String>,
+}
+
+/// Ответ системной очистки
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SystemCleanResponse {
+    pub success: bool,
+    pub message: String,
+    pub details: Vec<String>,
+}
+
+/// Ответ очистки приватности
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PrivacyCleanResponse {
+    pub success: bool,
+    pub message: String,
+    pub details: Vec<String>,
+}
+
+/// Информация о сетевых адаптерах
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct NetworkInfoResponse {
+    pub adapters: Vec<String>,
+    pub dns_servers: Vec<String>,
+    pub connections: usize,
+}

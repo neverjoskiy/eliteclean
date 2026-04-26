@@ -238,3 +238,19 @@ body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color
 .toast.warning .toast-icon { color: var(--warn); }
 .toast.info    .toast-icon { color: var(--tx3); }
 .toast-message { flex: 1; line-height: 1.4; }
+
+/* ── Details list (new tabs) ── */
+.details-list {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+.detail-item {
+    font-size: .72rem;
+    color: var(--tx2);
+    font-family: 'JetBrains Mono', monospace;
+    padding: 2px 0;
+    border-bottom: 1px solid var(--bg3);
+}
+.detail-item:last-child { border-bottom: none; }

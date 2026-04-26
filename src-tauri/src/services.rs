@@ -1103,4 +1103,431 @@ impl CleanupService {
             message: format!("Удалено временных файлов: {}", deleted),
         }
     }
+
+    // ══════════════════════════════════════════
+    // СЕТЕВЫЕ МЕТОДЫ
+    // ══════════════════════════════════════════
+
+    pub async fn flush_dns(state: State<'_, SharedAppState>) -> Result<NetworkCleanResponse, String> {
+        use std::process::Command;
+        let mut details = Vec::new();
+        {
+            let mut s = state.write().await;
+            s.add_log("Сброс DNS кэша...".to_string(), "info".to_string());
+        }
+        #[cfg(windows)]
+        {
+            if Command::new("ipconfig").arg("/flushdns").output()
+                .map(|o| o.status.success()).unwrap_or(false)
+            {
+                details.push("✓ DNS кэш сброшен (ipconfig /flushdns)".to_string());
+            } else {
+                details.push("✗ Ошибка сброса DNS кэша".to_string());
+            }
+        }
+        #[cfg(not(windows))]
+        { details.push("Доступно только на Windows".to_string()); }
+        let success = details.iter().any(|d| d.starts_with('✓'));
+        {
+            let mut s = state.write().await;
+            s.add_log(details.join(", "), if success { "success" } else { "error" }.to_string());
+        }
+        Ok(NetworkCleanResponse { success, message: details.join("; "), details })
+    }
+
+    pub async fn reset_network(state: State<'_, SharedAppState>) -> Result<NetworkCleanResponse, String> {
+        use std::process::Command;
+        let mut details = Vec::new();
+        {
+            let mut s = state.write().await;
+            s.add_log("Сброс сетевых настроек...".to_string(), "info".to_string());
+        }
+        #[cfg(windows)]
+        {
+            let cmds: &[(&str, &[&str])] = &[
+                ("netsh", &["winsock", "reset"]),
+                ("netsh", &["int", "ip", "reset"]),
+                ("netsh", &["int", "ipv6", "reset"]),
+                ("ipconfig", &["/flushdns"]),
+            ];
+            for (cmd, args) in cmds {
+                let label = format!("{} {}", cmd, args.join(" "));
+                if Command::new(cmd).args(*args).output()
+                    .map(|o| o.status.success()).unwrap_or(false)
+                {
+                    details.push(format!("✓ {}", label));
+                } else {
+                    details.push(format!("✗ {} (нужны права администратора)", label));
+                }
+            }
+        }
+        #[cfg(not(windows))]
+        { details.push("Доступно только на Windows".to_string()); }
+        let ok = details.iter().filter(|d| d.starts_with('✓')).count();
+        let success = ok > 0;
+        {
+            let mut s = state.write().await;
+            s.add_log(format!("Сброс сети: {}/{} успешно", ok, details.len()),
+                if success { "success" } else { "error" }.to_string());
+        }
+        Ok(NetworkCleanResponse { success, message: format!("Выполнено {}/{}", ok, details.len()), details })
+    }
+
+    pub async fn clear_arp(state: State<'_, SharedAppState>) -> Result<NetworkCleanResponse, String> {
+        use std::process::Command;
+        let mut details = Vec::new();
+        {
+            let mut s = state.write().await;
+            s.add_log("Очистка ARP таблицы...".to_string(), "info".to_string());
+        }
+        #[cfg(windows)]
+        {
+            if Command::new("netsh").args(["interface", "ip", "delete", "arpcache"])
+                .output().map(|o| o.status.success()).unwrap_or(false)
+            {
+                details.push("✓ ARP таблица очищена".to_string());
+            } else if Command::new("arp").arg("-d").arg("*")
+                .output().map(|o| o.status.success()).unwrap_or(false)
+            {
+                details.push("✓ ARP таблица очищена (arp -d)".to_string());
+            } else {
+                details.push("✗ Ошибка очистки ARP (нужны права администратора)".to_string());
+            }
+        }
+        #[cfg(not(windows))]
+        { details.push("Доступно только на Windows".to_string()); }
+        let success = details.iter().any(|d| d.starts_with('✓'));
+        {
+            let mut s = state.write().await;
+            s.add_log(details.join(", "), if success { "success" } else { "error" }.to_string());
+        }
+        Ok(NetworkCleanResponse { success, message: details.join("; "), details })
+    }
+
+    pub async fn clear_netbios(state: State<'_, SharedAppState>) -> Result<NetworkCleanResponse, String> {
+        use std::process::Command;
+        let mut details = Vec::new();
+        {
+            let mut s = state.write().await;
+            s.add_log("Очистка NetBIOS кэша...".to_string(), "info".to_string());
+        }
+        #[cfg(windows)]
+        {
+            if Command::new("nbtstat").arg("-R")
+                .output().map(|o| o.status.success()).unwrap_or(false)
+            {
+                details.push("✓ NetBIOS кэш очищен (nbtstat -R)".to_string());
+            } else {
+                details.push("✗ Ошибка очистки NetBIOS".to_string());
+            }
+            if Command::new("nbtstat").arg("-RR")
+                .output().map(|o| o.status.success()).unwrap_or(false)
+            {
+                details.push("✓ NetBIOS имена обновлены".to_string());
+            }
+        }
+        #[cfg(not(windows))]
+        { details.push("Доступно только на Windows".to_string()); }
+        let success = details.iter().any(|d| d.starts_with('✓'));
+        {
+            let mut s = state.write().await;
+            s.add_log(details.join(", "), if success { "success" } else { "error" }.to_string());
+        }
+        Ok(NetworkCleanResponse { success, message: details.join("; "), details })
+    }
+
+    // ══════════════════════════════════════════
+    // СИСТЕМНЫЕ МЕТОДЫ
+    // ══════════════════════════════════════════
+
+    pub async fn clean_registry(state: State<'_, SharedAppState>) -> Result<SystemCleanResponse, String> {
+        use std::process::Command;
+        let mut details = Vec::new();
+        {
+            let mut s = state.write().await;
+            s.add_log("Очистка реестра...".to_string(), "info".to_string());
+        }
+        #[cfg(windows)]
+        {
+            let keys = [
+                ("HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\RunMRU", "RunMRU"),
+                ("HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\TypedPaths", "TypedPaths"),
+                ("HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\RecentDocs", "RecentDocs"),
+                ("HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\ComDlg32\\OpenSavePidlMRU", "OpenSaveMRU"),
+                ("HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\UserAssist", "UserAssist"),
+            ];
+            for (key, label) in &keys {
+                if Command::new("reg").args(["delete", key, "/va", "/f"])
+                    .output().map(|o| o.status.success()).unwrap_or(false)
+                {
+                    details.push(format!("✓ {}", label));
+                }
+            }
+        }
+        #[cfg(not(windows))]
+        { details.push("Доступно только на Windows".to_string()); }
+        let cleaned = details.iter().filter(|d| d.starts_with('✓')).count();
+        let success = cleaned > 0;
+        {
+            let mut s = state.write().await;
+            s.add_log(format!("Реестр: очищено {} ключей", cleaned),
+                if success { "success" } else { "error" }.to_string());
+        }
+        Ok(SystemCleanResponse { success, message: format!("Очищено {} ключей реестра", cleaned), details })
+    }
+
+    pub async fn clean_dumps(state: State<'_, SharedAppState>) -> Result<SystemCleanResponse, String> {
+        use std::fs;
+        use std::path::PathBuf;
+        let mut details = Vec::new();
+        let mut deleted = 0usize;
+        {
+            let mut s = state.write().await;
+            s.add_log("Очистка дампов памяти...".to_string(), "info".to_string());
+        }
+        #[cfg(windows)]
+        {
+            let windir = std::env::var("WINDIR").unwrap_or_else(|_| "C:\\Windows".to_string());
+            let dump_paths = [
+                PathBuf::from(&windir).join("Minidump"),
+                PathBuf::from(&windir).join("MEMORY.DMP"),
+                PathBuf::from(std::env::var("LOCALAPPDATA").unwrap_or_default()).join("CrashDumps"),
+            ];
+            for path in &dump_paths {
+                if path.is_file() {
+                    if fs::remove_file(path).is_ok() {
+                        deleted += 1;
+                        details.push(format!("✓ {}", path.file_name().unwrap_or_default().to_string_lossy()));
+                    }
+                } else if path.is_dir() {
+                    let before = deleted;
+                    if let Ok(entries) = fs::read_dir(path) {
+                        for entry in entries.flatten() {
+                            if fs::remove_file(entry.path()).is_ok() { deleted += 1; }
+                        }
+                    }
+                    if deleted > before {
+                        details.push(format!("✓ {} ({} файлов)", path.file_name().unwrap_or_default().to_string_lossy(), deleted - before));
+                    }
+                }
+            }
+        }
+        #[cfg(not(windows))]
+        { details.push("Доступно только на Windows".to_string()); }
+        {
+            let mut s = state.write().await;
+            s.add_log(format!("Дампы: удалено {} файлов", deleted), "success".to_string());
+        }
+        Ok(SystemCleanResponse { success: true, message: format!("Удалено дампов: {}", deleted), details })
+    }
+
+    pub async fn clean_update_cache(state: State<'_, SharedAppState>) -> Result<SystemCleanResponse, String> {
+        use std::fs;
+        use std::path::PathBuf;
+        use std::process::Command;
+        let mut details = Vec::new();
+        let mut deleted = 0usize;
+        {
+            let mut s = state.write().await;
+            s.add_log("Очистка кэша Windows Update...".to_string(), "info".to_string());
+        }
+        #[cfg(windows)]
+        {
+            let _ = Command::new("net").args(["stop", "wuauserv"]).output();
+            let _ = Command::new("net").args(["stop", "bits"]).output();
+            let windir = std::env::var("WINDIR").unwrap_or_else(|_| "C:\\Windows".to_string());
+            let cache_path = PathBuf::from(&windir).join("SoftwareDistribution").join("Download");
+            if cache_path.exists() {
+                if let Ok(entries) = fs::read_dir(&cache_path) {
+                    for entry in entries.flatten() {
+                        let p = entry.path();
+                        if p.is_file() && fs::remove_file(&p).is_ok() { deleted += 1; }
+                        else if p.is_dir() && fs::remove_dir_all(&p).is_ok() { deleted += 1; }
+                    }
+                }
+                details.push(format!("✓ SoftwareDistribution\\Download: {} объектов", deleted));
+            }
+            let _ = Command::new("net").args(["start", "wuauserv"]).output();
+            let _ = Command::new("net").args(["start", "bits"]).output();
+        }
+        #[cfg(not(windows))]
+        { details.push("Доступно только на Windows".to_string()); }
+        {
+            let mut s = state.write().await;
+            s.add_log(format!("WU кэш: удалено {} объектов", deleted), "success".to_string());
+        }
+        Ok(SystemCleanResponse { success: true, message: format!("Удалено из кэша WU: {}", deleted), details })
+    }
+
+    pub async fn clean_thumbnails(state: State<'_, SharedAppState>) -> Result<SystemCleanResponse, String> {
+        use std::fs;
+        use std::path::PathBuf;
+        let mut details = Vec::new();
+        let mut deleted = 0usize;
+        {
+            let mut s = state.write().await;
+            s.add_log("Очистка thumbnail кэша...".to_string(), "info".to_string());
+        }
+        #[cfg(windows)]
+        {
+            let local = std::env::var("LOCALAPPDATA").unwrap_or_default();
+            let thumb_path = PathBuf::from(&local).join("Microsoft").join("Windows").join("Explorer");
+            if thumb_path.exists() {
+                if let Ok(entries) = fs::read_dir(&thumb_path) {
+                    for entry in entries.flatten() {
+                        let p = entry.path();
+                        let name = p.file_name().unwrap_or_default().to_string_lossy().to_lowercase();
+                        if name.starts_with("thumbcache") && p.is_file() {
+                            if fs::remove_file(&p).is_ok() { deleted += 1; }
+                        }
+                    }
+                }
+                details.push(format!("✓ Thumbcache: {} файлов", deleted));
+            }
+        }
+        #[cfg(not(windows))]
+        { details.push("Доступно только на Windows".to_string()); }
+        {
+            let mut s = state.write().await;
+            s.add_log(format!("Thumbnails: удалено {} файлов", deleted), "success".to_string());
+        }
+        Ok(SystemCleanResponse { success: true, message: format!("Удалено thumbnail файлов: {}", deleted), details })
+    }
+
+    // ══════════════════════════════════════════
+    // ПРИВАТНОСТЬ
+    // ══════════════════════════════════════════
+
+    pub async fn clear_clipboard(state: State<'_, SharedAppState>) -> Result<PrivacyCleanResponse, String> {
+        use std::process::Command;
+        let mut details = Vec::new();
+        {
+            let mut s = state.write().await;
+            s.add_log("Очистка буфера обмена...".to_string(), "info".to_string());
+        }
+        #[cfg(windows)]
+        {
+            if Command::new("cmd").args(["/c", "echo off | clip"])
+                .output().map(|o| o.status.success()).unwrap_or(false)
+            {
+                details.push("✓ Буфер обмена очищен".to_string());
+            } else {
+                details.push("✗ Ошибка очистки буфера".to_string());
+            }
+            if Command::new("reg").args([
+                "delete", "HKCU\\Software\\Microsoft\\Clipboard", "/va", "/f"
+            ]).output().map(|o| o.status.success()).unwrap_or(false) {
+                details.push("✓ История буфера обмена очищена".to_string());
+            }
+        }
+        #[cfg(not(windows))]
+        { details.push("Доступно только на Windows".to_string()); }
+        let success = details.iter().any(|d| d.starts_with('✓'));
+        {
+            let mut s = state.write().await;
+            s.add_log("Буфер обмена очищен".to_string(), if success { "success" } else { "error" }.to_string());
+        }
+        Ok(PrivacyCleanResponse { success, message: details.join("; "), details })
+    }
+
+    pub async fn clean_icon_cache(state: State<'_, SharedAppState>) -> Result<PrivacyCleanResponse, String> {
+        use std::fs;
+        use std::path::PathBuf;
+        let mut details = Vec::new();
+        let mut deleted = 0usize;
+        {
+            let mut s = state.write().await;
+            s.add_log("Очистка кэша иконок...".to_string(), "info".to_string());
+        }
+        #[cfg(windows)]
+        {
+            let local = std::env::var("LOCALAPPDATA").unwrap_or_default();
+            let icon_db = PathBuf::from(&local).join("IconCache.db");
+            if icon_db.exists() && fs::remove_file(&icon_db).is_ok() {
+                deleted += 1;
+                details.push("✓ IconCache.db удалён".to_string());
+            }
+            let explorer_path = PathBuf::from(&local).join("Microsoft").join("Windows").join("Explorer");
+            if explorer_path.exists() {
+                if let Ok(entries) = fs::read_dir(&explorer_path) {
+                    for entry in entries.flatten() {
+                        let p = entry.path();
+                        let name = p.file_name().unwrap_or_default().to_string_lossy().to_lowercase();
+                        if name.starts_with("iconcache") && p.is_file() {
+                            if fs::remove_file(&p).is_ok() { deleted += 1; }
+                        }
+                    }
+                }
+            }
+        }
+        #[cfg(not(windows))]
+        { details.push("Доступно только на Windows".to_string()); }
+        {
+            let mut s = state.write().await;
+            s.add_log(format!("Иконки: удалено {} файлов", deleted), "success".to_string());
+        }
+        Ok(PrivacyCleanResponse { success: true, message: format!("Удалено файлов кэша иконок: {}", deleted), details })
+    }
+
+    pub async fn clean_search_history(state: State<'_, SharedAppState>) -> Result<PrivacyCleanResponse, String> {
+        use std::process::Command;
+        let mut details = Vec::new();
+        {
+            let mut s = state.write().await;
+            s.add_log("Очистка истории поиска...".to_string(), "info".to_string());
+        }
+        #[cfg(windows)]
+        {
+            let keys = [
+                ("HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\WordWheelQuery", "WordWheelQuery"),
+                ("HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Search", "Search"),
+            ];
+            for (key, label) in &keys {
+                if Command::new("reg").args(["delete", key, "/va", "/f"])
+                    .output().map(|o| o.status.success()).unwrap_or(false)
+                {
+                    details.push(format!("✓ {}", label));
+                }
+            }
+        }
+        #[cfg(not(windows))]
+        { details.push("Доступно только на Windows".to_string()); }
+        let success = details.iter().any(|d| d.starts_with('✓'));
+        {
+            let mut s = state.write().await;
+            s.add_log("История поиска очищена".to_string(), if success { "success" } else { "error" }.to_string());
+        }
+        Ok(PrivacyCleanResponse { success, message: details.join("; "), details })
+    }
+
+    pub async fn clean_run_history(state: State<'_, SharedAppState>) -> Result<PrivacyCleanResponse, String> {
+        use std::process::Command;
+        let mut details = Vec::new();
+        {
+            let mut s = state.write().await;
+            s.add_log("Очистка истории запуска...".to_string(), "info".to_string());
+        }
+        #[cfg(windows)]
+        {
+            let keys = [
+                ("HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\RunMRU", "Run MRU"),
+                ("HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\TypedPaths", "TypedPaths"),
+            ];
+            for (key, label) in &keys {
+                if Command::new("reg").args(["delete", key, "/va", "/f"])
+                    .output().map(|o| o.status.success()).unwrap_or(false)
+                {
+                    details.push(format!("✓ {}", label));
+                }
+            }
+        }
+        #[cfg(not(windows))]
+        { details.push("Доступно только на Windows".to_string()); }
+        let success = details.iter().any(|d| d.starts_with('✓'));
+        {
+            let mut s = state.write().await;
+            s.add_log("История запуска очищена".to_string(), if success { "success" } else { "error" }.to_string());
+        }
+        Ok(PrivacyCleanResponse { success, message: details.join("; "), details })
+    }
 }

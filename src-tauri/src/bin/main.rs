@@ -33,6 +33,21 @@ fn main() {
             elite_cleaner_lib::commands::get_tools_status,
             elite_cleaner_lib::commands::get_global_clean_options,
             elite_cleaner_lib::commands::run_global_clean,
+            // сеть
+            elite_cleaner_lib::commands::flush_dns,
+            elite_cleaner_lib::commands::reset_network,
+            elite_cleaner_lib::commands::clear_arp,
+            elite_cleaner_lib::commands::clear_netbios,
+            // система
+            elite_cleaner_lib::commands::clean_registry,
+            elite_cleaner_lib::commands::clean_dumps,
+            elite_cleaner_lib::commands::clean_update_cache,
+            elite_cleaner_lib::commands::clean_thumbnails,
+            // приватность
+            elite_cleaner_lib::commands::clear_clipboard,
+            elite_cleaner_lib::commands::clean_icon_cache,
+            elite_cleaner_lib::commands::clean_search_history,
+            elite_cleaner_lib::commands::clean_run_history,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

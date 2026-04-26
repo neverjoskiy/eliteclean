@@ -194,3 +194,81 @@ pub async fn run_global_clean(
 ) -> Result<GlobalCleanResponse, String> {
     CleanupService::run_global_clean(state, params).await
 }
+
+// ── Сетевые команды ──
+
+/// Сброс DNS кэша
+#[tauri::command]
+pub async fn flush_dns(state: State<'_, SharedAppState>) -> Result<NetworkCleanResponse, String> {
+    CleanupService::flush_dns(state).await
+}
+
+/// Сброс сетевых настроек (winsock, ip, firewall)
+#[tauri::command]
+pub async fn reset_network(state: State<'_, SharedAppState>) -> Result<NetworkCleanResponse, String> {
+    CleanupService::reset_network(state).await
+}
+
+/// Очистка ARP таблицы
+#[tauri::command]
+pub async fn clear_arp(state: State<'_, SharedAppState>) -> Result<NetworkCleanResponse, String> {
+    CleanupService::clear_arp(state).await
+}
+
+/// Очистка NetBIOS кэша
+#[tauri::command]
+pub async fn clear_netbios(state: State<'_, SharedAppState>) -> Result<NetworkCleanResponse, String> {
+    CleanupService::clear_netbios(state).await
+}
+
+// ── Системные команды ──
+
+/// Очистка реестра (Run, RunOnce, MRU)
+#[tauri::command]
+pub async fn clean_registry(state: State<'_, SharedAppState>) -> Result<SystemCleanResponse, String> {
+    CleanupService::clean_registry(state).await
+}
+
+/// Очистка дампов памяти
+#[tauri::command]
+pub async fn clean_dumps(state: State<'_, SharedAppState>) -> Result<SystemCleanResponse, String> {
+    CleanupService::clean_dumps(state).await
+}
+
+/// Очистка Windows Update кэша
+#[tauri::command]
+pub async fn clean_update_cache(state: State<'_, SharedAppState>) -> Result<SystemCleanResponse, String> {
+    CleanupService::clean_update_cache(state).await
+}
+
+/// Очистка thumbnail кэша
+#[tauri::command]
+pub async fn clean_thumbnails(state: State<'_, SharedAppState>) -> Result<SystemCleanResponse, String> {
+    CleanupService::clean_thumbnails(state).await
+}
+
+// ── Приватность ──
+
+/// Очистка буфера обмена
+#[tauri::command]
+pub async fn clear_clipboard(state: State<'_, SharedAppState>) -> Result<PrivacyCleanResponse, String> {
+    CleanupService::clear_clipboard(state).await
+}
+
+/// Очистка иконок (IconCache)
+#[tauri::command]
+pub async fn clean_icon_cache(state: State<'_, SharedAppState>) -> Result<PrivacyCleanResponse, String> {
+    CleanupService::clean_icon_cache(state).await
+}
+
+/// Очистка поиска Windows (search history)
+#[tauri::command]
+pub async fn clean_search_history(state: State<'_, SharedAppState>) -> Result<PrivacyCleanResponse, String> {
+    CleanupService::clean_search_history(state).await
+}
+
+/// Очистка списка запуска (Run dialog history)
+#[tauri::command]
+pub async fn clean_run_history(state: State<'_, SharedAppState>) -> Result<PrivacyCleanResponse, String> {
+    CleanupService::clean_run_history(state).await
+}
