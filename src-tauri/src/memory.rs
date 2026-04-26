@@ -19,6 +19,8 @@ impl MemoryCleaner {
         use windows::Win32::System::Memory::{
             VirtualQueryEx, MEMORY_BASIC_INFORMATION, MEM_COMMIT,
             PAGE_READWRITE, PAGE_EXECUTE_READWRITE,
+            PAGE_WRITECOPY, PAGE_EXECUTE_WRITECOPY,
+            PAGE_GUARD, PAGE_NOACCESS,
         };
         use windows::Win32::System::Diagnostics::Debug::{
             ReadProcessMemory, WriteProcessMemory,
@@ -147,9 +149,18 @@ impl MemoryCleaner {
             regions_scanned += 1;
             
             // Проверяем регион на читаемость/записываемость
-            if mbi.State.0 == MEM_COMMIT.0 
-                && (mbi.Protect.0 == PAGE_READWRITE.0 || mbi.Protect.0 == PAGE_EXECUTE_READWRITE.0) 
-            {
+            // Исключаем только NOACCESS и GUARD-регионы
+            let is_accessible = mbi.State.0 == MEM_COMMIT.0
+                && (mbi.Protect.0 & PAGE_NOACCESS.0) == 0
+                && (mbi.Protect.0 & PAGE_GUARD.0) == 0;
+
+            // Регион доступен для записи (для патчинга)
+            let is_writable = (mbi.Protect.0 & PAGE_READWRITE.0) != 0
+                || (mbi.Protect.0 & PAGE_EXECUTE_READWRITE.0) != 0
+                || (mbi.Protect.0 & PAGE_WRITECOPY.0) != 0
+                || (mbi.Protect.0 & PAGE_EXECUTE_WRITECOPY.0) != 0;
+
+            if is_accessible {
                 let region_size = mbi.RegionSize;
                 let read_size = std::cmp::min(region_size, 10 * 1024 * 1024); // Максимум 10MB за раз
                 
@@ -188,17 +199,8 @@ impl MemoryCleaner {
                                     let mut rng = rand::thread_rng();
                                     let random_bytes: Vec<u8> = (0..pattern.len()).map(|_| rng.gen()).collect();
 
-                                    let write_result = unsafe {
-                                        WriteProcessMemory(
-                                            process_handle,
-                                            target_addr as *const _,
-                                            random_bytes.as_ptr() as *const _,
-                                            random_bytes.len(),
-                                            None,
-                                        )
-                                    };
-
-                                    if write_result.is_ok() {
+                                    let written = write_to_process(process_handle, target_addr, &random_bytes, is_writable);
+                                    if written {
                                         cleared_count += 1;
                                         found_in_region += 1;
                                     }
@@ -225,17 +227,8 @@ impl MemoryCleaner {
                                     let mut rng = rand::thread_rng();
                                     let random_bytes: Vec<u8> = (0..pattern_utf16.len()).map(|_| rng.gen()).collect();
 
-                                    let write_result = unsafe {
-                                        WriteProcessMemory(
-                                            process_handle,
-                                            target_addr as *const _,
-                                            random_bytes.as_ptr() as *const _,
-                                            random_bytes.len(),
-                                            None,
-                                        )
-                                    };
-
-                                    if write_result.is_ok() {
+                                    let written = write_to_process(process_handle, target_addr, &random_bytes, is_writable);
+                                    if written {
                                         cleared_count += 1;
                                         found_in_region += 1;
                                     }
@@ -272,5 +265,65 @@ impl MemoryCleaner {
             regions_matched,
             cleared_count,
         }
+    }
+}
+
+/// Записывает байты по адресу в чужом процессе.
+/// Если регион не writable — временно меняет права через VirtualProtectEx.
+#[cfg(windows)]
+fn write_to_process(
+    process: windows::Win32::Foundation::HANDLE,
+    addr: usize,
+    data: &[u8],
+    is_writable: bool,
+) -> bool {
+    use windows::Win32::System::Memory::{VirtualProtectEx, PAGE_READWRITE};
+    use windows::Win32::System::Diagnostics::Debug::WriteProcessMemory;
+
+    if is_writable {
+        // Регион уже writable — пишем напрямую
+        unsafe {
+            WriteProcessMemory(
+                process,
+                addr as *const _,
+                data.as_ptr() as *const _,
+                data.len(),
+                None,
+            ).is_ok()
+        }
+    } else {
+        // Временно делаем регион writable
+        let mut old_protect = windows::Win32::System::Memory::PAGE_PROTECTION_FLAGS(0);
+        let protect_ok = unsafe {
+            VirtualProtectEx(
+                process,
+                addr as *const _,
+                data.len(),
+                PAGE_READWRITE,
+                &mut old_protect,
+            ).is_ok()
+        };
+
+        if !protect_ok {
+            return false;
+        }
+
+        let written = unsafe {
+            WriteProcessMemory(
+                process,
+                addr as *const _,
+                data.as_ptr() as *const _,
+                data.len(),
+                None,
+            ).is_ok()
+        };
+
+        // Восстанавливаем оригинальные права
+        let mut dummy = windows::Win32::System::Memory::PAGE_PROTECTION_FLAGS(0);
+        unsafe {
+            let _ = VirtualProtectEx(process, addr as *const _, data.len(), old_protect, &mut dummy);
+        }
+
+        written
     }
 }
