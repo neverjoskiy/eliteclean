@@ -125,6 +125,9 @@ impl MemoryCleaner {
         let mut cleared_count = 0;
         let mut regions_scanned = 0;
         let mut regions_matched = 0;
+        let mut regions_accessible = 0;
+        let mut regions_read_ok = 0;
+        let mut write_failed = 0;
         
         // Сканируем память процесса
         let mut current_address: usize = 0;
@@ -161,6 +164,7 @@ impl MemoryCleaner {
                 || (mbi.Protect.0 & PAGE_EXECUTE_WRITECOPY.0) != 0;
 
             if is_accessible {
+                regions_accessible += 1;
                 let region_size = mbi.RegionSize;
                 let read_size = std::cmp::min(region_size, 10 * 1024 * 1024); // Максимум 10MB за раз
                 
@@ -179,6 +183,7 @@ impl MemoryCleaner {
                 };
                 
                 if read_result.is_ok() && bytes_read > 0 {
+                    regions_read_ok += 1;
                     let region_data = &buffer[..bytes_read];
                     let mut found_in_region = 0;
                     
@@ -203,6 +208,9 @@ impl MemoryCleaner {
                                     if written {
                                         cleared_count += 1;
                                         found_in_region += 1;
+                                    } else {
+                                        write_failed += 1;
+                                        log::warn!("Не удалось записать по адресу 0x{:X} (writable={})", target_addr, is_writable);
                                     }
 
                                     start = idx + pattern.len();
@@ -231,6 +239,9 @@ impl MemoryCleaner {
                                     if written {
                                         cleared_count += 1;
                                         found_in_region += 1;
+                                    } else {
+                                        write_failed += 1;
+                                        log::warn!("Не удалось записать UTF-16 по адресу 0x{:X} (writable={})", target_addr, is_writable);
                                     }
 
                                     start = idx + pattern_utf16.len();
@@ -252,8 +263,8 @@ impl MemoryCleaner {
         unsafe { let _ = CloseHandle(process_handle); }
         
         let result_msg = format!(
-            "Очистка завершена. Регионов просканировано: {}, совпадений удалено: {}",
-            regions_scanned, cleared_count
+            "Очистка завершена. Просканировано: {}, доступных: {}, прочитано: {}, совпадений удалено: {}, ошибок записи: {}",
+            regions_scanned, regions_accessible, regions_read_ok, cleared_count, write_failed
         );
         
         log::info!("{}", result_msg);
