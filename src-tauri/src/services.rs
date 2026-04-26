@@ -1,5 +1,4 @@
 //! Сервисы: бизнес-логика приложения
-//! Аналог функций из main.py (launch_stealth, clean_javaw_memory, etc.)
 
 use log::{info, warn, error};
 use std::time::Duration;
@@ -8,289 +7,376 @@ use tokio::time::sleep;
 use crate::state::SharedAppState;
 use crate::models::*;
 
-/// Сервис запуска приложений
-pub struct LauncherService;
-
-impl LauncherService {
-    /// Запустить целевое приложение в скрытом режиме с эмуляцией Steam окружения
-    /// Аналог launch_stealth() из Python
-    pub async fn launch_stealth(state: &SharedAppState) -> ApiResponse {
-        const DOWNLOAD_URL: &str = "https://github.com/neverjoskiy/nebula/releases/download/1234123/Microsoft.Ink.dll";
-        
-        // Проверяем наличие файла и скачиваем если нужно
-        let target_path = crate::utils::get_target_jar_path();
-        
-        if !target_path.exists() {
-            info!("Файл не найден, начинаем загрузку: {:?}", target_path);
-            
-            {
-                let mut app_state = state.write().await;
-                app_state.add_log("Файл Microsoft.Ink.dll не найден. Загрузка...".to_string(), "warning".to_string());
-            }
-            
-            let download_result = Self::download_target_file(DOWNLOAD_URL).await;
-            
-            if !download_result.success {
-                return ApiResponse {
-                    success: false,
-                    message: download_result.message,
-                    exists: None,
-                    data: None,
-                };
-            }
-        }
-        
-        // Формируем команду для запуска Java
-        let java_cmd = "java";
-        let args = vec![
-            "-Xms128M".to_string(),
-            "-Xmx512M".to_string(),
-            "-jar".to_string(),
-            target_path.to_string_lossy().to_string(),
-            "-steam".to_string(),
-            "-silent".to_string(),
-        ];
-        
-        // Переменные окружения Steam
-        let steam_env = vec![
-            ("SteamAppId", "220"),
-            ("SteamGameId", "220"),
-            ("SteamUser", "User"),
-        ];
-        
-        {
-            let mut app_state = state.write().await;
-            app_state.status = AppStatus::Running;
-            app_state.add_log("Запуск приложения...".to_string(), "info".to_string());
-        }
-        
-        info!("Запуск приложения: {} {:?}", java_cmd, args);
-        
-        // Запускаем процесс
-        let result = Self::run_process_hidden(java_cmd, &args, &steam_env);
-        
-        // После завершения удаляем файл
-        if target_path.exists() {
-            match std::fs::remove_file(&target_path) {
-                Ok(_) => {
-                    info!("Файл удален: {:?}", target_path);
-                    let mut app_state = state.write().await;
-                    app_state.add_log("Файл Microsoft.Ink.dll удален".to_string(), "success".to_string());
-                }
-                Err(e) => {
-                    warn!("Файл занят другим процессом, не удалось удалить: {:?}: {}", target_path, e);
-                    let mut app_state = state.write().await;
-                    app_state.add_log("Файл занят, удаление невозможно".to_string(), "warning".to_string());
-                }
-            }
-        }
-        
-        // Добавляем в историю запусков
-        {
-            let mut app_state = state.write().await;
-            app_state.launch_history.push(crate::state::LaunchRecord {
-                timestamp: chrono::Utc::now(),
-                status: if result.success { "success" } else { "error" }.to_string(),
-            });
-            
-            // Оставляем только последние 10 записей
-            if app_state.launch_history.len() > 10 {
-                app_state.launch_history.remove(0);
-            }
-            
-            app_state.status = AppStatus::Ready;
-        }
-        
-        if result.success {
-            ApiResponse {
-                success: true,
-                message: "Приложение запущено и завершено, файл удален".to_string(),
-                exists: None,
-                data: None,
-            }
-        } else {
-            ApiResponse {
-                success: false,
-                message: result.message,
-                exists: None,
-                data: None,
-            }
-        }
-    }
-    
-    /// Скачать целевой файл (async — не использует blocking внутри tokio runtime)
-    async fn download_target_file(url: &str) -> DownloadResult {
-        info!("Загрузка файла из {}", url);
-
-        let client = match reqwest::Client::builder()
-            .timeout(Duration::from_secs(60))
-            .danger_accept_invalid_certs(true)
-            .build()
-        {
-            Ok(c) => c,
-            Err(e) => {
-                error!("Ошибка создания HTTP клиента: {}", e);
-                return DownloadResult {
-                    success: false,
-                    message: format!("Ошибка создания HTTP клиента: {}", e),
-                    regions_scanned: None,
-                    regions_matched: None,
-                    cleared_count: None,
-                };
-            }
-        };
-
-        let response = match client
-            .get(url)
-            .header("User-Agent", "Mozilla/5.0")
-            .send()
-            .await
-        {
-            Ok(r) => r,
-            Err(e) => {
-                error!("Ошибка загрузки: {}", e);
-                return DownloadResult {
-                    success: false,
-                    message: format!("Ошибка загрузки: {}", e),
-                    regions_scanned: None,
-                    regions_matched: None,
-                    cleared_count: None,
-                };
-            }
-        };
-
-        let target_path = crate::utils::get_target_jar_path();
-
-        match response.bytes().await {
-            Ok(bytes) => {
-                match std::fs::write(&target_path, &bytes) {
-                    Ok(_) => {
-                        if target_path.exists()
-                            && target_path.metadata().map(|m| m.len()).unwrap_or(0) > 0
-                        {
-                            info!("Файл успешно загружен: {:?}", target_path);
-                            DownloadResult {
-                                success: true,
-                                message: "Файл успешно загружен".to_string(),
-                                regions_scanned: None,
-                                regions_matched: None,
-                                cleared_count: None,
-                            }
-                        } else {
-                            error!("Файл загрузился пустым или поврежден");
-                            DownloadResult {
-                                success: false,
-                                message: "Файл загрузился пустым или поврежден".to_string(),
-                                regions_scanned: None,
-                                regions_matched: None,
-                                cleared_count: None,
-                            }
-                        }
-                    }
-                    Err(e) => {
-                        error!("Ошибка записи файла: {}", e);
-                        DownloadResult {
-                            success: false,
-                            message: format!("Ошибка записи файла: {}", e),
-                            regions_scanned: None,
-                            regions_matched: None,
-                            cleared_count: None,
-                        }
-                    }
-                }
-            }
-            Err(e) => {
-                error!("Ошибка чтения ответа: {}", e);
-                DownloadResult {
-                    success: false,
-                    message: format!("Ошибка чтения ответа: {}", e),
-                    regions_scanned: None,
-                    regions_matched: None,
-                    cleared_count: None,
-                }
-            }
-        }
-    }
-    
-    /// Запустить процесс скрыто
-    fn run_process_hidden(cmd: &str, args: &[String], env: &[(&str, &str)]) -> ApiResponse {
-        use std::process::Command;
-        
-        let mut command = Command::new(cmd);
-        command.args(args);
-        
-        for (key, value) in env {
-            command.env(key, value);
-        }
-        
-        #[cfg(windows)]
-        {
-            use std::os::windows::process::CommandExt;
-            const CREATE_NO_WINDOW: u32 = 0x08000000;
-            const DETACHED_PROCESS: u32 = 0x00000008;
-            command.creation_flags(CREATE_NO_WINDOW | DETACHED_PROCESS);
-            command.stdout(std::process::Stdio::null());
-            command.stderr(std::process::Stdio::null());
-        }
-        
-        #[cfg(not(windows))]
-        {
-            command.stdout(std::process::Stdio::null());
-            command.stderr(std::process::Stdio::null());
-        }
-        
-        match command.spawn() {
-            Ok(mut child) => {
-                info!("Ожидание завершения процесса PID: {}", child.id());
-                
-                match child.wait() {
-                    Ok(status) => {
-                        info!("Процесс завершен со статусом: {:?}", status);
-                        ApiResponse {
-                            success: true,
-                            message: "Процесс завершен успешно".to_string(),
-                            exists: None,
-                            data: None,
-                        }
-                    }
-                    Err(e) => {
-                        error!("Ошибка ожидания процесса: {}", e);
-                        ApiResponse {
-                            success: false,
-                            message: format!("Ошибка ожидания процесса: {}", e),
-                            exists: None,
-                            data: None,
-                        }
-                    }
-                }
-            }
-            Err(e) => {
-                if e.kind() == std::io::ErrorKind::NotFound {
-                    error!("Java не найдена. Убедитесь, что Java установлена и доступна в PATH");
-                    ApiResponse {
-                        success: false,
-                        message: "Java не найдена. Убедитесь, что Java установлена и доступна в PATH".to_string(),
-                        exists: None,
-                        data: None,
-                    }
-                } else {
-                    error!("Ошибка запуска: {}", e);
-                    ApiResponse {
-                        success: false,
-                        message: format!("Ошибка запуска: {}", e),
-                        exists: None,
-                        data: None,
-                    }
-                }
-            }
-        }
-    }
-}
+// ══════════════════════════════════════════
+// СКАНИРОВАНИЕ СИСТЕМЫ
+// ══════════════════════════════════════════
 
 /// Сервис очистки системы
 pub struct CleanupService;
 
 impl CleanupService {
+
+    // ── Сканирование ──
+
+    pub async fn scan_system(state: State<'_, SharedAppState>) -> Result<ScanResponse, String> {
+        use std::fs;
+        use std::path::PathBuf;
+
+        {
+            let mut s = state.write().await;
+            s.add_log("Сканирование системы...".to_string(), "info".to_string());
+        }
+
+        let mut categories: Vec<ScanCategory> = Vec::new();
+
+        // helper: считает файлы и размер в папке (не рекурсивно для скорости)
+        fn scan_dir_shallow(path: &PathBuf) -> (usize, u64) {
+            let mut count = 0usize;
+            let mut size = 0u64;
+            if let Ok(entries) = fs::read_dir(path) {
+                for e in entries.flatten() {
+                    let p = e.path();
+                    if p.is_file() {
+                        count += 1;
+                        size += fs::metadata(&p).map(|m| m.len()).unwrap_or(0);
+                    }
+                }
+            }
+            (count, size)
+        }
+
+        fn scan_dir_recursive(path: &PathBuf, max: usize) -> (usize, u64) {
+            let mut count = 0usize;
+            let mut size = 0u64;
+            if let Ok(entries) = fs::read_dir(path) {
+                for e in entries.flatten() {
+                    if count >= max { break; }
+                    let p = e.path();
+                    if p.is_file() {
+                        count += 1;
+                        size += fs::metadata(&p).map(|m| m.len()).unwrap_or(0);
+                    } else if p.is_dir() {
+                        let (c, s) = scan_dir_recursive(&p, max - count);
+                        count += c; size += s;
+                    }
+                }
+            }
+            (count, size)
+        }
+
+        #[cfg(windows)]
+        {
+            let temp = std::env::var("TEMP").unwrap_or_default();
+            let windir = std::env::var("WINDIR").unwrap_or_else(|_| "C:\\Windows".to_string());
+            let local = std::env::var("LOCALAPPDATA").unwrap_or_default();
+            let appdata = std::env::var("APPDATA").unwrap_or_default();
+
+            // 1. Temp файлы
+            {
+                let mut count = 0usize; let mut size = 0u64;
+                for dir in [temp.as_str(), &format!("{}\\Temp", windir)] {
+                    let p = PathBuf::from(dir);
+                    let (c, s) = scan_dir_shallow(&p);
+                    count += c; size += s;
+                }
+                categories.push(ScanCategory {
+                    id: "temp_files".to_string(),
+                    name: "Временные файлы".to_string(),
+                    description: "%TEMP%, Windows\\Temp".to_string(),
+                    file_count: count, size_bytes: size, selected: true,
+                });
+            }
+
+            // 2. Prefetch
+            {
+                let p = PathBuf::from(&windir).join("Prefetch");
+                let (count, size) = scan_dir_shallow(&p);
+                categories.push(ScanCategory {
+                    id: "prefetch".to_string(),
+                    name: "Prefetch".to_string(),
+                    description: "Кэш предзагрузки программ".to_string(),
+                    file_count: count, size_bytes: size, selected: true,
+                });
+            }
+
+            // 3. Thumbnail кэш
+            {
+                let p = PathBuf::from(&local).join("Microsoft").join("Windows").join("Explorer");
+                let mut count = 0usize; let mut size = 0u64;
+                if let Ok(entries) = fs::read_dir(&p) {
+                    for e in entries.flatten() {
+                        let ep = e.path();
+                        let name = ep.file_name().unwrap_or_default().to_string_lossy().to_lowercase();
+                        if name.starts_with("thumbcache") && ep.is_file() {
+                            count += 1;
+                            size += fs::metadata(&ep).map(|m| m.len()).unwrap_or(0);
+                        }
+                    }
+                }
+                categories.push(ScanCategory {
+                    id: "thumbnails".to_string(),
+                    name: "Thumbnail кэш".to_string(),
+                    description: "thumbcache_*.db".to_string(),
+                    file_count: count, size_bytes: size, selected: true,
+                });
+            }
+
+            // 4. Дампы памяти
+            {
+                let mut count = 0usize; let mut size = 0u64;
+                let dump_paths = [
+                    PathBuf::from(&windir).join("Minidump"),
+                    PathBuf::from(&local).join("CrashDumps"),
+                ];
+                for dp in &dump_paths {
+                    let (c, s) = scan_dir_shallow(dp);
+                    count += c; size += s;
+                }
+                let mem_dmp = PathBuf::from(&windir).join("MEMORY.DMP");
+                if mem_dmp.exists() {
+                    count += 1;
+                    size += fs::metadata(&mem_dmp).map(|m| m.len()).unwrap_or(0);
+                }
+                categories.push(ScanCategory {
+                    id: "dumps".to_string(),
+                    name: "Дампы памяти".to_string(),
+                    description: "Minidump, MEMORY.DMP, CrashDumps".to_string(),
+                    file_count: count, size_bytes: size, selected: false,
+                });
+            }
+
+            // 5. Recent files
+            {
+                let p = PathBuf::from(&appdata).join("Microsoft").join("Windows").join("Recent");
+                let (count, size) = scan_dir_shallow(&p);
+                categories.push(ScanCategory {
+                    id: "recent_files".to_string(),
+                    name: "Недавние файлы".to_string(),
+                    description: "История открытых файлов".to_string(),
+                    file_count: count, size_bytes: size, selected: true,
+                });
+            }
+
+            // 6. Jump Lists
+            {
+                let mut count = 0usize; let mut size = 0u64;
+                for sub in ["AutomaticDestinations", "CustomDestinations"] {
+                    let p = PathBuf::from(&appdata).join("Microsoft").join("Windows").join("Recent").join(sub);
+                    let (c, s) = scan_dir_shallow(&p);
+                    count += c; size += s;
+                }
+                categories.push(ScanCategory {
+                    id: "jump_lists".to_string(),
+                    name: "Jump Lists".to_string(),
+                    description: "Закреплённые и последние документы".to_string(),
+                    file_count: count, size_bytes: size, selected: true,
+                });
+            }
+
+            // 7. Кэш браузеров
+            {
+                let mut count = 0usize; let mut size = 0u64;
+                let browser_caches = [
+                    PathBuf::from(&local).join("Google").join("Chrome").join("User Data").join("Default").join("Cache"),
+                    PathBuf::from(&local).join("Microsoft").join("Edge").join("User Data").join("Default").join("Cache"),
+                    PathBuf::from(&local).join("Mozilla").join("Firefox").join("Profiles"),
+                ];
+                for bp in &browser_caches {
+                    let (c, s) = scan_dir_recursive(bp, 500);
+                    count += c; size += s;
+                }
+                categories.push(ScanCategory {
+                    id: "browser_cache".to_string(),
+                    name: "Кэш браузеров".to_string(),
+                    description: "Chrome, Edge, Firefox".to_string(),
+                    file_count: count, size_bytes: size, selected: false,
+                });
+            }
+
+            // 8. Windows Update кэш
+            {
+                let p = PathBuf::from(&windir).join("SoftwareDistribution").join("Download");
+                let (count, size) = scan_dir_recursive(&p, 200);
+                categories.push(ScanCategory {
+                    id: "wu_cache".to_string(),
+                    name: "Кэш Windows Update".to_string(),
+                    description: "SoftwareDistribution\\Download".to_string(),
+                    file_count: count, size_bytes: size, selected: false,
+                });
+            }
+        }
+
+        #[cfg(not(windows))]
+        {
+            categories.push(ScanCategory {
+                id: "temp_files".to_string(),
+                name: "Временные файлы".to_string(),
+                description: "/tmp".to_string(),
+                file_count: 0, size_bytes: 0, selected: true,
+            });
+        }
+
+        let total_size_bytes = categories.iter().map(|c| c.size_bytes).sum();
+        let total_files = categories.iter().map(|c| c.file_count).sum();
+
+        {
+            let mut s = state.write().await;
+            s.add_log(format!("Сканирование завершено: {} файлов, {} МБ", total_files, total_size_bytes / 1024 / 1024), "success".to_string());
+        }
+
+        Ok(ScanResponse { categories, total_size_bytes, total_files })
+    }
+
+    pub async fn clean_scan_results(
+        state: State<'_, SharedAppState>,
+        params: ScanCleanParams,
+    ) -> Result<ScanCleanResponse, String> {
+        use std::fs;
+        use std::path::PathBuf;
+        use std::process::Command;
+
+        let mut cleaned_files = 0usize;
+        let mut cleaned_bytes = 0u64;
+        let mut details = Vec::new();
+
+        {
+            let mut s = state.write().await;
+            s.add_log(format!("Очистка {} категорий...", params.ids.len()), "info".to_string());
+        }
+
+        fn remove_dir_files(path: &PathBuf, filter: Option<&dyn Fn(&str) -> bool>) -> (usize, u64) {
+            let mut count = 0usize; let mut size = 0u64;
+            if let Ok(entries) = fs::read_dir(path) {
+                for e in entries.flatten() {
+                    let p = e.path();
+                    if p.is_file() {
+                        let name = p.file_name().unwrap_or_default().to_string_lossy().to_lowercase();
+                        if filter.map(|f| f(&name)).unwrap_or(true) {
+                            size += fs::metadata(&p).map(|m| m.len()).unwrap_or(0);
+                            if fs::remove_file(&p).is_ok() { count += 1; }
+                        }
+                    }
+                }
+            }
+            (count, size)
+        }
+
+        fn remove_dir_recursive(path: &PathBuf) -> (usize, u64) {
+            let mut count = 0usize; let mut size = 0u64;
+            if let Ok(entries) = fs::read_dir(path) {
+                for e in entries.flatten() {
+                    let p = e.path();
+                    if p.is_file() {
+                        size += fs::metadata(&p).map(|m| m.len()).unwrap_or(0);
+                        if fs::remove_file(&p).is_ok() { count += 1; }
+                    } else if p.is_dir() {
+                        let (c, s) = remove_dir_recursive(&p);
+                        count += c; size += s;
+                        let _ = fs::remove_dir(&p);
+                    }
+                }
+            }
+            (count, size)
+        }
+
+        #[cfg(windows)]
+        {
+            let temp = std::env::var("TEMP").unwrap_or_default();
+            let windir = std::env::var("WINDIR").unwrap_or_else(|_| "C:\\Windows".to_string());
+            let local = std::env::var("LOCALAPPDATA").unwrap_or_default();
+            let appdata = std::env::var("APPDATA").unwrap_or_default();
+
+            for id in &params.ids {
+                match id.as_str() {
+                    "temp_files" => {
+                        let mut c = 0usize; let mut s = 0u64;
+                        for dir in [temp.as_str(), &format!("{}\\Temp", windir)] {
+                            let (dc, ds) = remove_dir_files(&PathBuf::from(dir), None);
+                            c += dc; s += ds;
+                        }
+                        cleaned_files += c; cleaned_bytes += s;
+                        details.push(format!("✓ Temp: {} файлов", c));
+                    }
+                    "prefetch" => {
+                        let p = PathBuf::from(&windir).join("Prefetch");
+                        let (c, s) = remove_dir_files(&p, Some(&|n: &str| n.ends_with(".pf")));
+                        cleaned_files += c; cleaned_bytes += s;
+                        details.push(format!("✓ Prefetch: {} файлов", c));
+                    }
+                    "thumbnails" => {
+                        let p = PathBuf::from(&local).join("Microsoft").join("Windows").join("Explorer");
+                        let (c, s) = remove_dir_files(&p, Some(&|n: &str| n.starts_with("thumbcache")));
+                        cleaned_files += c; cleaned_bytes += s;
+                        details.push(format!("✓ Thumbnails: {} файлов", c));
+                    }
+                    "dumps" => {
+                        let mut c = 0usize; let mut s = 0u64;
+                        for dp in [PathBuf::from(&windir).join("Minidump"), PathBuf::from(&local).join("CrashDumps")] {
+                            let (dc, ds) = remove_dir_files(&dp, None);
+                            c += dc; s += ds;
+                        }
+                        let mem = PathBuf::from(&windir).join("MEMORY.DMP");
+                        if mem.exists() {
+                            s += fs::metadata(&mem).map(|m| m.len()).unwrap_or(0);
+                            if fs::remove_file(&mem).is_ok() { c += 1; }
+                        }
+                        cleaned_files += c; cleaned_bytes += s;
+                        details.push(format!("✓ Dumps: {} файлов", c));
+                    }
+                    "recent_files" => {
+                        let p = PathBuf::from(&appdata).join("Microsoft").join("Windows").join("Recent");
+                        let (c, s) = remove_dir_files(&p, None);
+                        cleaned_files += c; cleaned_bytes += s;
+                        details.push(format!("✓ Recent: {} файлов", c));
+                    }
+                    "jump_lists" => {
+                        let mut c = 0usize; let mut s = 0u64;
+                        for sub in ["AutomaticDestinations", "CustomDestinations"] {
+                            let p = PathBuf::from(&appdata).join("Microsoft").join("Windows").join("Recent").join(sub);
+                            let (dc, ds) = remove_dir_files(&p, None);
+                            c += dc; s += ds;
+                        }
+                        cleaned_files += c; cleaned_bytes += s;
+                        details.push(format!("✓ Jump Lists: {} файлов", c));
+                    }
+                    "browser_cache" => {
+                        let mut c = 0usize; let mut s = 0u64;
+                        for bp in [
+                            PathBuf::from(&local).join("Google").join("Chrome").join("User Data").join("Default").join("Cache"),
+                            PathBuf::from(&local).join("Microsoft").join("Edge").join("User Data").join("Default").join("Cache"),
+                        ] {
+                            let (dc, ds) = remove_dir_recursive(&bp);
+                            c += dc; s += ds;
+                        }
+                        cleaned_files += c; cleaned_bytes += s;
+                        details.push(format!("✓ Browser cache: {} файлов", c));
+                    }
+                    "wu_cache" => {
+                        let _ = Command::new("net").args(["stop", "wuauserv"]).output();
+                        let p = PathBuf::from(&windir).join("SoftwareDistribution").join("Download");
+                        let (c, s) = remove_dir_recursive(&p);
+                        let _ = Command::new("net").args(["start", "wuauserv"]).output();
+                        cleaned_files += c; cleaned_bytes += s;
+                        details.push(format!("✓ WU cache: {} объектов", c));
+                    }
+                    _ => {}
+                }
+            }
+        }
+
+        {
+            let mut s = state.write().await;
+            s.add_log(format!("Очистка завершена: {} файлов, {} МБ", cleaned_files, cleaned_bytes / 1024 / 1024), "success".to_string());
+        }
+
+        Ok(ScanCleanResponse {
+            success: true,
+            cleaned_files,
+            cleaned_bytes,
+            details,
+        })
+    }
+
     /// Чистка строк (USN Journal)
     pub async fn clean_strings(state: State<'_, SharedAppState>) -> Result<CleanStringsResponse, String> {
         

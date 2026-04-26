@@ -178,3 +178,44 @@ pub struct NetworkInfoResponse {
     pub dns_servers: Vec<String>,
     pub connections: usize,
 }
+
+/// Одна найденная категория при сканировании
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ScanCategory {
+    pub id: String,
+    pub name: String,
+    pub description: String,
+    pub file_count: usize,
+    pub size_bytes: u64,
+    pub selected: bool,
+}
+
+/// Ответ сканирования системы
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ScanResponse {
+    pub categories: Vec<ScanCategory>,
+    pub total_size_bytes: u64,
+    pub total_files: usize,
+}
+
+/// Параметры очистки по результатам сканирования
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ScanCleanParams {
+    pub ids: Vec<String>,
+}
+
+/// Ответ очистки по результатам сканирования
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ScanCleanResponse {
+    pub success: bool,
+    pub cleaned_files: usize,
+    pub cleaned_bytes: u64,
+    pub details: Vec<String>,
+}
+
+/// Статус приложения (упрощённый, без jar)
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AppStatusResponse {
+    pub status: AppStatus,
+    pub timestamp: DateTime<Utc>,
+}

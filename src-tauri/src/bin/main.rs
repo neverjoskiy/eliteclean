@@ -23,7 +23,8 @@ fn main() {
         .manage(app_state)
         .invoke_handler(tauri::generate_handler![
             elite_cleaner_lib::commands::get_status,
-            elite_cleaner_lib::commands::launch_app,
+            elite_cleaner_lib::commands::scan_system,
+            elite_cleaner_lib::commands::clean_scan_results,
             elite_cleaner_lib::commands::get_logs,
             elite_cleaner_lib::commands::clear_logs,
             elite_cleaner_lib::commands::clean_strings,

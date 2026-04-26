@@ -1,5 +1,6 @@
 const { invoke } = window.__TAURI__.core;
 let logs = [];
+let scanData = null; // хранит последние результаты сканирования
 
 // ── Toast ──
 function showToast(message, type = 'info') {
@@ -119,6 +120,8 @@ const api = {
     cleanJavaw:      () => invoke('clean_javaw_memory'),
     globalOptions:   () => invoke('get_global_clean_options'),
     globalClean:     (p) => invoke('run_global_clean', { params: p }),
+    scanSystem:      () => invoke('scan_system'),
+    cleanScan:       (ids) => invoke('clean_scan_results', { params: { ids } }),
     // сеть
     flushDns:        () => invoke('flush_dns'),
     resetNetwork:    () => invoke('reset_network'),
@@ -516,6 +519,108 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('hq-cleanIconCache').addEventListener('click', () => hqRun('hq-cleanIconCache', api.cleanIconCache, 'иконки'));
     document.getElementById('hq-cleanSearch').addEventListener('click', () => hqRun('hq-cleanSearch', api.cleanSearch, 'поиск'));
     document.getElementById('hq-cleanRun').addEventListener('click', () => hqRun('hq-cleanRun', api.cleanRun, 'история запуска'));
+
+    // ── Сканер ──
+    function fmtSize(bytes) {
+        if (bytes < 1024) return bytes + ' Б';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' КБ';
+        return (bytes / 1024 / 1024).toFixed(1) + ' МБ';
+    }
+
+    document.getElementById('scanBtn').addEventListener('click', async () => {
+        const btn = document.getElementById('scanBtn');
+        setBtnLoading(btn, true);
+        document.getElementById('scanResults').classList.add('hidden');
+        document.getElementById('scanCleanResult').classList.add('hidden');
+        document.getElementById('scanProgress').classList.remove('hidden');
+        document.getElementById('scanSubtitle').textContent = 'анализ...';
+
+        // анимируем прогресс пока идёт сканирование
+        let pct = 0;
+        const ticker = setInterval(() => {
+            pct = Math.min(pct + Math.random() * 12, 90);
+            document.getElementById('scanProgressFill').style.width = pct + '%';
+        }, 200);
+
+        addLog('сканирование системы...', 'info');
+        try {
+            scanData = await api.scanSystem();
+            clearInterval(ticker);
+            document.getElementById('scanProgressFill').style.width = '100%';
+            document.getElementById('scanProgressText').textContent = 'готово';
+
+            // Рендерим результаты
+            const total = scanData.total_size_bytes;
+            const files = scanData.total_files;
+            document.getElementById('scanSummary').innerHTML =
+                `<span class="scan-sum-files">${files} файлов</span><span class="scan-sum-sep">·</span><span class="scan-sum-size">${fmtSize(total)}</span>`;
+
+            const cats = document.getElementById('scanCategories');
+            cats.innerHTML = '';
+            scanData.categories.forEach(cat => {
+                const row = document.createElement('label');
+                row.className = 'scan-cat-row';
+                row.innerHTML = `
+                    <input type="checkbox" class="scan-cat-cb" value="${cat.id}" ${cat.selected ? 'checked' : ''}>
+                    <span class="scan-cat-name">${cat.name}</span>
+                    <span class="scan-cat-desc">${cat.description}</span>
+                    <span class="scan-cat-count">${cat.file_count} файл.</span>
+                    <span class="scan-cat-size ${cat.size_bytes > 10*1024*1024 ? 'big' : ''}">${fmtSize(cat.size_bytes)}</span>
+                `;
+                cats.appendChild(row);
+            });
+
+            setTimeout(() => {
+                document.getElementById('scanProgress').classList.add('hidden');
+                document.getElementById('scanResults').classList.remove('hidden');
+            }, 400);
+
+            const totalSelected = scanData.categories.filter(c => c.selected).reduce((a, c) => a + c.size_bytes, 0);
+            document.getElementById('scanSubtitle').textContent = `найдено ${fmtSize(total)}`;
+            addLog(`сканирование завершено: ${files} файлов, ${fmtSize(total)}`, 'success');
+            showToast(`найдено ${fmtSize(total)}`, 'info');
+        } catch (e) {
+            clearInterval(ticker);
+            document.getElementById('scanProgress').classList.add('hidden');
+            document.getElementById('scanSubtitle').textContent = 'ошибка сканирования';
+            addLog('ошибка сканирования: ' + e.message, 'error');
+            showToast(e.message, 'error');
+        } finally { setBtnLoading(btn, false); }
+    });
+
+    // выбрать все
+    document.getElementById('scanSelectAll').addEventListener('change', (e) => {
+        document.querySelectorAll('.scan-cat-cb').forEach(cb => cb.checked = e.target.checked);
+    });
+
+    // очистить выбранное
+    document.getElementById('scanCleanBtn').addEventListener('click', async () => {
+        const checked = [...document.querySelectorAll('.scan-cat-cb:checked')].map(cb => cb.value);
+        if (!checked.length) { showToast('ничего не выбрано', 'warning'); return; }
+        const btn = document.getElementById('scanCleanBtn');
+        setBtnLoading(btn, true);
+        document.getElementById('scanCleanResult').classList.add('hidden');
+        addLog(`очистка ${checked.length} категорий...`, 'info');
+        try {
+            const r = await api.cleanScan(checked);
+            const msg = `удалено ${r.cleaned_files} файлов (${fmtSize(r.cleaned_bytes)})`;
+            const el = document.getElementById('scanCleanResult');
+            el.className = 'scan-clean-result success';
+            el.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> ${msg}`;
+            el.classList.remove('hidden');
+            document.getElementById('scanResults').classList.add('hidden');
+            document.getElementById('scanSubtitle').textContent = 'очищено';
+            addLog(msg, 'success');
+            showToast(msg, 'success');
+            scanData = null;
+        } catch (e) {
+            const el = document.getElementById('scanCleanResult');
+            el.className = 'scan-clean-result error';
+            el.textContent = e.message;
+            el.classList.remove('hidden');
+            showToast(e.message, 'error');
+        } finally { setBtnLoading(btn, false); }
+    });
 
     init();
 });
