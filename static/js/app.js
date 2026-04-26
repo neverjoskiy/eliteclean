@@ -1,660 +1,364 @@
-/**
- * Steam Launcher - Frontend JavaScript
- * Обработка взаимодействия с API и управление UI
- */
-
-// ============================================
-// Глобальные переменные
-// ============================================
+const { invoke } = window.__TAURI__.core;
 let logs = [];
 
-// ============================================
-// Утилиты
-// ============================================
-
-/**
- * Показывает toast уведомление
- */
+// ── Toast ──
 function showToast(message, type = 'info') {
-    const container = document.getElementById('toastContainer');
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-
     const icons = {
         success: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
-        error: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>',
-        warning: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
-        info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>'
+        error:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>',
+        warning: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg>',
+        info:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>'
     };
-
-    toast.innerHTML = `
-        <span class="toast-icon">${icons[type]}</span>
-        <span class="toast-message">${message}</span>
-    `;
-
-    container.appendChild(toast);
-
-    // Удаляем через 4 секунды
-    setTimeout(() => {
-        toast.classList.add('hiding');
-        setTimeout(() => toast.remove(), 300);
-    }, 4000);
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.innerHTML = `<span class="toast-icon">${icons[type]}</span><span class="toast-message">${message}</span>`;
+    document.getElementById('toastContainer').appendChild(t);
+    setTimeout(() => { t.classList.add('hiding'); setTimeout(() => t.remove(), 250); }, 3500);
 }
 
-/**
- * Добавляет/удаляет класс loading у кнопки
- */
-function setButtonLoading(button, loading) {
-    if (loading) {
-        button.classList.add('loading');
-        button.disabled = true;
-    } else {
-        button.classList.remove('loading');
-        button.disabled = false;
-    }
-}
-
-/**
- * Форматирует текущее время для логов
- */
-function formatTime() {
-    const now = new Date();
-    return now.toLocaleTimeString('ru-RU', {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-    });
-}
-
-// ============================================
-// Логирование
-// ============================================
-
+// ── Logs ──
 function addLog(message, type = 'info') {
-    const timestamp = formatTime();
-    logs.push({ timestamp, message, type });
-
-    const container = document.getElementById('logsContainer');
-    
-    // Очищаем placeholder если это первая запись
-    if (logs.length === 1) {
-        container.innerHTML = '';
-    }
-
-    const logEntry = document.createElement('div');
-    logEntry.className = `log-entry ${type}`;
-    logEntry.innerHTML = `
-        <span class="log-time">${timestamp}</span>
-        <span class="log-message">${message}</span>
-    `;
-
-    container.appendChild(logEntry);
-    
-    // Прокрутка вниз
-    container.scrollTop = container.scrollHeight;
-
-    // Сохраняем только последние 50 записей
-    if (logs.length > 50) {
-        logs.shift();
-    }
+    const ts = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    logs.push({ ts, message, type });
+    const c = document.getElementById('logsContainer');
+    if (logs.length === 1) c.innerHTML = '';
+    const el = document.createElement('div');
+    el.className = `log-entry ${type}`;
+    el.innerHTML = `<span class="lt">${ts}</span><span class="lm">${message}</span>`;
+    c.appendChild(el);
+    c.scrollTop = c.scrollHeight;
+    if (logs.length > 50) logs.shift();
 }
 
 function clearLogs() {
     logs = [];
-    const container = document.getElementById('logsContainer');
-    container.innerHTML = `
-        <div class="log-entry info">
-            <span class="log-time">--:--:--</span>
-            <span class="log-message">Ожидание событий...</span>
-        </div>
-    `;
-    showToast('Журнал очищен', 'info');
+    document.getElementById('logsContainer').innerHTML =
+        '<div class="log-entry info"><span class="lt">--:--:--</span><span class="lm">ожидание событий...</span></div>';
+    showToast('журнал очищен', 'info');
 }
 
-// ============================================
-// API функции (Tauri invoke)
-// ============================================
-
-const { invoke } = window.__TAURI__.core;
-
-async function launchApp() {
-    return await invoke('launch_app');
-}
-
-async function getStatus() {
-    return await invoke('get_status');
-}
-
-async function getLogs(lines = 50) {
-    return await invoke('get_logs', { lines });
-}
-
-async function clearLogsApi() {
-    return await invoke('clear_logs');
-}
-
-async function cleanStrings() {
-    return await invoke('clean_strings');
-}
-
-async function cleanTracks() {
-    return await invoke('clean_tracks');
-}
-
-async function simulateFolders() {
-    return await invoke('simulate_folders');
-}
-
-async function cleanJavawMemory() {
-    return await invoke('clean_javaw_memory');
-}
-
-async function getToolsStatus() {
-    return await invoke('get_tools_status');
-}
-
-async function getGlobalCleanOptions() {
-    return await invoke('get_global_clean_options');
-}
-
-async function runGlobalClean(options) {
-    return await invoke('run_global_clean', { params: options });
-}
-
-// ============================================
-// Обновление UI
-// ============================================
-
+// ── Status ──
 function updateStatusIndicator(status) {
-    const indicator = document.getElementById('statusIndicator');
-    const statusText = indicator.querySelector('.status-text');
-
-    indicator.className = 'status-indicator';
-
-    switch (status) {
-        case 'ready':
-            indicator.classList.add('ready');
-            statusText.textContent = 'Готов';
-            break;
-        case 'running':
-            indicator.classList.add('running');
-            statusText.textContent = 'Запуск...';
-            break;
-        case 'error':
-            indicator.classList.add('error');
-            statusText.textContent = 'Ошибка';
-            break;
-        default:
-            statusText.textContent = 'Готов';
-    }
+    const el = document.getElementById('statusIndicator');
+    el.className = 'sdot ' + (status || 'ready');
 }
 
-
-function updateLaunchStatus(message, type = 'info') {
-    const statusEl = document.getElementById('launchStatus');
-    statusEl.className = 'launch-status';
-    
-    if (type !== 'info') {
-        statusEl.classList.add(type);
-    }
-    
-    statusEl.querySelector('.status-message').textContent = message;
+function setLaunchStatus(message, type = '') {
+    const el = document.getElementById('launchStatus');
+    el.className = 'launch-status' + (type ? ' ' + type : '');
+    el.textContent = message;
 }
 
-// ============================================
-// Инструменты - Чистка строк
-// ============================================
-
-function resetStepStatus(stepId) {
-    const step = document.getElementById(stepId);
-    const statusEl = document.getElementById(stepId + 'Status');
-    
-    step.classList.remove('active', 'completed', 'failed');
-    statusEl.innerHTML = '<span class="status-badge pending">Ожидание</span>';
+// ── Steps ──
+function resetStep(id) {
+    const s = document.getElementById(id);
+    s.classList.remove('active', 'completed', 'failed');
+    document.getElementById(id + 'Status').className = 'sb pending';
+    document.getElementById(id + 'Status').textContent = '—';
+}
+function stepRunning(id) {
+    const s = document.getElementById(id);
+    s.classList.add('active'); s.classList.remove('completed', 'failed');
+    const b = document.getElementById(id + 'Status');
+    b.className = 'sb running'; b.textContent = '...';
+}
+function stepDone(id) {
+    const s = document.getElementById(id);
+    s.classList.add('completed'); s.classList.remove('active', 'failed');
+    const b = document.getElementById(id + 'Status');
+    b.className = 'sb success'; b.textContent = '✓';
+}
+function stepFail(id) {
+    const s = document.getElementById(id);
+    s.classList.add('failed'); s.classList.remove('active', 'completed');
+    const b = document.getElementById(id + 'Status');
+    b.className = 'sb error'; b.textContent = '✗';
 }
 
-function setStepRunning(stepId) {
-    const step = document.getElementById(stepId);
-    const statusEl = document.getElementById(stepId + 'Status');
-    
-    step.classList.add('active');
-    step.classList.remove('completed', 'failed');
-    statusEl.innerHTML = '<span class="status-badge running">Выполнение</span>';
+// ── Progress ──
+function showProgress(name, pct, text) {
+    const el = document.getElementById(name + 'Progress');
+    el.classList.remove('hidden');
+    document.getElementById(name + 'ProgressFill').style.width = pct + '%';
+    document.getElementById(name + 'ProgressText').textContent = text;
+}
+function hideProgress(name) {
+    document.getElementById(name + 'Progress').classList.add('hidden');
 }
 
-function setStepCompleted(stepId) {
-    const step = document.getElementById(stepId);
-    const statusEl = document.getElementById(stepId + 'Status');
-    
-    step.classList.add('completed');
-    step.classList.remove('active', 'failed');
-    statusEl.innerHTML = '<span class="status-badge success">Готово</span>';
+// ── Tool Result ──
+function showResult(id, message, type) {
+    const el = document.getElementById(id);
+    el.className = `tool-result ${type}`;
+    el.querySelector('.result-message').textContent = message;
+    el.classList.remove('hidden');
+}
+function hideResult(id) {
+    document.getElementById(id).classList.add('hidden');
 }
 
-function setStepFailed(stepId) {
-    const step = document.getElementById(stepId);
-    const statusEl = document.getElementById(stepId + 'Status');
-    
-    step.classList.add('failed');
-    step.classList.remove('active', 'completed');
-    statusEl.innerHTML = '<span class="status-badge error">Ошибка</span>';
+// ── Modal ──
+function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+// ── Button loading ──
+function setBtnLoading(btn, on) {
+    btn.classList.toggle('loading', on);
+    btn.disabled = on;
 }
 
-function showToolResult(resultId, message, type = 'info') {
-    const resultEl = document.getElementById(resultId);
-    resultEl.style.display = 'block';
-    resultEl.className = `tool-result ${type}`;
-    resultEl.querySelector('.result-message').textContent = message;
-}
+// ── API ──
+const api = {
+    launch:          () => invoke('launch_app'),
+    status:          () => invoke('get_status'),
+    logs:            (n=50) => invoke('get_logs', { lines: n }),
+    clearLogs:       () => invoke('clear_logs'),
+    cleanStrings:    () => invoke('clean_strings'),
+    cleanTracks:     () => invoke('clean_tracks'),
+    simulate:        () => invoke('simulate_folders'),
+    cleanJavaw:      () => invoke('clean_javaw_memory'),
+    globalOptions:   () => invoke('get_global_clean_options'),
+    globalClean:     (p) => invoke('run_global_clean', { params: p }),
+};
 
-// ============================================
-// Инструменты - Прогресс бары
-// ============================================
-
-function updateProgress(toolName, progress, text) {
-    const progressEl = document.getElementById(toolName + 'Progress');
-    const fillEl = document.getElementById(toolName + 'ProgressFill');
-    const textEl = document.getElementById(toolName + 'ProgressText');
-    
-    progressEl.style.display = 'block';
-    
-    if (progress > 0 && progress < 100) {
-        progressEl.classList.add('running');
-    } else {
-        progressEl.classList.remove('running');
-    }
-    
-    fillEl.style.width = progress + '%';
-    textEl.textContent = text;
-}
-
-function hideProgress(toolName) {
-    const progressEl = document.getElementById(toolName + 'Progress');
-    progressEl.style.display = 'none';
-}
-
-// ============================================
-// Обработчики событий
-// ============================================
-
-function setupEventListeners() {
-    // Переключение вкладок из sidebar
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const tabId = btn.dataset.tab;
-
-            // Убираем активный класс у всех кнопок и контента
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-
-            // Добавляем активный класс текущим
-            btn.classList.add('active');
-            document.getElementById(tabId).classList.add('active');
-        });
-    });
-
-    // Кнопка запуска приложения
-    document.getElementById('launchBtn').addEventListener('click', async () => {
-        const btn = document.getElementById('launchBtn');
-        
-        setButtonLoading(btn, true);
-        updateStatusIndicator('running');
-        updateLaunchStatus('Выполняется запуск...', 'info');
-        addLog('Инициализация запуска приложения', 'info');
-
-        try {
-            const result = await launchApp();
-
-            if (result.success) {
-                updateLaunchStatus('Приложение успешно запущено', 'success');
-                updateStatusIndicator('ready');
-                addLog('Приложение запущено успешно', 'success');
-                showToast('Приложение запущено', 'success');
-            } else {
-                updateLaunchStatus(result.message || 'Ошибка запуска', 'error');
-                updateStatusIndicator('error');
-                addLog(`Ошибка запуска: ${result.message}`, 'error');
-                showToast('Ошибка при запуске: ' + result.message, 'error');
-            }
-
-        } catch (error) {
-            updateLaunchStatus('Ошибка соединения с сервером', 'error');
-            updateStatusIndicator('error');
-            addLog(`Критическая ошибка: ${error.message}`, 'error');
-            showToast('Ошибка соединения: ' + error.message, 'error');
-        } finally {
-            setButtonLoading(btn, false);
-        }
-    });
-
-    // Кнопка инструкции
-    document.getElementById('instructionBtn').addEventListener('click', () => {
-        document.getElementById('instructionModal').style.display = 'flex';
-    });
-
-    // Закрытие модального окна инструкции
-    document.getElementById('instructionCloseBtn').addEventListener('click', () => {
-        document.getElementById('instructionModal').style.display = 'none';
-    });
-
-    document.getElementById('instructionOkBtn').addEventListener('click', () => {
-        document.getElementById('instructionModal').style.display = 'none';
-    });
-
-    // Закрытие по клику вне окна
-    document.getElementById('instructionModal').addEventListener('click', (e) => {
-        if (e.target.id === 'instructionModal') {
-            e.target.style.display = 'none';
-        }
-    });
-
-    // Кнопка очистки логов
-    document.getElementById('clearLogsBtn').addEventListener('click', async () => {
-        try {
-            await clearLogsApi();
-            clearLogs();
-        } catch (error) {
-            // Очищаем локально даже если API недоступно
-            clearLogs();
-        }
-    });
-
-    // Кнопка "Чистка строк"
-    document.getElementById('cleanStringsBtn').addEventListener('click', async () => {
-        const btn = document.getElementById('cleanStringsBtn');
-        
-        setButtonLoading(btn, true);
-        document.getElementById('cleanStringsResult').style.display = 'none';
-        
-        // Сброс статусов шагов
-        resetStepStatus('cleanStringsStep1');
-        resetStepStatus('cleanStringsStep2');
-        
-        addLog('Запуск чистки строк', 'info');
-
-        try {
-            // Шаг 1: Удаление журнала USN
-            setStepRunning('cleanStringsStep1');
-            addLog('Шаг 1: Удаление журнала USN...', 'info');
-            
-            const result = await cleanStrings();
-            
-            if (result.success) {
-                setStepCompleted('cleanStringsStep1');
-                
-                // Шаг 2: Создание журнала USN
-                setStepRunning('cleanStringsStep2');
-                addLog('Шаг 2: Создание журнала USN...', 'info');
-                
-                // Имитация задержки для второго шага
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                
-                setStepCompleted('cleanStringsStep2');
-                
-                showToolResult('cleanStringsResult', 'Очистка строк успешно завершена', 'success');
-                addLog('Чистка строк завершена успешно', 'success');
-                showToast('Очистка строк завершена', 'success');
-            } else {
-                setStepFailed('cleanStringsStep1');
-                showToolResult('cleanStringsResult', result.message || 'Ошибка при выполнении', 'error');
-                addLog(`Ошибка чистки: ${result.message}`, 'error');
-                showToast('Ошибка: ' + result.message, 'error');
-            }
-
-        } catch (error) {
-            setStepFailed('cleanStringsStep1');
-            showToolResult('cleanStringsResult', 'Ошибка соединения с сервером', 'error');
-            addLog(`Критическая ошибка чистки: ${error.message}`, 'error');
-            showToast('Ошибка соединения: ' + error.message, 'error');
-        } finally {
-            setButtonLoading(btn, false);
-        }
-    });
-
-    // Кнопка "Очистка следов"
-    document.getElementById('cleanTracksBtn').addEventListener('click', async () => {
-        const btn = document.getElementById('cleanTracksBtn');
-        
-        setButtonLoading(btn, true);
-        document.getElementById('cleanTracksResult').style.display = 'none';
-        updateProgress('cleanTracks', 10, 'Запуск...');
-        
-        addLog('Запуск очистки следов', 'info');
-
-        try {
-            const result = await cleanTracks();
-            
-            if (result.success) {
-                updateProgress('cleanTracks', 100, 'Завершено');
-                showToolResult('cleanTracksResult', 'Очистка следов выполнена', 'success');
-                addLog('Очистка следов завершена', 'success');
-                showToast('Очистка следов завершена', 'success');
-                
-                setTimeout(() => hideProgress('cleanTracks'), 3000);
-            } else {
-                updateProgress('cleanTracks', 100, 'Ошибка');
-                showToolResult('cleanTracksResult', result.message || 'Ошибка при выполнении', 'error');
-                addLog(`Ошибка очистки: ${result.message}`, 'error');
-                showToast('Ошибка: ' + result.message, 'error');
-            }
-
-        } catch (error) {
-            updateProgress('cleanTracks', 100, 'Ошибка');
-            showToolResult('cleanTracksResult', 'Ошибка соединения с сервером', 'error');
-            addLog(`Критическая ошибка очистки: ${error.message}`, 'error');
-            showToast('Ошибка соединения: ' + error.message, 'error');
-        } finally {
-            setButtonLoading(btn, false);
-        }
-    });
-
-    // Кнопка "Симуляция открытия папок"
-    document.getElementById('simulateBtn').addEventListener('click', async () => {
-        const btn = document.getElementById('simulateBtn');
-        
-        setButtonLoading(btn, true);
-        document.getElementById('simulateResult').style.display = 'none';
-        updateProgress('simulate', 50, 'Запуск...');
-        
-        addLog('Запуск симуляции открытия папок', 'info');
-
-        try {
-            const result = await simulateFolders();
-            
-            if (result.success) {
-                updateProgress('simulate', 100, 'Запущено');
-                showToolResult('simulateResult', 'Симуляция запущена', 'success');
-                addLog('Симуляция запущена успешно', 'success');
-                showToast('Симуляция запущена', 'success');
-                
-                setTimeout(() => hideProgress('simulate'), 3000);
-            } else {
-                updateProgress('simulate', 100, 'Ошибка');
-                showToolResult('simulateResult', result.message || 'Ошибка при выполнении', 'error');
-                addLog(`Ошибка симуляции: ${result.message}`, 'error');
-                showToast('Ошибка: ' + result.message, 'error');
-            }
-
-        } catch (error) {
-            updateProgress('simulate', 100, 'Ошибка');
-            showToolResult('simulateResult', 'Ошибка соединения с сервером', 'error');
-            addLog(`Критическая ошибка симуляции: ${error.message}`, 'error');
-            showToast('Ошибка соединения: ' + error.message, 'error');
-        } finally {
-            setButtonLoading(btn, false);
-        }
-    });
-
-    // Очистка памяти javaw.exe
-    document.getElementById('cleanJavawBtn').addEventListener('click', async () => {
-        const btn = document.getElementById('cleanJavawBtn');
-
-        setButtonLoading(btn, true);
-        document.getElementById('cleanJavawResult').style.display = 'none';
-        updateProgress('cleanJavaw', 10, 'Подключение...');
-
-        addLog('Запуск очистки памяти javaw.exe', 'info');
-
-        try {
-            const result = await cleanJavawMemory();
-
-            if (result.success) {
-                updateProgress('cleanJavaw', 100, 'Завершено');
-                const msg = result.message || `Удалено ${result.cleared_count} совпадений`;
-                showToolResult('cleanJavawResult', msg, 'success');
-                addLog(`Очистка javaw завершена: ${msg}`, 'success');
-                showToast('Очистка памяти javaw.exe завершена', 'success');
-
-                setTimeout(() => hideProgress('cleanJavaw'), 3000);
-            } else {
-                updateProgress('cleanJavaw', 100, 'Ошибка');
-                showToolResult('cleanJavawResult', result.message || 'Ошибка при выполнении', 'error');
-                addLog(`Ошибка очистки javaw: ${result.message}`, 'error');
-                showToast('Ошибка: ' + result.message, 'error');
-            }
-
-        } catch (error) {
-            updateProgress('cleanJavaw', 100, 'Ошибка');
-            showToolResult('cleanJavawResult', 'Ошибка соединения с сервером', 'error');
-            addLog(`Критическая ошибка очистки javaw: ${error.message}`, 'error');
-            showToast('Ошибка соединения: ' + error.message, 'error');
-        } finally {
-            setButtonLoading(btn, false);
-        }
-    });
-
-    // Глобальная очистка - открытие модального окна
-    document.getElementById('globalCleanBtn').addEventListener('click', async () => {
-        const modal = document.getElementById('globalCleanModal');
-        const optionsContainer = document.getElementById('cleanOptions');
-        
-        try {
-            const data = await getGlobalCleanOptions();
-            optionsContainer.innerHTML = '';
-            
-            for (const [key, option] of Object.entries(data.options)) {
-                const optionEl = document.createElement('label');
-                optionEl.className = 'clean-option';
-                optionEl.innerHTML = `
-                    <input type="checkbox" value="${key}" id="opt_${key}">
-                    <div class="clean-option-label">
-                        <div class="clean-option-name">${option.name}</div>
-                        <div class="clean-option-desc">${option.description}</div>
-                    </div>
-                `;
-                optionsContainer.appendChild(optionEl);
-            }
-            
-            modal.style.display = 'flex';
-        } catch (error) {
-            showToast('Ошибка загрузки опций: ' + error.message, 'error');
-        }
-    });
-
-    // Закрытие модального окна
-    document.getElementById('modalCloseBtn').addEventListener('click', () => {
-        document.getElementById('globalCleanModal').style.display = 'none';
-    });
-
-    document.getElementById('modalCancelBtn').addEventListener('click', () => {
-        document.getElementById('globalCleanModal').style.display = 'none';
-    });
-
-    // Закрытие по клику вне окна
-    document.getElementById('globalCleanModal').addEventListener('click', (e) => {
-        if (e.target.id === 'globalCleanModal') {
-            e.target.style.display = 'none';
-        }
-    });
-
-    // Запуск глобальной очистки
-    document.getElementById('modalStartBtn').addEventListener('click', async () => {
-        const btn = document.getElementById('modalStartBtn');
-        const checkboxes = document.querySelectorAll('#cleanOptions input[type="checkbox"]:checked');
-        
-        if (checkboxes.length === 0) {
-            showToast('Выберите хотя бы один компонент', 'warning');
-            return;
-        }
-        
-        const options = {};
-        checkboxes.forEach(cb => {
-            options[cb.value] = true;
-        });
-        
-        setButtonLoading(btn, true);
-        document.getElementById('globalCleanModal').style.display = 'none';
-        document.getElementById('globalCleanResult').style.display = 'none';
-        updateProgress('globalClean', 0, 'Запуск...');
-        
-        addLog('Запуск глобальной очистки', 'info');
-
-        try {
-            const result = await runGlobalClean(options);
-            
-            if (result.success) {
-                updateProgress('globalClean', 100, `Завершено: ${result.completed}/${result.total}`);
-                showToolResult('globalCleanResult', `Очистка завершена: ${result.completed}/${result.total} успешно`, 'success');
-                addLog(`Глобальная очистка: ${result.completed}/${result.total} успешно`, 'success');
-                showToast(`Очистка завершена: ${result.completed}/${result.total}`, 'success');
-                
-                // Показать детали
-                let details = '';
-                for (const [key, res] of Object.entries(result.results)) {
-                    details += `${res.success ? '✓' : '✗'} ${key}: ${res.message}\n`;
-                }
-                console.log(details);
-                
-                setTimeout(() => hideProgress('globalClean'), 5000);
-            } else {
-                updateProgress('globalClean', 100, 'Ошибка');
-                showToolResult('globalCleanResult', result.message || 'Ошибка при выполнении', 'error');
-                showToast('Ошибка: ' + result.message, 'error');
-            }
-
-        } catch (error) {
-            updateProgress('globalClean', 100, 'Ошибка');
-            showToolResult('globalCleanResult', 'Ошибка соединения с сервером', 'error');
-            showToast('Ошибка соединения: ' + error.message, 'error');
-        } finally {
-            setButtonLoading(btn, false);
-        }
-    });
-}
-
-// Загрузка при старте
+// ── Init ──
 async function init() {
     try {
-        // Получаем текущий статус
-        const status = await getStatus();
-        updateStatusIndicator(status.status || 'ready');
-        
-        // Загружаем логи если есть
+        const s = await api.status();
+        updateStatusIndicator(s.status || 'ready');
         try {
-            const logsData = await getLogs();
-            if (logsData.logs && logsData.logs.length > 0) {
-                const container = document.getElementById('logsContainer');
-                container.innerHTML = '';
-                logsData.logs.forEach(log => {
-                    if (log.message) {
-                        addLog(log.message, log.type || 'info');
-                    }
-                });
+            const ld = await api.logs();
+            if (ld.logs?.length) {
+                document.getElementById('logsContainer').innerHTML = '';
+                ld.logs.forEach(l => l.message && addLog(l.message, l.type || 'info'));
             }
-        } catch (e) {
-            // Логи не загрузились - не критично
-        }
-
-        addLog('Веб-интерфейс инициализирован', 'info');
-        
-    } catch (error) {
-        console.error('Init error:', error);
-        addLog('Ошибка инициализации: ' + error.message, 'error');
+        } catch {}
+        addLog('интерфейс инициализирован', 'info');
+    } catch (e) {
+        addLog('ошибка инициализации: ' + e.message, 'error');
     }
 }
 
-// Запуск после загрузки DOM
+// ── Event Listeners ──
 document.addEventListener('DOMContentLoaded', () => {
-    setupEventListeners();
+
+    // Tabs
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById(btn.dataset.tab).classList.add('active');
+        });
+    });
+
+    // Launch
+    document.getElementById('launchBtn').addEventListener('click', async () => {
+        const btn = document.getElementById('launchBtn');
+        setBtnLoading(btn, true);
+        updateStatusIndicator('running');
+        setLaunchStatus('запуск...');
+        addLog('запуск приложения', 'info');
+        try {
+            const r = await api.launch();
+            if (r.success) {
+                setLaunchStatus('запущено успешно', 'success');
+                updateStatusIndicator('ready');
+                addLog('приложение запущено', 'success');
+                showToast('запущено', 'success');
+            } else {
+                setLaunchStatus(r.message || 'ошибка', 'error');
+                updateStatusIndicator('error');
+                addLog('ошибка: ' + r.message, 'error');
+                showToast(r.message, 'error');
+            }
+        } catch (e) {
+            setLaunchStatus('ошибка соединения', 'error');
+            updateStatusIndicator('error');
+            addLog('ошибка: ' + e.message, 'error');
+            showToast(e.message, 'error');
+        } finally { setBtnLoading(btn, false); }
+    });
+
+    // Instruction modal
+    document.getElementById('instructionBtn').addEventListener('click', () => openModal('instructionModal'));
+    document.getElementById('instructionCloseBtn').addEventListener('click', () => closeModal('instructionModal'));
+    document.getElementById('instructionOkBtn').addEventListener('click', () => closeModal('instructionModal'));
+    document.getElementById('instructionModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal('instructionModal'); });
+
+    // Clear logs
+    document.getElementById('clearLogsBtn').addEventListener('click', async () => {
+        try { await api.clearLogs(); } catch {}
+        clearLogs();
+    });
+
+    // Clean Strings
+    document.getElementById('cleanStringsBtn').addEventListener('click', async () => {
+        const btn = document.getElementById('cleanStringsBtn');
+        setBtnLoading(btn, true);
+        hideResult('cleanStringsResult');
+        resetStep('cleanStringsStep1'); resetStep('cleanStringsStep2');
+        addLog('чистка строк...', 'info');
+        try {
+            stepRunning('cleanStringsStep1');
+            const r = await api.cleanStrings();
+            if (r.success) {
+                stepDone('cleanStringsStep1');
+                stepRunning('cleanStringsStep2');
+                await new Promise(res => setTimeout(res, 800));
+                stepDone('cleanStringsStep2');
+                showResult('cleanStringsResult', 'чистка завершена', 'success');
+                addLog('чистка строк завершена', 'success');
+                showToast('чистка строк завершена', 'success');
+            } else {
+                stepFail('cleanStringsStep1');
+                showResult('cleanStringsResult', r.message || 'ошибка', 'error');
+                addLog('ошибка: ' + r.message, 'error');
+                showToast(r.message, 'error');
+            }
+        } catch (e) {
+            stepFail('cleanStringsStep1');
+            showResult('cleanStringsResult', e.message, 'error');
+            showToast(e.message, 'error');
+        } finally { setBtnLoading(btn, false); }
+    });
+
+    // Clean Tracks
+    document.getElementById('cleanTracksBtn').addEventListener('click', async () => {
+        const btn = document.getElementById('cleanTracksBtn');
+        setBtnLoading(btn, true);
+        hideResult('cleanTracksResult');
+        showProgress('cleanTracks', 10, 'запуск...');
+        addLog('очистка следов...', 'info');
+        try {
+            const r = await api.cleanTracks();
+            if (r.success) {
+                showProgress('cleanTracks', 100, 'завершено');
+                showResult('cleanTracksResult', 'очистка следов выполнена', 'success');
+                addLog('очистка следов завершена', 'success');
+                showToast('очистка следов завершена', 'success');
+                setTimeout(() => hideProgress('cleanTracks'), 2500);
+            } else {
+                showProgress('cleanTracks', 100, 'ошибка');
+                showResult('cleanTracksResult', r.message || 'ошибка', 'error');
+                addLog('ошибка: ' + r.message, 'error');
+                showToast(r.message, 'error');
+            }
+        } catch (e) {
+            showProgress('cleanTracks', 100, 'ошибка');
+            showResult('cleanTracksResult', e.message, 'error');
+            showToast(e.message, 'error');
+        } finally { setBtnLoading(btn, false); }
+    });
+
+    // Simulate
+    document.getElementById('simulateBtn').addEventListener('click', async () => {
+        const btn = document.getElementById('simulateBtn');
+        setBtnLoading(btn, true);
+        hideResult('simulateResult');
+        showProgress('simulate', 50, 'запуск...');
+        addLog('симуляция папок...', 'info');
+        try {
+            const r = await api.simulate();
+            if (r.success) {
+                showProgress('simulate', 100, 'запущено');
+                showResult('simulateResult', 'симуляция запущена', 'success');
+                addLog('симуляция запущена', 'success');
+                showToast('симуляция запущена', 'success');
+                setTimeout(() => hideProgress('simulate'), 2500);
+            } else {
+                showProgress('simulate', 100, 'ошибка');
+                showResult('simulateResult', r.message || 'ошибка', 'error');
+                addLog('ошибка: ' + r.message, 'error');
+                showToast(r.message, 'error');
+            }
+        } catch (e) {
+            showProgress('simulate', 100, 'ошибка');
+            showResult('simulateResult', e.message, 'error');
+            showToast(e.message, 'error');
+        } finally { setBtnLoading(btn, false); }
+    });
+
+    // Clean Javaw
+    document.getElementById('cleanJavawBtn').addEventListener('click', async () => {
+        const btn = document.getElementById('cleanJavawBtn');
+        setBtnLoading(btn, true);
+        hideResult('cleanJavawResult');
+        showProgress('cleanJavaw', 10, 'подключение...');
+        addLog('очистка памяти javaw.exe...', 'info');
+        try {
+            const r = await api.cleanJavaw();
+            if (r.success) {
+                showProgress('cleanJavaw', 100, 'завершено');
+                const msg = r.message || `удалено ${r.cleared_count} совпадений`;
+                showResult('cleanJavawResult', msg, 'success');
+                addLog('javaw: ' + msg, 'success');
+                showToast('очистка javaw завершена', 'success');
+                setTimeout(() => hideProgress('cleanJavaw'), 2500);
+            } else {
+                showProgress('cleanJavaw', 100, 'ошибка');
+                showResult('cleanJavawResult', r.message || 'ошибка', 'error');
+                addLog('ошибка javaw: ' + r.message, 'error');
+                showToast(r.message, 'error');
+            }
+        } catch (e) {
+            showProgress('cleanJavaw', 100, 'ошибка');
+            showResult('cleanJavawResult', e.message, 'error');
+            showToast(e.message, 'error');
+        } finally { setBtnLoading(btn, false); }
+    });
+
+    // Global Clean — open modal
+    document.getElementById('globalCleanBtn').addEventListener('click', async () => {
+        try {
+            const data = await api.globalOptions();
+            const c = document.getElementById('cleanOptions');
+            c.innerHTML = '';
+            for (const [key, opt] of Object.entries(data.options)) {
+                const el = document.createElement('label');
+                el.className = 'clean-option';
+                el.innerHTML = `<input type="checkbox" value="${key}"><div class="clean-option-label"><div class="clean-option-name">${opt.name}</div><div class="clean-option-desc">${opt.description}</div></div>`;
+                c.appendChild(el);
+            }
+            openModal('globalCleanModal');
+        } catch (e) { showToast('ошибка загрузки опций: ' + e.message, 'error'); }
+    });
+
+    document.getElementById('modalCloseBtn').addEventListener('click', () => closeModal('globalCleanModal'));
+    document.getElementById('modalCancelBtn').addEventListener('click', () => closeModal('globalCleanModal'));
+    document.getElementById('globalCleanModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal('globalCleanModal'); });
+
+    // Global Clean — run
+    document.getElementById('modalStartBtn').addEventListener('click', async () => {
+        const btn = document.getElementById('modalStartBtn');
+        const checked = document.querySelectorAll('#cleanOptions input:checked');
+        if (!checked.length) { showToast('выберите хотя бы один пункт', 'warning'); return; }
+        const params = {};
+        checked.forEach(cb => params[cb.value] = true);
+        setBtnLoading(btn, true);
+        closeModal('globalCleanModal');
+        hideResult('globalCleanResult');
+        showProgress('globalClean', 0, 'запуск...');
+        addLog('глобальная очистка...', 'info');
+        try {
+            const r = await api.globalClean(params);
+            if (r.success) {
+                showProgress('globalClean', 100, `${r.completed}/${r.total}`);
+                showResult('globalCleanResult', `завершено: ${r.completed}/${r.total}`, 'success');
+                addLog(`глобальная очистка: ${r.completed}/${r.total}`, 'success');
+                showToast(`очистка: ${r.completed}/${r.total}`, 'success');
+                setTimeout(() => hideProgress('globalClean'), 4000);
+            } else {
+                showProgress('globalClean', 100, 'ошибка');
+                showResult('globalCleanResult', r.message || 'ошибка', 'error');
+                showToast(r.message, 'error');
+            }
+        } catch (e) {
+            showProgress('globalClean', 100, 'ошибка');
+            showResult('globalCleanResult', e.message, 'error');
+            showToast(e.message, 'error');
+        } finally { setBtnLoading(btn, false); }
+    });
+
     init();
 });
