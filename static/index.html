@@ -10,7 +10,22 @@
     <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
-<div class="app">
+
+<!-- ── Splash Screen ── -->
+<div id="splashScreen" class="splash">
+    <div class="splash-inner">
+        <div class="splash-logo">
+            <div class="splash-logo-ring"></div>
+            <div class="splash-logo-ring r2"></div>
+            <span class="splash-logo-text">EC</span>
+        </div>
+        <div class="splash-name">EliteCleaner</div>
+        <div class="splash-bar"><div class="splash-bar-fill" id="splashBarFill"></div></div>
+        <div class="splash-status" id="splashStatus">инициализация...</div>
+    </div>
+</div>
+
+<div class="app" id="appRoot" style="opacity:0">
     <aside class="sidebar">
         <div class="logo">EC</div>
         <nav>

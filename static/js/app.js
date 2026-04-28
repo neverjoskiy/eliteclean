@@ -2,6 +2,72 @@ const { invoke } = window.__TAURI__.core;
 let logs = [];
 let scanData = null; // хранит последние результаты сканирования
 
+// ── Audio ──
+const _ac = new (window.AudioContext || window.webkitAudioContext)();
+
+function _playTone(freq, type, duration, vol = 0.08) {
+    try {
+        const o = _ac.createOscillator();
+        const g = _ac.createGain();
+        o.connect(g); g.connect(_ac.destination);
+        o.type = type; o.frequency.value = freq;
+        g.gain.setValueAtTime(vol, _ac.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.0001, _ac.currentTime + duration);
+        o.start(_ac.currentTime);
+        o.stop(_ac.currentTime + duration);
+    } catch {}
+}
+
+const sfx = {
+    // короткий клик при навигации
+    nav: () => { _playTone(880, 'sine', 0.08, 0.06); },
+    // мягкий подтверждающий звук
+    success: () => {
+        _playTone(660, 'sine', 0.12, 0.07);
+        setTimeout(() => _playTone(880, 'sine', 0.15, 0.06), 80);
+    },
+    // тихий ошибочный звук
+    error: () => { _playTone(220, 'sawtooth', 0.18, 0.05); },
+    // звук запуска (при старте приложения)
+    boot: () => {
+        _playTone(440, 'sine', 0.15, 0.05);
+        setTimeout(() => _playTone(550, 'sine', 0.15, 0.05), 120);
+        setTimeout(() => _playTone(660, 'sine', 0.25, 0.07), 240);
+    },
+    // клик кнопки
+    click: () => { _playTone(1200, 'sine', 0.06, 0.04); },
+};
+
+// ── Splash ──
+async function runSplash() {
+    const splash = document.getElementById('splashScreen');
+    const fill   = document.getElementById('splashBarFill');
+    const status = document.getElementById('splashStatus');
+    const app    = document.getElementById('appRoot');
+
+    const steps = [
+        [15,  'загрузка модулей...'],
+        [40,  'подключение к системе...'],
+        [70,  'проверка компонентов...'],
+        [90,  'почти готово...'],
+        [100, 'готово'],
+    ];
+
+    sfx.boot();
+
+    for (const [pct, msg] of steps) {
+        fill.style.width = pct + '%';
+        status.textContent = msg;
+        await new Promise(r => setTimeout(r, pct === 100 ? 200 : 280 + Math.random() * 120));
+    }
+
+    await new Promise(r => setTimeout(r, 300));
+    splash.classList.add('hiding');
+    app.style.transition = 'opacity .4s ease';
+    app.style.opacity = '1';
+    setTimeout(() => splash.remove(), 450);
+}
+
 // ── Toast ──
 function showToast(message, type = 'info') {
     const icons = {
@@ -14,6 +80,8 @@ function showToast(message, type = 'info') {
     t.className = `toast ${type}`;
     t.innerHTML = `<span class="toast-icon">${icons[type]}</span><span class="toast-message">${message}</span>`;
     document.getElementById('toastContainer').appendChild(t);
+    if (type === 'success') sfx.success();
+    else if (type === 'error') sfx.error();
     setTimeout(() => { t.classList.add('hiding'); setTimeout(() => t.remove(), 250); }, 3500);
 }
 
@@ -160,9 +228,18 @@ async function init() {
 // ── Event Listeners ──
 document.addEventListener('DOMContentLoaded', () => {
 
+    // Splash
+    runSplash().then(() => init());
+
+    // Звук на все кнопки действий
+    document.addEventListener('click', e => {
+        if (e.target.closest('.btn-tool, .btn-run, .hql-btn')) sfx.click();
+    });
+
     // Tabs
     document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.addEventListener('click', () => {
+            sfx.nav();
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             btn.classList.add('active');
@@ -470,6 +547,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ── Переходы со страницы home ──
     document.querySelectorAll('.home-section-goto').forEach(btn => {
         btn.addEventListener('click', () => {
+            sfx.nav();
             const tab = btn.dataset.tab;
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -622,5 +700,4 @@ document.addEventListener('DOMContentLoaded', () => {
         } finally { setBtnLoading(btn, false); }
     });
 
-    init();
 });
