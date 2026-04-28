@@ -19,23 +19,11 @@ function _playTone(freq, type, duration, vol = 0.08) {
 }
 
 const sfx = {
-    // короткий клик при навигации
-    nav: () => { _playTone(880, 'sine', 0.08, 0.06); },
-    // мягкий подтверждающий звук
-    success: () => {
-        _playTone(660, 'sine', 0.12, 0.07);
-        setTimeout(() => _playTone(880, 'sine', 0.15, 0.06), 80);
-    },
-    // тихий ошибочный звук
-    error: () => { _playTone(220, 'sawtooth', 0.18, 0.05); },
-    // звук запуска (при старте приложения)
-    boot: () => {
-        _playTone(440, 'sine', 0.15, 0.05);
-        setTimeout(() => _playTone(550, 'sine', 0.15, 0.05), 120);
-        setTimeout(() => _playTone(660, 'sine', 0.25, 0.07), 240);
-    },
-    // клик кнопки
-    click: () => { _playTone(1200, 'sine', 0.06, 0.04); },
+    nav:     () => { if (settings.sounds) _playTone(880, 'sine', 0.08, 0.06); },
+    success: () => { if (settings.sounds) { _playTone(660, 'sine', 0.12, 0.07); setTimeout(() => _playTone(880, 'sine', 0.15, 0.06), 80); } },
+    error:   () => { if (settings.sounds) _playTone(220, 'sawtooth', 0.18, 0.05); },
+    boot:    () => { if (settings.sounds) { _playTone(440, 'sine', 0.15, 0.05); setTimeout(() => _playTone(550, 'sine', 0.15, 0.05), 120); setTimeout(() => _playTone(660, 'sine', 0.25, 0.07), 240); } },
+    click:   () => { if (settings.sounds) _playTone(1200, 'sine', 0.06, 0.04); },
 };
 
 // ── Splash ──
@@ -68,7 +56,59 @@ async function runSplash() {
     setTimeout(() => splash.remove(), 450);
 }
 
-// ── Toast ──
+// ── Odometer ──
+function animateOdo(el, from, to, duration = 600) {
+    const start = performance.now();
+    const update = (now) => {
+        const p = Math.min((now - start) / duration, 1);
+        const ease = 1 - Math.pow(1 - p, 3);
+        const val = Math.round(from + (to - from) * ease);
+        el.textContent = val.toLocaleString('ru-RU');
+        if (p < 1) requestAnimationFrame(update);
+    };
+    requestAnimationFrame(update);
+}
+
+// ── Scan ring ──
+function setScanRing(pct) {
+    const circ = 94.25; // 2π * 15
+    const fill = document.getElementById('scanRingFill');
+    if (!fill) return;
+    fill.style.strokeDashoffset = circ - (circ * pct / 100);
+}
+
+// ── Settings ──
+const settings = {
+    sounds: true,
+    animations: true,
+    compact: false,
+    confirm: false,
+    autoScan: false,
+    logLimit: 50,
+};
+
+function loadSettings() {
+    try {
+        const saved = JSON.parse(localStorage.getItem('ec_settings') || '{}');
+        Object.assign(settings, saved);
+    } catch {}
+    applySettings();
+}
+
+function saveSettings() {
+    localStorage.setItem('ec_settings', JSON.stringify(settings));
+}
+
+function applySettings() {
+    document.getElementById('settingSounds').checked     = settings.sounds;
+    document.getElementById('settingAnimations').checked = settings.animations;
+    document.getElementById('settingCompact').checked    = settings.compact;
+    document.getElementById('settingConfirm').checked    = settings.confirm;
+    document.getElementById('settingAutoScan').checked   = settings.autoScan;
+    document.getElementById('settingLogLimit').value     = settings.logLimit;
+    document.body.classList.toggle('compact', settings.compact);
+    document.body.classList.toggle('no-anim', !settings.animations);
+}
 function showToast(message, type = 'info') {
     const icons = {
         success: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
@@ -229,7 +269,7 @@ async function init() {
 document.addEventListener('DOMContentLoaded', () => {
 
     // Splash
-    runSplash().then(() => init());
+    runSplash().then(() => { loadSettings(); init(); });
 
     // Звук на все кнопки действий
     document.addEventListener('click', e => {
@@ -608,30 +648,38 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('scanBtn').addEventListener('click', async () => {
         const btn = document.getElementById('scanBtn');
         setBtnLoading(btn, true);
+        btn.classList.add('scanning');
+        setScanRing(0);
         document.getElementById('scanResults').classList.add('hidden');
         document.getElementById('scanCleanResult').classList.add('hidden');
         document.getElementById('scanProgress').classList.remove('hidden');
         document.getElementById('scanSubtitle').textContent = 'анализ...';
 
-        // анимируем прогресс пока идёт сканирование
+        // анимируем кольцо пока идёт сканирование
         let pct = 0;
         const ticker = setInterval(() => {
             pct = Math.min(pct + Math.random() * 12, 90);
-            document.getElementById('scanProgressFill').style.width = pct + '%';
+            setScanRing(pct);
         }, 200);
 
         addLog('сканирование системы...', 'info');
         try {
             scanData = await api.scanSystem();
             clearInterval(ticker);
-            document.getElementById('scanProgressFill').style.width = '100%';
+            setScanRing(100);
+            btn.classList.remove('scanning');
+            btn.classList.add('done');
             document.getElementById('scanProgressText').textContent = 'готово';
 
             // Рендерим результаты
             const total = scanData.total_size_bytes;
             const files = scanData.total_files;
-            document.getElementById('scanSummary').innerHTML =
-                `<span class="scan-sum-files">${files} файлов</span><span class="scan-sum-sep">·</span><span class="scan-sum-size">${fmtSize(total)}</span>`;
+
+            // Одометр для файлов и размера
+            const sumEl = document.getElementById('scanSummary');
+            sumEl.innerHTML = `<span class="scan-sum-files"><span id="odoFiles">0</span> файлов</span><span class="scan-sum-sep">·</span><span class="scan-sum-size"><span id="odoSize">0</span> МБ</span>`;
+            animateOdo(document.getElementById('odoFiles'), 0, files, 700);
+            animateOdo(document.getElementById('odoSize'), 0, Math.round(total / 1024 / 1024 * 10) / 10, 900);
 
             const cats = document.getElementById('scanCategories');
             cats.innerHTML = '';
@@ -651,14 +699,17 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
                 document.getElementById('scanProgress').classList.add('hidden');
                 document.getElementById('scanResults').classList.remove('hidden');
-            }, 400);
+                btn.classList.remove('done');
+                setScanRing(0);
+            }, 600);
 
-            const totalSelected = scanData.categories.filter(c => c.selected).reduce((a, c) => a + c.size_bytes, 0);
             document.getElementById('scanSubtitle').textContent = `найдено ${fmtSize(total)}`;
             addLog(`сканирование завершено: ${files} файлов, ${fmtSize(total)}`, 'success');
             showToast(`найдено ${fmtSize(total)}`, 'info');
         } catch (e) {
             clearInterval(ticker);
+            setScanRing(0);
+            btn.classList.remove('scanning', 'done');
             document.getElementById('scanProgress').classList.add('hidden');
             document.getElementById('scanSubtitle').textContent = 'ошибка сканирования';
             addLog('ошибка сканирования: ' + e.message, 'error');
@@ -699,5 +750,13 @@ document.addEventListener('DOMContentLoaded', () => {
             showToast(e.message, 'error');
         } finally { setBtnLoading(btn, false); }
     });
+
+    // ── Настройки ──
+    document.getElementById('settingSounds').addEventListener('change', e => { settings.sounds = e.target.checked; saveSettings(); });
+    document.getElementById('settingAnimations').addEventListener('change', e => { settings.animations = e.target.checked; saveSettings(); applySettings(); });
+    document.getElementById('settingCompact').addEventListener('change', e => { settings.compact = e.target.checked; saveSettings(); applySettings(); });
+    document.getElementById('settingConfirm').addEventListener('change', e => { settings.confirm = e.target.checked; saveSettings(); });
+    document.getElementById('settingAutoScan').addEventListener('change', e => { settings.autoScan = e.target.checked; saveSettings(); });
+    document.getElementById('settingLogLimit').addEventListener('change', e => { settings.logLimit = parseInt(e.target.value); saveSettings(); });
 
 });

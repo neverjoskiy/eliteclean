@@ -13,17 +13,6 @@ pub enum AppStatus {
     Error,
 }
 
-/// Ответ статуса приложения (аналог /api/status)
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct StatusResponse {
-    pub status: AppStatus,
-    pub launches: usize,
-    pub file_exists: bool,
-    pub file_size: u64,
-    pub file_path: String,
-    pub timestamp: DateTime<Utc>,
-}
-
 /// Общий ответ успеха/ошибки
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ApiResponse {

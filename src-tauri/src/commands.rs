@@ -87,7 +87,7 @@ pub async fn get_tools_status(state: State<'_, SharedAppState>) -> Result<ToolsS
 pub fn get_global_clean_options() -> Result<GlobalCleanOptionsResponse, String> {
     let mut options = std::collections::HashMap::new();
     options.insert("event_logs".to_string(), CleanOption { name: "Очистка Event Log".to_string(), description: "Security, System, Application".to_string() });
-    options.insert("mft".to_string(), CleanOption { name: "Очистка $MFT".to_string(), description: "Prefetch + Master File Table".to_string() });
+    options.insert("mft".to_string(), CleanOption { name: "Очистка Prefetch".to_string(), description: "Кэш предзагрузки программ (*.pf)".to_string() });
     options.insert("amcache".to_string(), CleanOption { name: "Очистка Amcache".to_string(), description: "Следы запуска программ".to_string() });
     options.insert("jump_lists".to_string(), CleanOption { name: "Очистка Jump Lists".to_string(), description: "Последние документы".to_string() });
     options.insert("recent_files".to_string(), CleanOption { name: "Очистка Recent Files".to_string(), description: "История открытых файлов".to_string() });

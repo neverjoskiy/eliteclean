@@ -1,0 +1,59 @@
+EliteClean — список улучшений
+==============================
+
+Важно!
+Сначала точно убедись, что изменения не нарушат и программа будет также исправно работать
+
+1. run_batch_file_as_admin — не ждёт завершения
+   Файл: src-tauri/src/services.rs
+   Проблема: Start-Process -Verb RunAs запускает bat асинхронно, всегда возвращает success: true
+   Фикс: добавить -Wait в PowerShell команду
+   Было:   "Start-Process cmd -ArgumentList '/c','{}' -Verb RunAs"
+   Надо:   "Start-Process cmd -ArgumentList '/c','{}' -Verb RunAs -Wait"
+
+2. clean_usn_journal — хардкод диска C:
+   Файл: src-tauri/src/services.rs
+   Проблема: fsutil usn deletejournal /D C: упадёт если Windows не на C:
+   Фикс: брать диск из переменной WINDIR
+   Надо:   let drive = windir.chars().take(2).collect::<String>();
+           // использовать drive вместо "C:"
+
+3. scan_dir_recursive — нет защиты от симлинков
+   Файл: src-tauri/src/services.rs
+   Проблема: может зациклиться на circular symlinks
+   Фикс: добавить проверку перед рекурсией
+   Надо:   if p.is_symlink() { continue; }
+
+4. clean_registry + clean_run_history — дублирование
+   Файл: src-tauri/src/services.rs
+   Проблема: оба метода чистят одни и те же ключи RunMRU и TypedPaths
+   Фикс: убрать дубли из одного из методов
+
+5. run_batch_file — stderr в сообщении об ошибке
+   Файл: src-tauri/src/services.rs
+   Проблема: если exit code успешный но stderr не пустой — сообщение всё равно мусорное
+   Фикс: не показывать stderr если output.status.success() == true
+
+6. init() не вызывается при старте
+   Файл: static/js/app.js
+   Проблема: функция init() определена но нужно убедиться что вызывается внутри DOMContentLoaded
+   Фикс: в конце блока DOMContentLoaded добавить вызов init()
+
+7. StatusResponse — мёртвая структура
+   Файл: src-tauri/src/models.rs
+   Проблема: структура объявлена но нигде не используется (используется AppStatusResponse)
+   Фикс: удалить StatusResponse
+
+8. Неиспользуемые зависимости в Cargo.toml
+   Файл: src-tauri/Cargo.toml
+   Проблема: раздувают бинарник, увеличивают время компиляции
+   Фикс: удалить или проверить использование:
+     - reqwest
+     - tracing-appender
+     - tauri-plugin-dialog (если не используется)
+
+9. clean_mft — неверное название
+   Файл: src-tauri/src/services.rs + src-tauri/src/commands.rs
+   Проблема: функция называется clean_mft и описана как "Очистка $MFT"
+              но реально чистит только Prefetch файлы, не Master File Table
+   Фикс: переименовать в clean_prefetch или исправить описание в get_global_clean_options

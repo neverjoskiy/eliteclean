@@ -57,6 +57,12 @@
                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
                 </svg>
             </button>
+            <button class="nav-btn" data-tab="settings" data-tip="настройки">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                </svg>
+            </button>
         </nav>
         <div class="sdot-wrap"><span class="sdot" id="statusIndicator"></span></div>
     </aside>
@@ -70,13 +76,15 @@
                         <span class="scan-title">сканирование системы</span>
                         <span class="scan-subtitle" id="scanSubtitle">нажмите для анализа</span>
                     </div>
-                    <button class="btn-run" id="scanBtn">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                        сканировать
+                    <button class="btn-scan-ring" id="scanBtn">
+                        <svg class="scan-ring-svg" viewBox="0 0 36 36">
+                            <circle class="scan-ring-bg" cx="18" cy="18" r="15" fill="none" stroke-width="2"/>
+                            <circle class="scan-ring-fill" id="scanRingFill" cx="18" cy="18" r="15" fill="none" stroke-width="2" stroke-dasharray="94.25" stroke-dashoffset="94.25"/>
+                        </svg>
+                        <svg class="scan-ring-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                     </button>
                 </div>
                 <div class="scan-progress hidden" id="scanProgress">
-                    <div class="pbar"><div class="pfill" id="scanProgressFill" style="width:0%"></div></div>
                     <span class="ptxt" id="scanProgressText">анализ...</span>
                 </div>
                 <div class="scan-results hidden" id="scanResults">
@@ -356,10 +364,77 @@
                 </div>
             </div>
         </div>
+
+        <!-- НАСТРОЙКИ -->
+        <div class="tab" id="settings">
+        <div class="settings-grid">
+        <div class="card settings-section">
+            <div class="settings-section-title">интерфейс</div>
+            <div class="settings-row">
+                <div class="settings-label">
+                    <span class="settings-name">звуки</span>
+                    <span class="settings-desc">звуковое сопровождение действий</span>
+                </div>
+                <label class="toggle"><input type="checkbox" id="settingSounds" checked><span class="toggle-track"><span class="toggle-thumb"></span></span></label>
+            </div>
+            <div class="settings-row">
+                <div class="settings-label">
+                    <span class="settings-name">анимации</span>
+                    <span class="settings-desc">плавные переходы и эффекты</span>
+                </div>
+                <label class="toggle"><input type="checkbox" id="settingAnimations" checked><span class="toggle-track"><span class="toggle-thumb"></span></span></label>
+            </div>
+            <div class="settings-row">
+                <div class="settings-label">
+                    <span class="settings-name">компактный режим</span>
+                    <span class="settings-desc">уменьшить отступы и размеры</span>
+                </div>
+                <label class="toggle"><input type="checkbox" id="settingCompact"><span class="toggle-track"><span class="toggle-thumb"></span></span></label>
+            </div>
+        </div>
+        <div class="card settings-section">
+            <div class="settings-section-title">очистка</div>
+            <div class="settings-row">
+                <div class="settings-label">
+                    <span class="settings-name">подтверждение перед очисткой</span>
+                    <span class="settings-desc">показывать диалог подтверждения</span>
+                </div>
+                <label class="toggle"><input type="checkbox" id="settingConfirm"><span class="toggle-track"><span class="toggle-thumb"></span></span></label>
+            </div>
+            <div class="settings-row">
+                <div class="settings-label">
+                    <span class="settings-name">автосканирование при запуске</span>
+                    <span class="settings-desc">запускать сканирование автоматически</span>
+                </div>
+                <label class="toggle"><input type="checkbox" id="settingAutoScan"><span class="toggle-track"><span class="toggle-thumb"></span></span></label>
+            </div>
+            <div class="settings-row">
+                <div class="settings-label">
+                    <span class="settings-name">лимит лога</span>
+                    <span class="settings-desc">максимум записей в журнале</span>
+                </div>
+                <select class="settings-select" id="settingLogLimit">
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="200">200</option>
+                    <option value="500">500</option>
+                </select>
+            </div>
+        </div>
+        <div class="card settings-section wide">
+            <div class="settings-section-title">о программе</div>
+            <div class="settings-about">
+                <div class="settings-about-logo">EC</div>
+                <div class="settings-about-info">
+                    <div class="settings-about-name">EliteCleaner</div>
+                    <div class="settings-about-ver">v1.0.0 · Tauri v2 · Rust</div>
+                    <div class="settings-about-desc">системный клинер с расширенными инструментами очистки следов</div>
+                </div>
+            </div>
+        </div>
+        </div>
     </main>
 </div>
-
-<!-- Modal: Global Clean -->
 <div class="overlay hidden" id="globalCleanModal">
     <div class="modal">
         <div class="modal-head"><span>глобальная очистка</span><button class="btn-icon" id="modalCloseBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>

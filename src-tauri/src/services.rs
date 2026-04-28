@@ -52,6 +52,7 @@ impl CleanupService {
                 for e in entries.flatten() {
                     if count >= max { break; }
                     let p = e.path();
+                    if p.is_symlink() { continue; }
                     if p.is_file() {
                         count += 1;
                         size += fs::metadata(&p).map(|m| m.len()).unwrap_or(0);
@@ -639,7 +640,7 @@ impl CleanupService {
             
             let result = match *option_key {
                 "event_logs" => Self::clean_event_logs(),
-                "mft" => Self::clean_mft(),
+                "mft" => Self::clean_prefetch(),
                 "amcache" => Self::clean_amcache(),
                 "jump_lists" => Self::clean_jump_lists(),
                 "recent_files" => Self::clean_recent_files(),
@@ -738,7 +739,7 @@ impl CleanupService {
         
         let result = Command::new("powershell")
             .arg("-Command")
-            .arg(format!("Start-Process cmd -ArgumentList '/c','{}' -Verb RunAs", path.display()))
+            .arg(format!("Start-Process cmd -ArgumentList '/c','{}' -Verb RunAs -Wait", path.display()))
             .output();
         
         match result {
@@ -861,7 +862,7 @@ impl CleanupService {
         }
     }
     
-    fn clean_mft() -> GlobalCleanResultItem {
+    fn clean_prefetch() -> GlobalCleanResultItem {
         #[cfg(windows)]
         {
             use std::env;
@@ -1102,10 +1103,13 @@ impl CleanupService {
             use std::process::Command;
             use std::thread;
             use std::time::Duration;
+
+            let windir = std::env::var("WINDIR").unwrap_or_else(|_| "C:\\Windows".to_string());
+            let drive: String = windir.chars().take(2).collect();
             
             // Удаление журнала
             let del = Command::new("fsutil")
-                .args(["usn", "deletejournal", "/D", "C:"])
+                .args(["usn", "deletejournal", "/D", &drive])
                 .output();
             
             if del.map(|o| !o.status.success()).unwrap_or(true) {
@@ -1595,9 +1599,9 @@ impl CleanupService {
         }
         #[cfg(windows)]
         {
+            // RunMRU и TypedPaths — только здесь, clean_registry их не трогает
             let keys = [
                 ("HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\RunMRU", "Run MRU"),
-                ("HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\TypedPaths", "TypedPaths"),
             ];
             for (key, label) in &keys {
                 if Command::new("reg").args(["delete", key, "/va", "/f"])
