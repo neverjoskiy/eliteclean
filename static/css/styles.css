@@ -570,3 +570,60 @@ body.no-anim *, body.no-anim *::before, body.no-anim *::after {
     animation-duration: 0.001ms !important;
     transition-duration: 0.001ms !important;
 }
+
+/* ── Tweaks tab ── */
+.tweaks-header { padding: 10px 14px; }
+.tweaks-header-inner { display: flex; align-items: center; gap: 8px; }
+.tweaks-title { font-size: .78rem; font-weight: 600; color: var(--tx); }
+.tweaks-subtitle { font-size: .68rem; color: var(--tx3); font-family: 'JetBrains Mono', monospace; }
+
+.tweaks-list { display: flex; flex-direction: column; gap: 6px; }
+.tweaks-loading { padding: 20px; text-align: center; font-size: .72rem; color: var(--tx3); font-family: 'JetBrains Mono', monospace; }
+
+.tweak-card {
+    background: var(--bg1); border: 1px solid var(--b); border-radius: var(--r);
+    padding: 12px 14px; display: flex; align-items: center; gap: 12px;
+    transition: border-color var(--t);
+}
+.tweak-card:hover { border-color: var(--bh); }
+.tweak-card.applied { border-color: rgba(90,158,90,.25); }
+.tweak-card.danger  { border-left: 2px solid rgba(160,120,48,.5); }
+
+.tweak-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.tweak-name-row { display: flex; align-items: center; gap: 6px; }
+.tweak-name { font-size: .78rem; font-weight: 600; color: var(--tx); }
+.tweak-badge-danger {
+    font-family: 'JetBrains Mono', monospace; font-size: .58rem; font-weight: 500;
+    color: var(--warn); background: rgba(160,120,48,.12); border: 1px solid rgba(160,120,48,.3);
+    border-radius: 3px; padding: 1px 5px; flex-shrink: 0;
+}
+.tweak-desc { font-size: .68rem; color: var(--tx3); line-height: 1.4; }
+
+.tweak-status {
+    font-family: 'JetBrains Mono', monospace; font-size: .65rem;
+    padding: 2px 7px; border-radius: 3px; flex-shrink: 0;
+    border: 1px solid var(--b); color: var(--tx3); background: var(--bg2);
+    min-width: 52px; text-align: center;
+}
+.tweak-status.on  { color: var(--ok); background: rgba(90,158,90,.08); border-color: rgba(90,158,90,.25); }
+.tweak-status.off { color: var(--tx3); }
+
+.tweak-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+    padding: 6px 12px; font-family: 'Inter', sans-serif; font-size: .7rem; font-weight: 500;
+    border-radius: var(--r); cursor: pointer; transition: all var(--t);
+    border: 1px solid var(--b); background: var(--bg2); color: var(--tx2);
+    flex-shrink: 0; position: relative; overflow: hidden; min-width: 72px;
+}
+.tweak-btn:hover { background: var(--bg3); color: var(--tx); border-color: var(--bh); }
+.tweak-btn:disabled { opacity: .4; cursor: not-allowed; }
+.tweak-btn.loading .tweak-btn-text { opacity: 0; }
+.tweak-btn.loading::after {
+    content: ''; position: absolute; width: 11px; height: 11px;
+    border: 1.5px solid rgba(255,255,255,.15); border-top-color: var(--tx);
+    border-radius: 50%; animation: spin .7s linear infinite;
+}
+.tweak-btn.apply { border-color: rgba(90,158,90,.3); color: var(--ok); }
+.tweak-btn.apply:hover { background: rgba(90,158,90,.1); border-color: rgba(90,158,90,.5); }
+.tweak-btn.revert { border-color: rgba(158,74,74,.3); color: var(--err); }
+.tweak-btn.revert:hover { background: rgba(158,74,74,.1); border-color: rgba(158,74,74,.5); }

@@ -63,6 +63,11 @@
                     <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
                 </svg>
             </button>
+            <button class="nav-btn" data-tab="tweaks" data-tip="твики">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                </svg>
+            </button>
         </nav>
         <div class="sdot-wrap"><span class="sdot" id="statusIndicator"></span></div>
     </aside>
@@ -220,6 +225,14 @@
                     <button class="btn-tool" id="cleanJavawBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span class="btn-text">запустить</span></button>
                 </div>
                 <div class="card tool-card">
+                    <div class="tool-top"><span class="tag">fun</span><span class="tool-name">FunTime</span></div>
+                    <p class="tool-desc">запуск 1fc.exe и очистка вывода</p>
+                    <div class="tool-progress hidden" id="funTimeProgress"><div class="pbar"><div class="pfill" id="funTimeProgressFill"></div></div><span class="ptxt" id="funTimeProgressText">запуск...</span></div>
+                    <div class="tool-result hidden" id="funTimeResult"><span class="result-message"></span></div>
+                    <div class="hidden" id="funTimeLines" style="margin-top:8px;max-height:200px;overflow-y:auto;font-size:11px;font-family:monospace;color:var(--text-muted);"></div>
+                    <button class="btn-tool" id="funTimeBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polygon points="5 3 19 12 5 21 5 3"/></svg><span class="btn-text">запустить</span></button>
+                </div>
+                <div class="card tool-card">
                     <div class="tool-top"><span class="tag">ext</span><span class="tool-name">симуляция папок</span></div>
                     <p class="tool-desc">запуск внешнего инструмента симуляции</p>
                     <div class="tool-progress hidden" id="simulateProgress"><div class="pbar"><div class="pfill" id="simulateProgressFill"></div></div><span class="ptxt" id="simulateProgressText">запуск...</span></div>
@@ -362,6 +375,23 @@
                         <span class="btn-text">очистить</span>
                     </button>
                 </div>
+            </div>
+        </div>
+
+        <!-- ТВИКИ -->
+        <div class="tab" id="tweaks">
+            <div class="tweaks-header card">
+                <div class="tweaks-header-inner">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    <span class="tweaks-title">системные твики</span>
+                    <span class="tweaks-subtitle">правки реестра для оптимизации</span>
+                    <button class="btn-icon" id="tweaksRefreshBtn" title="обновить статус" style="margin-left:auto">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="tweaks-list" id="tweaksList">
+                <div class="tweaks-loading">загрузка...</div>
             </div>
         </div>
 

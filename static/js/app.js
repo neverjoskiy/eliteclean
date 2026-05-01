@@ -226,8 +226,9 @@ const api = {
     cleanTracks:     () => invoke('clean_tracks'),
     simulate:        () => invoke('simulate_folders'),
     cleanJavaw:      () => invoke('clean_javaw_memory'),
+    funTime:         () => invoke('fun_time'),
     globalOptions:   () => invoke('get_global_clean_options'),
-    globalClean:     (p) => invoke('run_global_clean', { params: p }),
+    globalClean:     (options) => invoke('run_global_clean', { params: { options } }),
     scanSystem:      () => invoke('scan_system'),
     cleanScan:       (ids) => invoke('clean_scan_results', { params: { ids } }),
     // сеть
@@ -245,6 +246,10 @@ const api = {
     cleanIconCache:  () => invoke('clean_icon_cache'),
     cleanSearch:     () => invoke('clean_search_history'),
     cleanRun:        () => invoke('clean_run_history'),
+    // твики
+    getTweaks:       () => invoke('get_tweaks'),
+    applyTweak:      (id) => invoke('apply_tweak', { id }),
+    revertTweak:     (id) => invoke('revert_tweak', { id }),
 };
 
 // ── Init ──
@@ -443,6 +448,40 @@ document.addEventListener('DOMContentLoaded', () => {
         } finally { setBtnLoading(btn, false); }
     });
 
+    // FunTime
+    document.getElementById('funTimeBtn').addEventListener('click', async () => {
+        const btn = document.getElementById('funTimeBtn');
+        setBtnLoading(btn, true);
+        hideResult('funTimeResult');
+        document.getElementById('funTimeLines').classList.add('hidden');
+        showProgress('funTime', 20, 'запуск 1fc.exe...');
+        addLog('FunTime: запуск...', 'info');
+        try {
+            const r = await api.funTime();
+            if (r.success) {
+                showProgress('funTime', 100, 'завершено');
+                showResult('funTimeResult', r.message, 'success');
+                addLog('FunTime: ' + r.message, 'success');
+                showToast('FunTime завершён', 'success');
+                if (r.details && r.details.length) {
+                    const el = document.getElementById('funTimeLines');
+                    el.innerHTML = r.details.map(l => `<div>${l}</div>`).join('');
+                    el.classList.remove('hidden');
+                }
+                setTimeout(() => hideProgress('funTime'), 2500);
+            } else {
+                showProgress('funTime', 100, 'ошибка');
+                showResult('funTimeResult', r.message || 'ошибка', 'error');
+                addLog('FunTime ошибка: ' + r.message, 'error');
+                showToast(r.message, 'error');
+            }
+        } catch (e) {
+            showProgress('funTime', 100, 'ошибка');
+            showResult('funTimeResult', e.message, 'error');
+            showToast(e.message, 'error');
+        } finally { setBtnLoading(btn, false); }
+    });
+
     // Global Clean — open modal
     document.getElementById('globalCleanBtn').addEventListener('click', async () => {
         try {
@@ -468,15 +507,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const btn = document.getElementById('modalStartBtn');
         const checked = document.querySelectorAll('#cleanOptions input:checked');
         if (!checked.length) { showToast('выберите хотя бы один пункт', 'warning'); return; }
-        const params = {};
-        checked.forEach(cb => params[cb.value] = true);
+        const options = Array.from(checked).map(cb => cb.value);
         setBtnLoading(btn, true);
         closeModal('globalCleanModal');
         hideResult('globalCleanResult');
         showProgress('globalClean', 0, 'запуск...');
         addLog('глобальная очистка...', 'info');
         try {
-            const r = await api.globalClean(params);
+            const r = await api.globalClean(options);
             if (r.success) {
                 showProgress('globalClean', 100, `${r.completed}/${r.total}`);
                 showResult('globalCleanResult', `завершено: ${r.completed}/${r.total}`, 'success');
@@ -759,4 +797,81 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('settingAutoScan').addEventListener('change', e => { settings.autoScan = e.target.checked; saveSettings(); });
     document.getElementById('settingLogLimit').addEventListener('change', e => { settings.logLimit = parseInt(e.target.value); saveSettings(); });
 
+    // ── Твики ──
+    async function loadTweaks() {
+        const list = document.getElementById('tweaksList');
+        list.innerHTML = '<div class="tweaks-loading">загрузка...</div>';
+        try {
+            const tweaks = await api.getTweaks();
+            renderTweaks(tweaks);
+        } catch (e) {
+            list.innerHTML = `<div class="tweaks-loading">ошибка: ${e.message}</div>`;
+        }
+    }
+
+    function renderTweaks(tweaks) {
+        const list = document.getElementById('tweaksList');
+        list.innerHTML = '';
+        tweaks.forEach(tweak => {
+            const card = document.createElement('div');
+            card.className = `tweak-card${tweak.applied ? ' applied' : ''}${tweak.danger ? ' danger' : ''}`;
+            card.dataset.id = tweak.id;
+            card.innerHTML = `
+                <div class="tweak-info">
+                    <div class="tweak-name-row">
+                        <span class="tweak-name">${tweak.name}</span>
+                        ${tweak.danger ? '<span class="tweak-badge-danger">опасно</span>' : ''}
+                    </div>
+                    <span class="tweak-desc">${tweak.description}</span>
+                </div>
+                <span class="tweak-status ${tweak.applied ? 'on' : 'off'}">${tweak.applied ? 'вкл' : 'выкл'}</span>
+                <button class="tweak-btn ${tweak.applied ? 'revert' : 'apply'}" data-id="${tweak.id}" data-applied="${tweak.applied}">
+                    <span class="tweak-btn-text">${tweak.applied ? 'откат' : 'применить'}</span>
+                </button>
+            `;
+            list.appendChild(card);
+        });
+
+        list.querySelectorAll('.tweak-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const id = btn.dataset.id;
+                const isApplied = btn.dataset.applied === 'true';
+                btn.disabled = true;
+                btn.classList.add('loading');
+                addLog(`твик "${id}": ${isApplied ? 'откат' : 'применение'}...`, 'info');
+                try {
+                    const r = isApplied ? await api.revertTweak(id) : await api.applyTweak(id);
+                    const type = r.success ? 'success' : 'error';
+                    addLog(`твик "${id}": ${r.message}`, type);
+                    showToast(r.message, type);
+                    if (r.success) {
+                        // обновляем карточку
+                        const card = btn.closest('.tweak-card');
+                        const statusEl = card.querySelector('.tweak-status');
+                        card.classList.toggle('applied', r.applied);
+                        statusEl.className = `tweak-status ${r.applied ? 'on' : 'off'}`;
+                        statusEl.textContent = r.applied ? 'вкл' : 'выкл';
+                        btn.className = `tweak-btn ${r.applied ? 'revert' : 'apply'}`;
+                        btn.dataset.applied = r.applied;
+                        btn.querySelector('.tweak-btn-text').textContent = r.applied ? 'откат' : 'применить';
+                    }
+                } catch (e) {
+                    addLog(`твик "${id}" ошибка: ${e.message}`, 'error');
+                    showToast(e.message, 'error');
+                } finally {
+                    btn.disabled = false;
+                    btn.classList.remove('loading');
+                }
+            });
+        });
+    }
+
+    // Загружаем твики при переходе на вкладку
+    document.querySelector('.nav-btn[data-tab="tweaks"]').addEventListener('click', () => {
+        loadTweaks();
+    });
+
+    document.getElementById('tweaksRefreshBtn').addEventListener('click', () => loadTweaks());
+
 });
+

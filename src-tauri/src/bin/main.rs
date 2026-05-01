@@ -49,6 +49,12 @@ fn main() {
             elite_cleaner_lib::commands::clean_icon_cache,
             elite_cleaner_lib::commands::clean_search_history,
             elite_cleaner_lib::commands::clean_run_history,
+            // fun time
+            elite_cleaner_lib::commands::fun_time,
+            // твики
+            elite_cleaner_lib::commands::get_tweaks,
+            elite_cleaner_lib::commands::apply_tweak,
+            elite_cleaner_lib::commands::revert_tweak,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -3,6 +3,7 @@
 
 use std::collections::HashMap;
 use std::sync::Arc;
+use std::sync::atomic::{AtomicUsize, Ordering};
 use tokio::sync::RwLock;
 use chrono::{DateTime, Utc};
 use crate::models::{AppStatus, LogEntry, ToolState};
@@ -18,6 +19,31 @@ pub struct AppState {
     pub logs: Vec<LogEntry>,
     /// Состояния инструментов
     pub tool_states: HashMap<String, ToolState>,
+}
+
+/// Счётчик активных операций — атомарный, не требует блокировки состояния
+pub static RUNNING_OPS: AtomicUsize = AtomicUsize::new(0);
+
+/// RAII-guard: инкрементирует счётчик при создании, декрементирует при дропе
+pub struct OpGuard;
+
+impl OpGuard {
+    /// Попытаться захватить слот. Возвращает Err если уже выполняется операция.
+    pub fn try_acquire() -> Result<Self, String> {
+        let prev = RUNNING_OPS.fetch_add(1, Ordering::SeqCst);
+        if prev > 0 {
+            RUNNING_OPS.fetch_sub(1, Ordering::SeqCst);
+            Err("Другая операция уже выполняется. Дождитесь её завершения.".to_string())
+        } else {
+            Ok(OpGuard)
+        }
+    }
+}
+
+impl Drop for OpGuard {
+    fn drop(&mut self) {
+        RUNNING_OPS.fetch_sub(1, Ordering::SeqCst);
+    }
 }
 
 /// Запись истории запуска

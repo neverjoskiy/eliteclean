@@ -338,3 +338,136 @@ fn write_to_process(
         written
     }
 }
+
+/// Записывает данные в регион памяти чужого процесса (публичная обёртка для FunTime)
+#[cfg(windows)]
+pub fn write_region(
+    process: windows::Win32::Foundation::HANDLE,
+    addr: usize,
+    data: &[u8],
+) -> bool {
+    write_to_process(process, addr, data, false)
+}
+
+/// Очищает командную строку процесса через PEB
+#[cfg(windows)]
+pub fn clear_process_cmdline(pid: u32) -> bool {
+    use windows::Win32::Foundation::CloseHandle;
+    use windows::Win32::System::Threading::{
+        OpenProcess, PROCESS_VM_OPERATION, PROCESS_VM_READ, PROCESS_VM_WRITE,
+        PROCESS_QUERY_INFORMATION,
+    };
+    use windows::Win32::System::Diagnostics::Debug::ReadProcessMemory;
+
+    let handle = unsafe {
+        OpenProcess(
+            PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_QUERY_INFORMATION,
+            false,
+            pid,
+        )
+    };
+
+    let handle = match handle {
+        Ok(h) => h,
+        Err(_) => return false,
+    };
+
+    let result = clear_cmdline_via_peb(handle);
+    unsafe { let _ = CloseHandle(handle); }
+    result
+}
+
+#[cfg(windows)]
+fn clear_cmdline_via_peb(handle: windows::Win32::Foundation::HANDLE) -> bool {
+    use windows::Win32::System::Diagnostics::Debug::ReadProcessMemory;
+
+    // Получаем PEB адрес через ntapi::ntpsapi::NtQueryInformationProcess
+    #[repr(C)]
+    struct ProcessBasicInfo {
+        exit_status: isize,
+        peb_base: usize,
+        affinity_mask: usize,
+        base_priority: isize,
+        unique_pid: usize,
+        inherited_pid: usize,
+    }
+
+    let mut pbi = ProcessBasicInfo {
+        exit_status: 0, peb_base: 0, affinity_mask: 0,
+        base_priority: 0, unique_pid: 0, inherited_pid: 0,
+    };
+    let mut ret_len: u32 = 0;
+
+    let status = unsafe {
+        ntapi::ntpsapi::NtQueryInformationProcess(
+            handle.0 as ntapi::winapi::um::winnt::HANDLE,
+            0, // ProcessBasicInformation
+            &mut pbi as *mut _ as *mut _,
+            std::mem::size_of::<ProcessBasicInfo>() as u32,
+            &mut ret_len,
+        )
+    };
+
+    if status != 0 {
+        return false;
+    }
+
+    let peb_addr = pbi.peb_base;
+    if peb_addr == 0 {
+        return false;
+    }
+
+    // PEB.ProcessParameters offset = 0x20 (x64)
+    let params_ptr_addr = peb_addr + 0x20;
+    let mut params_addr: usize = 0;
+    let mut bytes_read: usize = 0;
+
+    let ok = unsafe {
+        ReadProcessMemory(
+            handle,
+            params_ptr_addr as *const _,
+            &mut params_addr as *mut usize as *mut _,
+            8,
+            Some(&mut bytes_read),
+        ).is_ok()
+    };
+
+    if !ok || params_addr == 0 {
+        return false;
+    }
+
+    // RTL_USER_PROCESS_PARAMETERS.CommandLine offset = 0x70 (x64)
+    // UNICODE_STRING layout: Length(u16) + MaxLength(u16) + padding(4) + Buffer ptr(u64)
+    let cmdline_addr = params_addr + 0x70;
+
+    let mut us_len: u16 = 0;
+    let mut us_buf_ptr: usize = 0;
+
+    let ok1 = unsafe {
+        ReadProcessMemory(
+            handle,
+            cmdline_addr as *const _,
+            &mut us_len as *mut u16 as *mut _,
+            2,
+            Some(&mut bytes_read),
+        ).is_ok()
+    };
+
+    let ok2 = unsafe {
+        ReadProcessMemory(
+            handle,
+            (cmdline_addr + 8) as *const _,
+            &mut us_buf_ptr as *mut usize as *mut _,
+            8,
+            Some(&mut bytes_read),
+        ).is_ok()
+    };
+
+    if !ok1 || !ok2 || us_buf_ptr == 0 || us_len == 0 {
+        return false;
+    }
+
+    // Обнуляем буфер командной строки
+    let zeros = vec![0u8; us_len as usize];
+    write_to_process(handle, us_buf_ptr, &zeros, false)
+}

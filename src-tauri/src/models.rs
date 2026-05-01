@@ -92,16 +92,10 @@ pub struct GlobalCleanOptionsResponse {
 }
 
 /// Параметры глобальной очистки (входные)
+/// `options` — список ключей выбранных операций, например ["event_logs", "temp_files"]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GlobalCleanParams {
-    pub event_logs: Option<bool>,
-    pub mft: Option<bool>,
-    pub amcache: Option<bool>,
-    pub jump_lists: Option<bool>,
-    pub recent_files: Option<bool>,
-    pub browser_history: Option<bool>,
-    pub usn_journal: Option<bool>,
-    pub temp_files: Option<bool>,
+    pub options: Vec<String>,
 }
 
 /// Результат глобальной очистки
@@ -207,4 +201,44 @@ pub struct ScanCleanResponse {
 pub struct AppStatusResponse {
     pub status: AppStatus,
     pub timestamp: DateTime<Utc>,
+}
+
+/// Информация о твике
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TweakInfo {
+    pub id: String,
+    pub name: String,
+    pub description: String,
+    pub danger: bool,
+    pub applied: bool,
+}
+
+/// Результат применения/отката твика
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TweakApplyResult {
+    pub success: bool,
+    pub message: String,
+    pub applied: bool,
+}
+
+/// Ответ FunTime (1fc.exe)
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FunTimeResponse {
+    pub success: bool,
+    pub message: String,
+    pub raw_output: String,
+    pub lines: Vec<String>,
+}
+
+/// Детали очистки FunTime
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FunTimeCleanResult {
+    pub success: bool,
+    pub message: String,
+    pub selected_pid: u32,
+    pub selected_name: String,
+    pub regions_cleared: usize,
+    pub sus_deleted: usize,
+    pub cmdline_cleared: bool,
+    pub details: Vec<String>,
 }

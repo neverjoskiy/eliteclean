@@ -1,9 +1,9 @@
 //! Tauri Commands
 
 use tauri::State;
-use crate::state::SharedAppState;
+use crate::state::{SharedAppState, OpGuard};
 use crate::models::*;
-use crate::services::CleanupService;
+use crate::services::{CleanupService, NetworkService, PrivacyService, SystemService, TweaksService};
 
 /// Статус приложения
 #[tauri::command]
@@ -18,6 +18,7 @@ pub async fn get_status(state: State<'_, SharedAppState>) -> Result<AppStatusRes
 /// Сканирование системы — возвращает категории с размерами
 #[tauri::command]
 pub async fn scan_system(state: State<'_, SharedAppState>) -> Result<ScanResponse, String> {
+    let _guard = OpGuard::try_acquire()?;
     CleanupService::scan_system(state).await
 }
 
@@ -27,6 +28,7 @@ pub async fn clean_scan_results(
     state: State<'_, SharedAppState>,
     params: ScanCleanParams,
 ) -> Result<ScanCleanResponse, String> {
+    let _guard = OpGuard::try_acquire()?;
     CleanupService::clean_scan_results(state, params).await
 }
 
@@ -48,24 +50,28 @@ pub async fn clear_logs(state: State<'_, SharedAppState>) -> Result<ApiResponse,
 /// Чистка строк (USN Journal)
 #[tauri::command]
 pub async fn clean_strings(state: State<'_, SharedAppState>) -> Result<CleanStringsResponse, String> {
+    let _guard = OpGuard::try_acquire()?;
     CleanupService::clean_strings(state).await
 }
 
 /// Очистка следов
 #[tauri::command]
 pub async fn clean_tracks(state: State<'_, SharedAppState>) -> Result<ApiResponse, String> {
+    let _guard = OpGuard::try_acquire()?;
     CleanupService::clean_tracks(state).await
 }
 
 /// Симуляция открытия папок
 #[tauri::command]
 pub async fn simulate_folders(state: State<'_, SharedAppState>) -> Result<ApiResponse, String> {
+    let _guard = OpGuard::try_acquire()?;
     CleanupService::simulate_folders(state).await
 }
 
 /// Очистка памяти javaw.exe
 #[tauri::command]
 pub async fn clean_javaw_memory(state: State<'_, SharedAppState>) -> Result<CleanJavawResult, String> {
+    let _guard = OpGuard::try_acquire()?;
     #[cfg(windows)]
     { CleanupService::clean_javaw_memory(state).await }
     #[cfg(not(windows))]
@@ -86,20 +92,21 @@ pub async fn get_tools_status(state: State<'_, SharedAppState>) -> Result<ToolsS
 #[tauri::command]
 pub fn get_global_clean_options() -> Result<GlobalCleanOptionsResponse, String> {
     let mut options = std::collections::HashMap::new();
-    options.insert("event_logs".to_string(), CleanOption { name: "Очистка Event Log".to_string(), description: "Security, System, Application".to_string() });
-    options.insert("mft".to_string(), CleanOption { name: "Очистка Prefetch".to_string(), description: "Кэш предзагрузки программ (*.pf)".to_string() });
-    options.insert("amcache".to_string(), CleanOption { name: "Очистка Amcache".to_string(), description: "Следы запуска программ".to_string() });
-    options.insert("jump_lists".to_string(), CleanOption { name: "Очистка Jump Lists".to_string(), description: "Последние документы".to_string() });
-    options.insert("recent_files".to_string(), CleanOption { name: "Очистка Recent Files".to_string(), description: "История открытых файлов".to_string() });
-    options.insert("browser_history".to_string(), CleanOption { name: "Очистка Browser History".to_string(), description: "Chrome, Firefox, Edge".to_string() });
-    options.insert("usn_journal".to_string(), CleanOption { name: "Очистка USN Journal".to_string(), description: "Удаление и пересоздание".to_string() });
-    options.insert("temp_files".to_string(), CleanOption { name: "Очистка Temp Files".to_string(), description: "Временные файлы системы".to_string() });
+    options.insert("event_logs".to_string(),      CleanOption { name: "Очистка Event Log".to_string(),      description: "Security, System, Application".to_string() });
+    options.insert("prefetch".to_string(),         CleanOption { name: "Очистка Prefetch".to_string(),       description: "Кэш предзагрузки программ (*.pf)".to_string() });
+    options.insert("amcache".to_string(),          CleanOption { name: "Очистка Amcache".to_string(),        description: "Следы запуска программ".to_string() });
+    options.insert("jump_lists".to_string(),       CleanOption { name: "Очистка Jump Lists".to_string(),     description: "Последние документы".to_string() });
+    options.insert("recent_files".to_string(),     CleanOption { name: "Очистка Recent Files".to_string(),   description: "История открытых файлов".to_string() });
+    options.insert("browser_history".to_string(),  CleanOption { name: "Очистка Browser History".to_string(),description: "Chrome, Firefox, Edge".to_string() });
+    options.insert("usn_journal".to_string(),      CleanOption { name: "Очистка USN Journal".to_string(),    description: "Удаление и пересоздание".to_string() });
+    options.insert("temp_files".to_string(),       CleanOption { name: "Очистка Temp Files".to_string(),     description: "Временные файлы системы".to_string() });
     Ok(GlobalCleanOptionsResponse { options })
 }
 
 /// Глобальная очистка
 #[tauri::command]
 pub async fn run_global_clean(state: State<'_, SharedAppState>, params: GlobalCleanParams) -> Result<GlobalCleanResponse, String> {
+    let _guard = OpGuard::try_acquire()?;
     CleanupService::run_global_clean(state, params).await
 }
 
@@ -107,64 +114,100 @@ pub async fn run_global_clean(state: State<'_, SharedAppState>, params: GlobalCl
 
 #[tauri::command]
 pub async fn flush_dns(state: State<'_, SharedAppState>) -> Result<NetworkCleanResponse, String> {
-    CleanupService::flush_dns(state).await
+    let _guard = OpGuard::try_acquire()?;
+    NetworkService::flush_dns(state).await
 }
 
 #[tauri::command]
 pub async fn reset_network(state: State<'_, SharedAppState>) -> Result<NetworkCleanResponse, String> {
-    CleanupService::reset_network(state).await
+    let _guard = OpGuard::try_acquire()?;
+    NetworkService::reset_network(state).await
 }
 
 #[tauri::command]
 pub async fn clear_arp(state: State<'_, SharedAppState>) -> Result<NetworkCleanResponse, String> {
-    CleanupService::clear_arp(state).await
+    let _guard = OpGuard::try_acquire()?;
+    NetworkService::clear_arp(state).await
 }
 
 #[tauri::command]
 pub async fn clear_netbios(state: State<'_, SharedAppState>) -> Result<NetworkCleanResponse, String> {
-    CleanupService::clear_netbios(state).await
+    let _guard = OpGuard::try_acquire()?;
+    NetworkService::clear_netbios(state).await
 }
 
 // ── Система ──
 
 #[tauri::command]
 pub async fn clean_registry(state: State<'_, SharedAppState>) -> Result<SystemCleanResponse, String> {
-    CleanupService::clean_registry(state).await
+    let _guard = OpGuard::try_acquire()?;
+    SystemService::clean_registry(state).await
 }
 
 #[tauri::command]
 pub async fn clean_dumps(state: State<'_, SharedAppState>) -> Result<SystemCleanResponse, String> {
-    CleanupService::clean_dumps(state).await
+    let _guard = OpGuard::try_acquire()?;
+    SystemService::clean_dumps(state).await
 }
 
 #[tauri::command]
 pub async fn clean_update_cache(state: State<'_, SharedAppState>) -> Result<SystemCleanResponse, String> {
-    CleanupService::clean_update_cache(state).await
+    let _guard = OpGuard::try_acquire()?;
+    SystemService::clean_update_cache(state).await
 }
 
 #[tauri::command]
 pub async fn clean_thumbnails(state: State<'_, SharedAppState>) -> Result<SystemCleanResponse, String> {
-    CleanupService::clean_thumbnails(state).await
+    let _guard = OpGuard::try_acquire()?;
+    SystemService::clean_thumbnails(state).await
 }
 
 // ── Приватность ──
 
 #[tauri::command]
 pub async fn clear_clipboard(state: State<'_, SharedAppState>) -> Result<PrivacyCleanResponse, String> {
-    CleanupService::clear_clipboard(state).await
+    let _guard = OpGuard::try_acquire()?;
+    PrivacyService::clear_clipboard(state).await
 }
 
 #[tauri::command]
 pub async fn clean_icon_cache(state: State<'_, SharedAppState>) -> Result<PrivacyCleanResponse, String> {
-    CleanupService::clean_icon_cache(state).await
+    let _guard = OpGuard::try_acquire()?;
+    PrivacyService::clean_icon_cache(state).await
 }
 
 #[tauri::command]
 pub async fn clean_search_history(state: State<'_, SharedAppState>) -> Result<PrivacyCleanResponse, String> {
-    CleanupService::clean_search_history(state).await
+    let _guard = OpGuard::try_acquire()?;
+    PrivacyService::clean_search_history(state).await
 }
 
 #[tauri::command]
 pub async fn clean_run_history(state: State<'_, SharedAppState>) -> Result<PrivacyCleanResponse, String> {
-    CleanupService::clean_run_history(state).await
+    let _guard = OpGuard::try_acquire()?;
+    PrivacyService::clean_run_history(state).await
+}
+
+/// FunTime — запуск 1fc.exe и парсинг вывода
+#[tauri::command]
+pub async fn fun_time(state: State<'_, SharedAppState>) -> Result<FunTimeCleanResult, String> {
+    let _guard = OpGuard::try_acquire()?;
+    CleanupService::fun_time(state).await
+}
+
+// ── Твики ──
+
+#[tauri::command]
+pub fn get_tweaks() -> Result<Vec<TweakInfo>, String> {
+    Ok(TweaksService::get_tweaks())
+}
+
+#[tauri::command]
+pub fn apply_tweak(id: String) -> Result<TweakApplyResult, String> {
+    Ok(TweaksService::apply_tweak(&id))
+}
+
+#[tauri::command]
+pub fn revert_tweak(id: String) -> Result<TweakApplyResult, String> {
+    Ok(TweaksService::revert_tweak(&id))
 }
