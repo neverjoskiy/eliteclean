@@ -13,6 +13,12 @@ fn main() {
     ).init();
     
     info!("EliteCleaner starting...");
+
+    // Распаковываем встроенные скрипты во временную директорию
+    match elite_cleaner_lib::embedded_scripts::EmbeddedScripts::extract_all() {
+        Ok(dir) => info!("Скрипты распакованы в {:?}", dir),
+        Err(e) => log::warn!("Не удалось распаковать скрипты: {}", e),
+    }
     
     let app_state = Arc::new(RwLock::new(AppState::new()));
     

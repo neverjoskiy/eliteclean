@@ -59,24 +59,8 @@ pub fn get_target_jar_path() -> PathBuf {
 
 /// Получить путь к директории скриптов
 pub fn get_scripts_dir() -> PathBuf {
-    // В production ресурсы копируются в бандл
-    // В dev режиме - относительный путь от исполняемого файла
-    let base = get_base_path();
-    
-    // Проверяем несколько возможных путей
-    let candidates = [
-        base.join("scripts"),
-        base.parent().map(|p| p.join("scripts")).unwrap_or_else(|| base.join("scripts")),
-    ];
-    
-    for candidate in &candidates {
-        if candidate.exists() {
-            return candidate.clone();
-        }
-    }
-    
-    // Fallback
-    base.join("scripts")
+    // Скрипты распакованы из бинарника в temp при старте
+    crate::embedded_scripts::EmbeddedScripts::get_extract_dir()
 }
 
 /// Инициализация логирования
