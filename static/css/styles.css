@@ -627,3 +627,112 @@ body.no-anim *, body.no-anim *::before, body.no-anim *::after {
 .tweak-btn.apply:hover { background: rgba(90,158,90,.1); border-color: rgba(90,158,90,.5); }
 .tweak-btn.revert { border-color: rgba(158,74,74,.3); color: var(--err); }
 .tweak-btn.revert:hover { background: rgba(158,74,74,.1); border-color: rgba(158,74,74,.5); }
+
+/* ── Process manager tab ── */
+.proc-header { padding: 10px 14px; }
+.proc-header-inner { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.proc-title { font-size: .78rem; font-weight: 600; color: var(--tx); }
+.proc-subtitle { font-size: .68rem; color: var(--tx3); font-family: 'JetBrains Mono', monospace; }
+.proc-header-actions { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+.proc-search {
+    background: var(--bg2); border: 1px solid var(--b); border-radius: var(--r);
+    color: var(--tx2); font-family: 'Inter', sans-serif; font-size: .7rem;
+    padding: 4px 8px; outline: none; width: 140px;
+    transition: border-color var(--t);
+}
+.proc-search::placeholder { color: var(--tx3); }
+.proc-search:focus { border-color: var(--bh); }
+
+.proc-table-card { overflow: hidden; }
+.proc-table-head {
+    display: flex; align-items: center; gap: 0;
+    padding: 6px 12px; border-bottom: 1px solid var(--b);
+    background: var(--bg2); font-size: .62rem; font-weight: 600;
+    color: var(--tx3); text-transform: uppercase; letter-spacing: .06em;
+}
+.proc-col { padding: 0 6px; }
+.proc-col-pid { width: 56px; flex-shrink: 0; }
+.proc-col-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.proc-col-mem { width: 72px; flex-shrink: 0; text-align: right; }
+.proc-col-priority { width: 110px; flex-shrink: 0; }
+.proc-col-threads { width: 50px; flex-shrink: 0; text-align: center; }
+.proc-col-status { width: 80px; flex-shrink: 0; }
+.proc-col-actions { width: auto; flex-shrink: 0; display: flex; align-items: center; gap: 4px; }
+
+.proc-table-body { max-height: 520px; overflow-y: auto; }
+.proc-loading { padding: 20px; text-align: center; font-size: .72rem; color: var(--tx3); font-family: 'JetBrains Mono', monospace; }
+
+.proc-row {
+    display: flex; align-items: center; gap: 0;
+    padding: 5px 12px; border-bottom: 1px solid rgba(255,255,255,.02);
+    transition: background var(--t);
+    font-size: .72rem;
+}
+.proc-row:hover { background: var(--bg2); }
+.proc-row:last-child { border-bottom: none; }
+
+.proc-row .proc-col-pid {
+    font-family: 'JetBrains Mono', monospace; font-size: .65rem; color: var(--tx3); width: 56px; flex-shrink: 0;
+}
+.proc-row .proc-col-name {
+    flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    color: var(--tx); font-size: .72rem;
+}
+.proc-row .proc-col-mem {
+    width: 72px; flex-shrink: 0; text-align: right;
+    font-family: 'JetBrains Mono', monospace; font-size: .65rem; color: var(--tx2);
+}
+.proc-row .proc-col-priority {
+    width: 110px; flex-shrink: 0;
+    font-family: 'JetBrains Mono', monospace; font-size: .62rem;
+    color: var(--tx3); padding: 1px 0;
+}
+.proc-row .proc-col-priority.critical { color: var(--err); }
+.proc-row .proc-col-priority.low { color: var(--tx3); }
+
+.proc-row .proc-col-threads {
+    width: 50px; flex-shrink: 0; text-align: center;
+    font-family: 'JetBrains Mono', monospace; font-size: .62rem; color: var(--tx3);
+}
+
+.proc-row .proc-col-status {
+    width: 80px; flex-shrink: 0;
+    font-size: .62rem; font-weight: 500;
+}
+.proc-col-status.running { color: var(--ok); }
+.proc-col-status.frozen { color: var(--warn); }
+
+.proc-row .proc-col-actions {
+    flex-shrink: 0; display: flex; align-items: center; gap: 4px;
+}
+
+.proc-action-btn {
+    width: 22px; height: 22px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg3); border: 1px solid var(--b);
+    border-radius: 3px; cursor: pointer; color: var(--tx3);
+    transition: background var(--t), color var(--t), border-color var(--t);
+}
+.proc-action-btn:hover { color: var(--tx); border-color: var(--bh); }
+.proc-action-btn.normalize { color: var(--warn); border-color: rgba(160,120,48,.25); }
+.proc-action-btn.normalize:hover { background: rgba(160,120,48,.1); border-color: rgba(160,120,48,.5); }
+.proc-action-btn.freeze { color: var(--tx2); }
+.proc-action-btn.freeze:hover { background: rgba(160,120,48,.1); border-color: rgba(160,120,48,.4); color: var(--warn); }
+.proc-action-btn.resume { color: var(--ok); border-color: rgba(90,158,90,.25); }
+.proc-action-btn.resume:hover { background: rgba(90,158,90,.1); border-color: rgba(90,158,90,.5); }
+.proc-action-btn.kill { color: var(--err); border-color: rgba(158,74,74,.2); }
+.proc-action-btn.kill:hover { background: rgba(158,74,74,.1); border-color: rgba(158,74,74,.5); }
+
+.proc-priority-select {
+    background: var(--bg2); border: 1px solid var(--b); border-radius: 3px;
+    color: var(--tx2); font-family: 'JetBrains Mono', monospace; font-size: .58rem;
+    padding: 2px 4px; cursor: pointer; outline: none;
+    transition: border-color var(--t);
+    max-width: 100px;
+}
+.proc-priority-select:hover { border-color: var(--bh); }
+.proc-priority-select:focus { border-color: var(--bh); }
+
+.proc-row.critical { border-left: 2px solid rgba(158,74,74,.5); }
+.proc-row.suspended { opacity: .65; }
+.proc-row.suspended .proc-col-name { color: var(--tx2); text-decoration: line-through; }

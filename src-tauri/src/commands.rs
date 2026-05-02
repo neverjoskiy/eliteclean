@@ -3,7 +3,7 @@
 use tauri::State;
 use crate::state::{SharedAppState, OpGuard};
 use crate::models::*;
-use crate::services::{CleanupService, NetworkService, PrivacyService, SystemService, TweaksService};
+use crate::services::{CleanupService, NetworkService, PrivacyService, ProcessService, SystemService, TweaksService};
 
 /// Статус приложения
 #[tauri::command]
@@ -210,4 +210,31 @@ pub fn apply_tweak(id: String) -> Result<TweakApplyResult, String> {
 #[tauri::command]
 pub fn revert_tweak(id: String) -> Result<TweakApplyResult, String> {
     Ok(TweaksService::revert_tweak(&id))
+}
+
+// ── Диспетчер задач ──
+
+#[tauri::command]
+pub async fn list_processes(state: State<'_, SharedAppState>) -> Result<ProcessListResponse, String> {
+    Ok(ProcessService::list_processes(state).await)
+}
+
+#[tauri::command]
+pub async fn set_process_priority(pid: u32, priority_class: u32, state: State<'_, SharedAppState>) -> Result<ProcessActionResponse, String> {
+    Ok(ProcessService::set_priority(pid, priority_class, state).await)
+}
+
+#[tauri::command]
+pub async fn suspend_process(pid: u32, state: State<'_, SharedAppState>) -> Result<ProcessActionResponse, String> {
+    Ok(ProcessService::suspend_process(pid, state).await)
+}
+
+#[tauri::command]
+pub async fn resume_process(pid: u32, state: State<'_, SharedAppState>) -> Result<ProcessActionResponse, String> {
+    Ok(ProcessService::resume_process(pid, state).await)
+}
+
+#[tauri::command]
+pub async fn kill_process(pid: u32, state: State<'_, SharedAppState>) -> Result<ProcessActionResponse, String> {
+    Ok(ProcessService::kill_process(pid, state).await)
 }

@@ -68,6 +68,12 @@
                     <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
                 </svg>
             </button>
+            <button class="nav-btn" data-tab="processes" data-tip="процессы">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                    <rect x="1" y="3" width="15" height="13" rx="2"/><polygon points="16 8 22 3 22 16 16 11"/>
+                    <line x1="23" y1="8" x2="23" y2="11"/>
+                </svg>
+            </button>
         </nav>
         <div class="sdot-wrap"><span class="sdot" id="statusIndicator"></span></div>
     </aside>
@@ -395,7 +401,7 @@
             </div>
         </div>
 
-        <!-- НАСТРОЙКИ -->
+         <!-- НАСТРОЙКИ -->
         <div class="tab" id="settings">
         <div class="settings-grid">
         <div class="card settings-section">
@@ -462,6 +468,38 @@
                 </div>
             </div>
         </div>
+        </div>
+        </div>
+
+        <!-- ДИСПЕТЧЕР ЗАДАЧ -->
+        <div class="tab" id="processes">
+            <div class="card proc-header">
+                <div class="proc-header-inner">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="1" y="3" width="15" height="13" rx="2"/><polygon points="16 8 22 3 22 16 16 11"/><line x1="23" y1="8" x2="23" y2="11"/></svg>
+                    <span class="proc-title">диспетчер задач</span>
+                    <span class="proc-subtitle" id="procCount">0 процессов</span>
+                    <div class="proc-header-actions">
+                        <input type="text" class="proc-search" id="procSearch" placeholder="поиск...">
+                        <button class="btn-icon" id="procRefreshBtn" title="обновить">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card proc-table-card">
+                <div class="proc-table-head">
+                    <span class="proc-col proc-col-pid">PID</span>
+                    <span class="proc-col proc-col-name">имя</span>
+                    <span class="proc-col proc-col-mem">память</span>
+                    <span class="proc-col proc-col-priority">приоритет</span>
+                    <span class="proc-col proc-col-threads">потоки</span>
+                    <span class="proc-col proc-col-status">статус</span>
+                    <span class="proc-col proc-col-actions">действия</span>
+                </div>
+                <div class="proc-table-body" id="procTableBody">
+                    <div class="proc-loading">загрузка...</div>
+                </div>
+            </div>
         </div>
     </main>
 </div>

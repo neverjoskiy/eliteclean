@@ -61,6 +61,12 @@ fn main() {
             elite_cleaner_lib::commands::get_tweaks,
             elite_cleaner_lib::commands::apply_tweak,
             elite_cleaner_lib::commands::revert_tweak,
+            // диспетчер задач
+            elite_cleaner_lib::commands::list_processes,
+            elite_cleaner_lib::commands::set_process_priority,
+            elite_cleaner_lib::commands::suspend_process,
+            elite_cleaner_lib::commands::resume_process,
+            elite_cleaner_lib::commands::kill_process,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

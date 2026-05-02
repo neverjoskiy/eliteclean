@@ -242,3 +242,29 @@ pub struct FunTimeCleanResult {
     pub cmdline_cleared: bool,
     pub details: Vec<String>,
 }
+
+/// Информация о процессе
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ProcessInfo {
+    pub pid: u32,
+    pub name: String,
+    pub memory_mb: f64,
+    pub priority: String,
+    pub priority_class: u32,
+    pub is_suspended: bool,
+    pub thread_count: u32,
+}
+
+/// Ответ списка процессов
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ProcessListResponse {
+    pub processes: Vec<ProcessInfo>,
+    pub total: usize,
+}
+
+/// Ответ операции с процессом
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ProcessActionResponse {
+    pub success: bool,
+    pub message: String,
+}

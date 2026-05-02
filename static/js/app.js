@@ -250,6 +250,12 @@ const api = {
     getTweaks:       () => invoke('get_tweaks'),
     applyTweak:      (id) => invoke('apply_tweak', { id }),
     revertTweak:     (id) => invoke('revert_tweak', { id }),
+    // диспетчер задач
+    listProcesses:   () => invoke('list_processes'),
+    setPriority:     (pid, priorityClass) => invoke('set_process_priority', { pid, priorityClass }),
+    suspendProcess:  (pid) => invoke('suspend_process', { pid }),
+    resumeProcess:   (pid) => invoke('resume_process', { pid }),
+    killProcess:     (pid) => invoke('kill_process', { pid }),
 };
 
 // ── Init ──
@@ -288,7 +294,9 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             btn.classList.add('active');
-            document.getElementById(btn.dataset.tab).classList.add('active');
+            const tabId = btn.dataset.tab;
+            document.getElementById(tabId).classList.add('active');
+            if (tabId === 'processes') loadProcesses();
         });
     });
 
@@ -631,6 +639,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelector(`.nav-btn[data-tab="${tab}"]`)?.classList.add('active');
             document.getElementById(tab)?.classList.add('active');
+            if (tab === 'processes') loadProcesses();
         });
     });
 
@@ -872,6 +881,147 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById('tweaksRefreshBtn').addEventListener('click', () => loadTweaks());
+
+    // ── Диспетчер задач ──
+    let procData = [];
+    let procFilter = '';
+
+    const PRIORITY_CLASSES = [
+        { value: 0x00000100, label: 'реального времени', danger: true },
+        { value: 0x00000080, label: 'высокий', danger: true },
+        { value: 0x00008000, label: 'выше среднего', danger: false },
+        { value: 0x00000020, label: 'нормальный', danger: false },
+        { value: 0x00004000, label: 'ниже среднего', danger: false },
+        { value: 0x00000010, label: 'низкий', danger: false },
+    ];
+
+    async function loadProcesses() {
+        const body = document.getElementById('procTableBody');
+        body.innerHTML = '<div class="proc-loading">загрузка...</div>';
+        try {
+            const r = await api.listProcesses();
+            procData = r.processes || [];
+            renderProcesses();
+        } catch (e) {
+            body.innerHTML = `<div class="proc-loading">ошибка: ${e.message}</div>`;
+        }
+    }
+
+    function renderProcesses() {
+        const body = document.getElementById('procTableBody');
+        const filter = procFilter.toLowerCase();
+        const filtered = filter
+            ? procData.filter(p => p.name.toLowerCase().includes(filter) || String(p.pid).includes(filter))
+            : procData;
+
+        document.getElementById('procCount').textContent = `${filtered.length} процессов`;
+
+        if (!filtered.length) {
+            body.innerHTML = '<div class="proc-loading">нет процессов</div>';
+            return;
+        }
+
+        body.innerHTML = filtered.map(p => {
+            const isCritical = p.priority_class === 0x100 || p.priority_class === 0x80;
+            const memStr = p.memory_mb < 1 ? (p.memory_mb * 1024).toFixed(0) + ' КБ' : p.memory_mb.toFixed(1) + ' МБ';
+            const statusClass = p.is_suspended ? 'frozen' : 'running';
+            const statusText = p.is_suspended ? 'заморожен' : 'работает';
+            const priorityClass = isCritical ? 'critical' : (p.priority_class <= 0x10 ? 'low' : '');
+
+            return `<div class="proc-row${isCritical ? ' critical' : ''}${p.is_suspended ? ' suspended' : ''}" data-pid="${p.pid}">
+                <span class="proc-col proc-col-pid">${p.pid}</span>
+                <span class="proc-col proc-col-name" title="${p.name}">${p.name}</span>
+                <span class="proc-col proc-col-mem">${memStr}</span>
+                <span class="proc-col proc-col-priority ${priorityClass}">${p.priority}</span>
+                <span class="proc-col proc-col-threads">${p.thread_count}</span>
+                <span class="proc-col proc-col-status ${statusClass}">${statusText}</span>
+                <span class="proc-col proc-col-actions">
+                    ${isCritical ? `<button class="proc-action-btn normalize" data-pid="${p.pid}" title="снять критичность"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></button>` : ''}
+                    ${p.is_suspended
+                        ? `<button class="proc-action-btn resume" data-pid="${p.pid}" title="разморозить"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><polygon points="5 3 19 12 5 21 5 3"/></svg></button>`
+                        : `<button class="proc-action-btn freeze" data-pid="${p.pid}" title="заморозить"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg></button>`
+                    }
+                    <button class="proc-action-btn kill" data-pid="${p.pid}" title="завершить"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                    <select class="proc-priority-select" data-pid="${p.pid}" title="изменить приоритет">
+                        ${PRIORITY_CLASSES.map(pc => `<option value="${pc.value}"${pc.value === p.priority_class ? ' selected' : ''}>${pc.label}</option>`).join('')}
+                    </select>
+                </span>
+            </div>`;
+        }).join('');
+
+        body.querySelectorAll('.proc-action-btn.normalize').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const pid = parseInt(btn.dataset.pid);
+                addLog(`снятие критичности PID ${pid}...`, 'info');
+                try {
+                    const r = await api.setPriority(pid, 0x20);
+                    showToast(r.message, r.success ? 'success' : 'error');
+                    addLog(r.message, r.success ? 'success' : 'error');
+                    if (r.success) loadProcesses();
+                } catch (e) { showToast(e.message, 'error'); }
+            });
+        });
+
+        body.querySelectorAll('.proc-action-btn.freeze').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const pid = parseInt(btn.dataset.pid);
+                addLog(`заморозка PID ${pid}...`, 'info');
+                try {
+                    const r = await api.suspendProcess(pid);
+                    showToast(r.message, r.success ? 'success' : 'error');
+                    addLog(r.message, r.success ? 'success' : 'error');
+                    if (r.success) loadProcesses();
+                } catch (e) { showToast(e.message, 'error'); }
+            });
+        });
+
+        body.querySelectorAll('.proc-action-btn.resume').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const pid = parseInt(btn.dataset.pid);
+                addLog(`разморозка PID ${pid}...`, 'info');
+                try {
+                    const r = await api.resumeProcess(pid);
+                    showToast(r.message, r.success ? 'success' : 'error');
+                    addLog(r.message, r.success ? 'success' : 'error');
+                    if (r.success) loadProcesses();
+                } catch (e) { showToast(e.message, 'error'); }
+            });
+        });
+
+        body.querySelectorAll('.proc-action-btn.kill').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const pid = parseInt(btn.dataset.pid);
+                addLog(`завершение PID ${pid}...`, 'info');
+                try {
+                    const r = await api.killProcess(pid);
+                    showToast(r.message, r.success ? 'success' : 'error');
+                    addLog(r.message, r.success ? 'success' : 'error');
+                    if (r.success) loadProcesses();
+                } catch (e) { showToast(e.message, 'error'); }
+            });
+        });
+
+        body.querySelectorAll('.proc-priority-select').forEach(sel => {
+            sel.addEventListener('change', async () => {
+                const pid = parseInt(sel.dataset.pid);
+                const priorityClass = parseInt(sel.value);
+                addLog(`изменение приоритета PID ${pid}...`, 'info');
+                try {
+                    const r = await api.setPriority(pid, priorityClass);
+                    showToast(r.message, r.success ? 'success' : 'error');
+                    addLog(r.message, r.success ? 'success' : 'error');
+                    if (r.success) loadProcesses();
+                } catch (e) { showToast(e.message, 'error'); }
+            });
+        });
+    }
+
+    document.getElementById('procRefreshBtn').addEventListener('click', () => loadProcesses());
+
+    document.getElementById('procSearch').addEventListener('input', e => {
+        procFilter = e.target.value;
+        renderProcesses();
+    });
 
 });
 
