@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="dark">
     <title>EliteClean — быстрый клинер для Windows</title>
     <meta name="description" content="EliteClean — компактная Windows-утилита для очистки временных файлов, системного кэша, истории и следов активности.">
     <meta name="keywords" content="EliteClean, Windows cleaner, очистка Windows, Tauri, Rust">
@@ -11,21 +12,44 @@
     <meta property="og:description" content="Сканирование мусора, очистка кэша, приватность, сетевые инструменты и системные твики.">
     <meta property="og:type" content="website">
     <meta name="theme-color" content="#111111">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23151515' stroke='%233a3a3a' stroke-width='1.0'/><text x='50%25' y='58%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-weight='700' font-size='14' fill='%23e8e8e8'>EC</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         :root{--bg:#111;--p:#171717;--p2:#1e1e1e;--p3:#262626;--b:#2c2c2c;--bh:#3a3a3a;--tx:#e8e8e8;--mut:#969696;--dim:#555;--ok:#5a9e5a;--wr:#a07830;--r:22px;--t:.2s ease;--sh:0 34px 100px rgba(0,0,0,.42)}
         *{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}body{min-height:100vh;overflow-x:hidden;background:radial-gradient(circle at 50% -8%,rgba(90,158,90,.13),transparent 34rem),radial-gradient(circle at 12% 24%,rgba(255,255,255,.035),transparent 18rem),linear-gradient(180deg,#111,#0f0f0f);color:var(--tx);font-family:Manrope,system-ui,sans-serif;-webkit-font-smoothing:antialiased}body:before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.035;background-image:linear-gradient(rgba(255,255,255,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.08) 1px,transparent 1px);background-size:64px 64px;mask-image:radial-gradient(circle at 50% 6%,#000,transparent 70%)}a{color:inherit;text-decoration:none}.shell{position:relative;z-index:1}.container{width:min(1120px,calc(100% - 40px));margin:0 auto}
-        .nav{position:sticky;top:0;z-index:20;background:rgba(17,17,17,.76);border-bottom:1px solid rgba(44,44,44,.86);backdrop-filter:blur(18px)}.nav-inner{height:68px;display:flex;align-items:center;justify-content:space-between;gap:20px}.brand{display:inline-flex;align-items:center;gap:12px;min-width:max-content}.brand-mark{width:38px;height:38px;display:grid;place-items:center;border-radius:13px;border:1px solid var(--bh);background:linear-gradient(145deg,var(--p3),var(--p));font:600 12px "IBM Plex Mono",monospace}.brand-name{display:block;font-size:15px;font-weight:800;letter-spacing:-.04em;line-height:1}.brand-sub{display:block;margin-top:4px;color:var(--dim);font:10px "IBM Plex Mono",monospace}.nav-links{display:flex;gap:4px}.nav-links a{padding:8px 13px;border-radius:999px;color:var(--mut);font-size:13px;font-weight:700;transition:var(--t)}.nav-links a:hover,.nav-links a.active{color:var(--tx);background:var(--p2)}.nav-action{padding:9px 14px;border-radius:999px;border:1px solid var(--b);background:var(--p2);font-size:13px;font-weight:800;transition:var(--t)}.nav-action:hover{border-color:var(--bh);background:var(--p3);transform:translateY(-1px)}
-        .hero{min-height:calc(100vh - 68px);display:grid;place-items:center;text-align:center;padding:72px 0 90px}.hero-box{width:min(980px,100%);display:flex;flex-direction:column;align-items:center;gap:28px}.pill{display:inline-flex;align-items:center;gap:10px;padding:9px 14px;border-radius:999px;border:1px solid var(--b);background:rgba(23,23,23,.78);color:var(--mut);font:12px "IBM Plex Mono",monospace}.pulse{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 0 rgba(90,158,90,.45);animation:pulse 1.8s infinite}@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(90,158,90,.45)}70%{box-shadow:0 0 0 10px transparent}100%{box-shadow:0 0 0 0 transparent}}h1{max-width:920px;font-size:clamp(4rem,10vw,8.8rem);line-height:.84;font-weight:800;letter-spacing:-.09em}h1 span{display:block;color:transparent;-webkit-text-stroke:1px rgba(232,232,232,.34)}.hero-copy{max-width:720px;color:var(--mut);font-size:clamp(1.08rem,2vw,1.36rem);line-height:1.75;font-weight:500}.hero-copy strong{color:var(--tx);font-weight:800}.hero-actions{display:flex;justify-content:center;flex-wrap:wrap;gap:12px;margin-top:4px}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:50px;padding:0 22px;border-radius:999px;border:1px solid transparent;font-size:14px;font-weight:800;transition:var(--t)}.btn-primary{background:var(--tx);color:#111;box-shadow:0 16px 48px rgba(232,232,232,.08)}.btn-secondary{background:var(--p2);border-color:var(--bh);color:var(--tx)}.btn-soft{background:transparent;color:var(--mut);border-color:var(--b)}.btn:hover{transform:translateY(-2px)}
+        [id]{scroll-margin-top:82px}
+        :focus-visible{outline:2px solid var(--ok);outline-offset:3px;border-radius:4px}
+        .nav{position:sticky;top:0;z-index:20;background:rgba(17,17,17,.76);border-bottom:1px solid rgba(44,44,44,.86);backdrop-filter:blur(18px)}.nav-inner{height:68px;display:flex;align-items:center;justify-content:space-between;gap:20px}.brand{display:inline-flex;align-items:center;gap:12px;min-width:max-content;border-radius:14px}.brand-mark{width:38px;height:38px;display:grid;place-items:center;border-radius:13px;border:1px solid var(--bh);background:linear-gradient(145deg,var(--p3),var(--p));font:600 12px "IBM Plex Mono",monospace}.brand-name{display:block;font-size:15px;font-weight:800;letter-spacing:-.04em;line-height:1}.brand-sub{display:block;margin-top:4px;color:var(--dim);font:10px "IBM Plex Mono",monospace}.nav-links{display:flex;gap:4px}.nav-links a{padding:8px 13px;border-radius:999px;color:var(--mut);font-size:13px;font-weight:700;transition:var(--t)}.nav-links a:hover,.nav-links a.active{color:var(--tx);background:var(--p2)}.nav-action{padding:9px 14px;border-radius:999px;border:1px solid var(--b);background:var(--p2);font-size:13px;font-weight:800;transition:var(--t)}.nav-action:hover{border-color:var(--bh);background:var(--p3);transform:translateY(-1px)}
+
+        .hamburger{display:none;width:40px;height:40px;align-items:center;justify-content:center;border:1px solid var(--b);border-radius:11px;background:var(--p2);cursor:pointer;transition:var(--t)}.hamburger:hover{border-color:var(--bh);background:var(--p3)}.hamburger span,.hamburger:after,.hamburger:before{content:"";display:block;position:absolute;width:18px;height:1.5px;border-radius:2px;background:var(--tx);transition:.25s cubic-bezier(.34,1.56,.64,1)}.hamburger{position:relative}.hamburger:before{transform:translateY(-5px)}.hamburger:after{transform:translateY(5px)}.hamburger.open span{opacity:0;transform:scaleX(0)}.hamburger.open:before{transform:rotate(-45deg) translate(0,0)}.hamburger.open:after{transform:rotate(45deg) translate(0,0)}
+
+        .mobile-overlay{position:fixed;inset:0;z-index:50;background:rgba(9,9,9,.94);backdrop-filter:blur(32px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .35s cubic-bezier(.16,1,.3,1)}.mobile-overlay.open{opacity:1;pointer-events:auto}.mobile-nav{display:flex;flex-direction:column;align-items:center;gap:8px}.mobile-nav a{padding:14px 28px;border-radius:999px;font-size:20px;font-weight:700;color:var(--mut);transition:var(--t)}.mobile-nav a:hover,.mobile-nav a.active{color:var(--tx);background:var(--p2)}.mobile-nav .nav-action{margin-top:16px}
+
+        .hero{min-height:calc(100vh - 68px);display:grid;place-items:center;text-align:center;padding:72px 0 90px}.hero-box{width:min(980px,100%);display:flex;flex-direction:column;align-items:center;gap:28px}.pill{display:inline-flex;align-items:center;gap:10px;padding:9px 14px;border-radius:999px;border:1px solid var(--b);background:rgba(23,23,23,.78);color:var(--mut);font:12px "IBM Plex Mono",monospace}.pulse{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 0 rgba(90,158,90,.45);animation:pulse 1.8s infinite}@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(90,158,90,.45)}70%{box-shadow:0 0 0 10px transparent}100%{box-shadow:0 0 0 0 transparent}}h1{max-width:920px;font-size:clamp(4rem,10vw,8.8rem);line-height:.84;font-weight:800;letter-spacing:-.09em}h1 span{display:block;color:transparent;-webkit-text-stroke:1px rgba(232,232,232,.34)}.hero-copy{max-width:720px;color:var(--mut);font-size:clamp(1.08rem,2vw,1.36rem);line-height:1.75;font-weight:500}.hero-copy strong{color:var(--tx);font-weight:800}.hero-actions{display:flex;justify-content:center;flex-wrap:wrap;gap:12px;margin-top:4px}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:50px;padding:0 22px;border-radius:999px;border:1px solid transparent;font-size:14px;font-weight:800;transition:var(--t)}.btn:active{transform:scale(.97);transition:transform .08s ease}.btn-primary{background:var(--tx);color:#111;box-shadow:0 16px 48px rgba(232,232,232,.08)}.btn-secondary{background:var(--p2);border-color:var(--bh);color:var(--tx)}.btn-soft{background:transparent;color:var(--mut);border-color:var(--b)}.btn:hover{transform:translateY(-2px)}.btn:hover:active{transform:translateY(-1px) scale(.97)}
         .hero-panel{width:min(780px,100%);margin-top:22px;overflow:hidden;text-align:left;border:1px solid var(--b);border-radius:var(--r);background:linear-gradient(180deg,rgba(30,30,30,.86),rgba(23,23,23,.86));box-shadow:var(--sh)}.panel-head{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid var(--b);background:rgba(38,38,38,.45)}.dots{display:flex;gap:7px}.dots i{display:block;width:9px;height:9px;border-radius:50%;background:#3a3a3a}.panel-title{font:12px "IBM Plex Mono",monospace;color:var(--dim)}.panel-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--b)}.metric{background:rgba(23,23,23,.96);padding:22px 18px}.metric-value{font-size:26px;font-weight:800;letter-spacing:-.05em}.metric-label{margin-top:4px;color:var(--dim);font:11px "IBM Plex Mono",monospace}
-        .section{padding:95px 0}.section-head{display:flex;align-items:end;justify-content:space-between;gap:30px;margin-bottom:34px}.eyebrow{display:inline-flex;align-items:center;gap:9px;color:var(--ok);font:600 12px "IBM Plex Mono",monospace;letter-spacing:.04em;text-transform:uppercase;margin-bottom:14px}.eyebrow:before{content:"";width:28px;height:1px;background:var(--ok)}.section-title{max-width:640px;font-size:clamp(2.1rem,4vw,4.2rem);line-height:.96;font-weight:800;letter-spacing:-.07em}.section-text{max-width:360px;color:var(--mut);font-size:15px;line-height:1.75;font-weight:500}.feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.feature-card{min-height:240px;display:flex;flex-direction:column;justify-content:space-between;border:1px solid var(--b);border-radius:var(--r);background:rgba(23,23,23,.82);padding:24px;transition:var(--t)}.feature-card:hover{transform:translateY(-4px);border-color:var(--bh);background:rgba(30,30,30,.9)}.feature-card.big{grid-column:span 2}.card-index{font:12px "IBM Plex Mono",monospace;color:var(--dim)}.feature-card h3{margin-top:26px;font-size:22px;line-height:1.08;letter-spacing:-.04em}.feature-card p{margin-top:14px;color:var(--mut);font-size:14px;line-height:1.7}.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}.chip{border:1px solid var(--b);border-radius:999px;padding:6px 10px;background:var(--p2);color:var(--dim);font:11px "IBM Plex Mono",monospace}
+        .section{padding:95px 0}.section-head{display:flex;align-items:end;justify-content:space-between;gap:30px;margin-bottom:34px}.eyebrow{display:inline-flex;align-items:center;gap:9px;color:var(--ok);font:600 12px "IBM Plex Mono",monospace;letter-spacing:.04em;text-transform:uppercase;margin-bottom:14px}.eyebrow:before{content:"";width:28px;height:1px;background:var(--ok)}.section-title{max-width:640px;font-size:clamp(2.1rem,4vw,4.2rem);line-height:.96;font-weight:800;letter-spacing:-.07em}.section-text{max-width:360px;color:var(--mut);font-size:15px;line-height:1.75;font-weight:500}.feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.feature-card{position:relative;min-height:240px;display:flex;flex-direction:column;justify-content:space-between;border:1px solid var(--b);border-radius:var(--r);background:rgba(23,23,23,.82);padding:24px;transition:var(--t);overflow:hidden}.feature-card:after{content:"";position:absolute;inset:-2px -2px 80% -2px;border-radius:var(--r) var(--r) 0 0;background:radial-gradient(ellipse at 50% 0%,rgba(90,158,90,.07),transparent 70%);opacity:0;transition:opacity .45s ease;pointer-events:none;z-index:0}.feature-card:hover:after{opacity:1}.feature-card:hover{transform:translateY(-4px);border-color:var(--bh);background:rgba(30,30,30,.9)}.feature-card.big{grid-column:span 2}.feature-card>*{position:relative;z-index:1}.card-index{font:12px "IBM Plex Mono",monospace;color:var(--dim)}.feature-card h3{margin-top:26px;font-size:22px;line-height:1.08;letter-spacing:-.04em}.feature-card p{margin-top:14px;color:var(--mut);font-size:14px;line-height:1.7}.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}.chip{border:1px solid var(--b);border-radius:999px;padding:6px 10px;background:var(--p2);color:var(--dim);font:11px "IBM Plex Mono",monospace}
+
+        [data-reveal]{opacity:0;transform:translateY(28px);transition:opacity .65s cubic-bezier(.16,1,.3,1),transform .65s cubic-bezier(.16,1,.3,1)}[data-reveal].revealed{opacity:1;transform:translateY(0)}
+
         .download-layout{display:grid;grid-template-columns:1.1fr .9fr;gap:12px}.download-card{border:1px solid var(--bh);border-radius:calc(var(--r) + 6px);background:radial-gradient(circle at 20% 0%,rgba(90,158,90,.13),transparent 22rem),linear-gradient(145deg,rgba(38,38,38,.9),rgba(23,23,23,.95));padding:34px;box-shadow:var(--sh)}.download-card h2{font-size:clamp(2rem,4vw,4rem);line-height:.98;letter-spacing:-.07em}.download-card p{margin-top:16px;max-width:520px;color:var(--mut);font-size:15px;line-height:1.75}.download-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}.release-list{border:1px solid var(--b);border-radius:calc(var(--r) + 6px);background:rgba(23,23,23,.82);overflow:hidden}.release-item{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px;border-bottom:1px solid var(--b)}.release-item:last-child{border-bottom:0}.release-name{font-weight:800;letter-spacing:-.03em}.release-meta{margin-top:4px;color:var(--dim);font:11px "IBM Plex Mono",monospace}.mini-link{min-width:max-content;padding:8px 12px;border-radius:999px;border:1px solid var(--b);background:var(--p2);color:var(--mut);font-size:12px;font-weight:800;transition:var(--t)}.mini-link:hover{color:var(--tx);border-color:var(--bh);background:var(--p3)}.note{margin-top:14px;border:1px solid rgba(160,120,48,.28);border-radius:14px;background:rgba(160,120,48,.055);padding:14px 16px;color:var(--mut);font-size:13px;line-height:1.6}.note strong{color:var(--tx)}footer{border-top:1px solid var(--b);padding:30px 0;color:var(--dim);font-size:13px}.footer-inner{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap}.footer-links{display:flex;gap:16px}.footer-links a:hover{color:var(--mut)}
-        @media(max-width:900px){.nav-links{display:none}.hero{min-height:auto;padding-top:76px}.panel-grid{grid-template-columns:repeat(2,1fr)}.section-head{align-items:flex-start;flex-direction:column}.feature-grid{grid-template-columns:1fr}.feature-card.big{grid-column:auto}.download-layout{grid-template-columns:1fr}}@media(max-width:560px){.container{width:min(100% - 28px,1120px)}.nav-inner{height:62px}.brand-sub{display:none}.nav-action{padding:8px 11px;font-size:12px}h1{font-size:clamp(3.4rem,19vw,6rem)}.hero-copy{font-size:1rem}.btn{width:100%}.hero-panel{margin-top:10px}.panel-grid{grid-template-columns:1fr}.section{padding:70px 0}.download-card{padding:24px}.release-item{align-items:flex-start;flex-direction:column}.mini-link{width:100%;text-align:center}}
+
+        .scroll-top{position:fixed;bottom:28px;right:28px;z-index:30;width:44px;height:44px;border-radius:14px;border:1px solid var(--bh);background:rgba(30,30,30,.88);backdrop-filter:blur(12px);cursor:pointer;display:grid;place-items:center;opacity:0;pointer-events:none;transform:translateY(12px);transition:opacity .35s ease,transform .35s cubic-bezier(.34,1.56,.64,1)}.scroll-top:before{content:"";display:block;width:16px;height:16px;border-left:2px solid var(--mut);border-top:2px solid var(--mut);transform:rotate(45deg) translate(2px,2px);transition:border-color .2s ease}.scroll-top.visible{opacity:1;pointer-events:auto;transform:translateY(0)}.scroll-top:hover{border-color:var(--ok);background:var(--p3)}.scroll-top:hover:before{border-color:var(--tx)}
+
+        @media(max-width:900px){.nav-links{display:none}.hamburger{display:inline-flex}.nav-action.desktop{display:none}.hero{min-height:auto;padding-top:76px}.panel-grid{grid-template-columns:repeat(2,1fr)}.section-head{align-items:flex-start;flex-direction:column}.feature-grid{grid-template-columns:1fr}.feature-card.big{grid-column:auto}.download-layout{grid-template-columns:1fr}.scroll-top{bottom:20px;right:20px;width:42px;height:42px;border-radius:13px}}@media(max-width:560px){.container{width:min(100% - 28px,1120px)}.nav-inner{height:62px}.brand-sub{display:none}.nav-action{padding:8px 11px;font-size:12px}h1{font-size:clamp(3.4rem,19vw,6rem)}.hero-copy{font-size:1rem}.btn{width:100%}.hero-panel{margin-top:10px}.panel-grid{grid-template-columns:1fr}.section{padding:70px 0}.download-card{padding:24px}.release-item{align-items:flex-start;flex-direction:column}.mini-link{width:100%;text-align:center}}
     </style>
 </head>
 <body>
+    <div class="mobile-overlay" id="mobile-overlay" aria-hidden="true">
+        <nav class="mobile-nav" aria-label="Мобильное меню">
+            <a href="#home" class="active" data-mobile-link>Главная</a>
+            <a href="#features" data-mobile-link>Возможности</a>
+            <a href="#download" data-mobile-link>Скачать</a>
+            <a class="nav-action" href="https://github.com/neverjoskiy/eliteclean" target="_blank" rel="noopener noreferrer">GitHub</a>
+        </nav>
+    </div>
+
     <div class="shell">
         <header class="nav">
             <div class="container nav-inner">
@@ -38,7 +62,8 @@
                     <a href="#features">Возможности</a>
                     <a href="#download">Скачать</a>
                 </nav>
-                <a class="nav-action" href="https://github.com/neverjoskiy/eliteclean" target="_blank" rel="noopener noreferrer">GitHub</a>
+                <a class="nav-action desktop" href="https://github.com/neverjoskiy/eliteclean" target="_blank" rel="noopener noreferrer">GitHub</a>
+                <button class="hamburger" id="hamburger" aria-label="Открыть меню" aria-expanded="false"><span></span></button>
             </div>
         </header>
 
@@ -67,23 +92,23 @@
 
             <section class="section" id="features">
                 <div class="container">
-                    <div class="section-head">
+                    <div class="section-head" data-reveal>
                         <div><div class="eyebrow">Возможности</div><h2 class="section-title">Чистый интерфейс. Сильные инструменты.</h2></div>
                         <p class="section-text">EliteClean показывает категории, помогает быстро убрать лишнее и оставляет контроль за пользователем. Ничего лишнего — только понятные действия и результат.</p>
                     </div>
                     <div class="feature-grid">
-                        <article class="feature-card big"><div><div class="card-index">01 / scanner</div><h3>Сканирование системы перед очисткой</h3><p>Анализ временных файлов, кэша, дампов, недавних элементов и других категорий перед удалением.</p></div><div class="chips"><span class="chip">Temp</span><span class="chip">Prefetch</span><span class="chip">Thumbnails</span><span class="chip">Dumps</span></div></article>
-                        <article class="feature-card"><div><div class="card-index">02 / privacy</div><h3>Приватность</h3><p>Очистка буфера обмена, истории поиска, истории запуска, recent files и jump lists.</p></div><div class="chips"><span class="chip">history</span><span class="chip">cache</span></div></article>
-                        <article class="feature-card"><div><div class="card-index">03 / network</div><h3>Сеть</h3><p>DNS, ARP, NetBIOS и полный сетевой reset для проблем с подключением.</p></div><div class="chips"><span class="chip">DNS</span><span class="chip">ARP</span></div></article>
-                        <article class="feature-card"><div><div class="card-index">04 / system</div><h3>Системная очистка</h3><p>Кэш обновлений Windows, thumbnail cache, дампы памяти и следы активности в реестре.</p></div><div class="chips"><span class="chip">Windows</span><span class="chip">Registry</span></div></article>
-                        <article class="feature-card big"><div><div class="card-index">05 / tweaks</div><h3>Расширенные твики</h3><p>Дополнительные настройки Windows для производительности, приватности и управления системным поведением.</p></div><div class="chips"><span class="chip">Game Bar</span><span class="chip">Telemetry</span><span class="chip">Power</span><span class="chip">GPU</span></div></article>
+                        <article class="feature-card big" data-reveal><div><div class="card-index">01 / scanner</div><h3>Сканирование системы перед очисткой</h3><p>Анализ временных файлов, кэша, дампов, недавних элементов и других категорий перед удалением.</p></div><div class="chips"><span class="chip">Temp</span><span class="chip">Prefetch</span><span class="chip">Thumbnails</span><span class="chip">Dumps</span></div></article>
+                        <article class="feature-card" data-reveal><div><div class="card-index">02 / privacy</div><h3>Приватность</h3><p>Очистка буфера обмена, истории поиска, истории запуска, recent files и jump lists.</p></div><div class="chips"><span class="chip">history</span><span class="chip">cache</span></div></article>
+                        <article class="feature-card" data-reveal><div><div class="card-index">03 / network</div><h3>Сеть</h3><p>DNS, ARP, NetBIOS и полный сетевой reset для проблем с подключением.</p></div><div class="chips"><span class="chip">DNS</span><span class="chip">ARP</span></div></article>
+                        <article class="feature-card" data-reveal><div><div class="card-index">04 / system</div><h3>Системная очистка</h3><p>Кэш обновлений Windows, thumbnail cache, дампы памяти и следы активности в реестре.</p></div><div class="chips"><span class="chip">Windows</span><span class="chip">Registry</span></div></article>
+                        <article class="feature-card big" data-reveal><div><div class="card-index">05 / tweaks</div><h3>Расширенные твики</h3><p>Дополнительные настройки Windows для производительности, приватности и управления системным поведением.</p></div><div class="chips"><span class="chip">Game Bar</span><span class="chip">Telemetry</span><span class="chip">Power</span><span class="chip">GPU</span></div></article>
                     </div>
                 </div>
             </section>
 
             <section class="section" id="download">
                 <div class="container download-layout">
-                    <div class="download-card">
+                    <div class="download-card" data-reveal>
                         <div class="eyebrow">Скачать</div>
                         <h2>Выбери удобную сборку для Windows.</h2>
                         <p>Можно установить через setup.exe или скачать standalone x86-версию одним файлом. Для части системных операций могут понадобиться права администратора.</p>
@@ -93,7 +118,7 @@
                         </div>
                         <div class="note"><strong>Совет:</strong> если SmartScreen показывает предупреждение, проверь ссылку на GitHub Releases и запускай файл только из официального релиза.</div>
                     </div>
-                    <div class="release-list" aria-label="Файлы релиза">
+                    <div class="release-list" aria-label="Файлы релиза" data-reveal>
                         <div class="release-item"><div><div class="release-name">Setup installer</div><div class="release-meta">setup.exe · рекомендуемый вариант</div></div><a class="mini-link" href="https://github.com/neverjoskiy/eliteclean/releases/download/setupus/setup.exe" target="_blank" rel="noopener noreferrer">скачать</a></div>
                         <div class="release-item"><div><div class="release-name">Windows x86 standalone</div><div class="release-meta">ec-standalone-x86.exe · без установки</div></div><a class="mini-link" href="https://github.com/neverjoskiy/eliteclean/releases/download/setupus/ec-standalone-x86.exe" target="_blank" rel="noopener noreferrer">скачать</a></div>
                         <div class="release-item"><div><div class="release-name">Исходный код</div><div class="release-meta">GitHub repository</div></div><a class="mini-link" href="https://github.com/neverjoskiy/eliteclean" target="_blank" rel="noopener noreferrer">открыть</a></div>
@@ -107,18 +132,86 @@
         </footer>
     </div>
 
+    <button class="scroll-top" id="scroll-top" aria-label="Наверх"></button>
+
     <script>
-        const sectionElements = document.querySelectorAll('section[id]');
-        const links = document.querySelectorAll('.nav-links a');
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach((entry) => {
-                if (!entry.isIntersecting) return;
-                links.forEach((link) => link.classList.remove('active'));
-                const active = document.querySelector('.nav-links a[href="#' + entry.target.id + '"]');
-                if (active) active.classList.add('active');
+        (function(){
+            var hamburger = document.getElementById('hamburger');
+            var overlay = document.getElementById('mobile-overlay');
+            var mobileLinks = document.querySelectorAll('[data-mobile-link]');
+            var scrollTop = document.getElementById('scroll-top');
+
+            function toggleMenu() {
+                var open = hamburger.classList.contains('open');
+                if (open) {
+                    hamburger.classList.remove('open');
+                    overlay.classList.remove('open');
+                    hamburger.setAttribute('aria-expanded', 'false');
+                    overlay.setAttribute('aria-hidden', 'true');
+                    hamburger.setAttribute('aria-label', 'Открыть меню');
+                } else {
+                    hamburger.classList.add('open');
+                    overlay.classList.add('open');
+                    hamburger.setAttribute('aria-expanded', 'true');
+                    overlay.setAttribute('aria-hidden', 'false');
+                    hamburger.setAttribute('aria-label', 'Закрыть меню');
+                }
+            }
+
+            hamburger.addEventListener('click', toggleMenu);
+
+            mobileLinks.forEach(function(link) {
+                link.addEventListener('click', function() {
+                    toggleMenu();
+                });
             });
-        }, { threshold: 0.45 });
-        sectionElements.forEach((section) => observer.observe(section));
+
+            /* Active nav link tracking */
+            var sections = document.querySelectorAll('section[id]');
+            var desktopLinks = document.querySelectorAll('.nav-links a');
+            var currentActive = null;
+            var observer = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (!entry.isIntersecting) return;
+                    var id = entry.target.id;
+                    var activeDesktop = document.querySelector('.nav-links a[href="#' + id + '"]');
+                    var activeMobile = document.querySelector('.mobile-nav a[href="#' + id + '"]');
+                    if (activeDesktop && activeDesktop !== currentActive) {
+                        desktopLinks.forEach(function(l) { l.classList.remove('active'); });
+                        activeDesktop.classList.add('active');
+                        currentActive = activeDesktop;
+                    }
+                    if (activeMobile) {
+                        document.querySelectorAll('.mobile-nav a').forEach(function(l) { l.classList.remove('active'); });
+                        activeMobile.classList.add('active');
+                    }
+                });
+            }, { threshold: 0.45 });
+            sections.forEach(function(s) { observer.observe(s); });
+
+            /* Scroll-to-top */
+            function updateScrollTop() {
+                var scrolled = window.scrollY > 400;
+                scrollTop.classList.toggle('visible', scrolled);
+            }
+            scrollTop.addEventListener('click', function() {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+            window.addEventListener('scroll', updateScrollTop, { passive: true });
+            updateScrollTop();
+
+            /* Scroll reveal */
+            var revealElements = document.querySelectorAll('[data-reveal]');
+            var revealObserver = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('revealed');
+                        revealObserver.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+            revealElements.forEach(function(el) { revealObserver.observe(el); });
+        })();
     </script>
 </body>
 </html>
