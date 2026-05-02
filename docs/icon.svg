@@ -1,0 +1,8 @@
+<svg width="250" height="250" viewBox="0 0 250 250" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="250" height="250" rx="50" fill="#1a1a2e"/>
+  <path d="M60 80L125 50L190 80V170L125 200L60 170V80Z" stroke="#00d4ff" stroke-width="4" fill="none"/>
+  <path d="M125 50V200" stroke="#00d4ff" stroke-width="2" stroke-dasharray="5 5"/>
+  <path d="M60 80L125 110L190 80" stroke="#00d4ff" stroke-width="2"/>
+  <circle cx="125" cy="125" r="25" fill="#00d4ff"/>
+  <text x="125" y="132" text-anchor="middle" fill="#1a1a2e" font-size="24" font-weight="bold">E</text>
+</svg>

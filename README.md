@@ -1,141 +1,162 @@
 <div align="center">
 
-```
-███████╗██╗     ██╗████████╗███████╗
-██╔════╝██║     ██║╚══██╔══╝██╔════╝
-█████╗  ██║     ██║   ██║   █████╗  
-██╔══╝  ██║     ██║   ██║   ██╔══╝  
-███████╗███████╗██║   ██║   ███████╗
-╚══════╝╚══════╝╚═╝   ╚═╝   ╚══════╝
-       C L E A N E R  v1.1
-```
+<img src="docs/icon.svg" width="250" alt="EliteCleaner logo">
 
-**Десктопный системный клинер с расширенными инструментами очистки следов**
+<br>
+<h3>EliteCleaner</h3>
+<h6>Desktop system cleaner with advanced trace cleaning tools</h6>
 
-![Rust](https://img.shields.io/badge/Rust-1.70+-orange?style=flat-square&logo=rust)
-![Tauri](https://img.shields.io/badge/Tauri-v2-blue?style=flat-square&logo=tauri)
-![Platform](https://img.shields.io/badge/Windows-10%2F11-lightblue?style=flat-square&logo=windows)
-![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
+[![Rust](https://img.shields.io/badge/Rust-1.70+-orange?style=flat-square&logo=rust)](https://www.rust-lang.org/)
+[![Tauri](https://img.shields.io/badge/Tauri-v2-blue?style=flat-square&logo=tauri)](https://tauri.app/)
+[![License](https://img.shields.io/github/license/neverjoskiy/eliteclean?color=green&style=flat-square)](LICENSE)
+[![Platform](https://img.shields.io/badge/Windows-10%2F11-lightblue?style=flat-square&logo=windows)](https://www.microsoft.com/windows)
+<br>
+[![Build](https://img.shields.io/badge/build-Release-brightgreen?style=flat-square)]
+[![WebView2](https://img.shields.io/badge/WebView2-Required-blue?style=flat-square)]
+
+English • [Русский](README_ru.md)
 
 </div>
 
----
+<br>
 
-## О проекте
+## What is EliteCleaner?
 
-EliteCleaner — десктопное приложение на **Rust + Tauri v2** для глубокой очистки системных следов.
-Интерфейс на Vanilla HTML/CSS/JS, без внешних фреймворков.
-Общение фронтенда с бэкендом через `window.__TAURI__.core.invoke()`.
+**EliteCleaner** is a desktop application built with **Rust + Tauri v2** for deep system trace cleaning. The interface is built with vanilla HTML/CSS/JS — no external frameworks. Frontend communicates with the backend via `window.__TAURI__.core.invoke()`.
 
----
+**Designed for:**
 
-## Возможности
+- 🛠 System maintenance and cleanup
+- 🔍 Digital forensics and trace analysis
+- 🔐 Privacy-conscious users
+- 📡 Windows system administration
 
-### Сканирование
-- Анализ системы по категориям с подсчётом размера
-- Выборочная очистка найденных файлов
-- Анимированный одометр результатов
+## Why EliteCleaner?
 
-### Инструменты
-| Инструмент | Описание |
+Traditional Windows cleanup means using separate tools for each task — registry cleaners, temp file removers, network reset tools, all opened **in separate windows**.
+
+You constantly **switch** between different utilities, and the tools are **not linked** together.
+
+#### **EliteCleaner solves this!**
+- 🔘 Everything is in one place
+- 🔗 All tools are connected
+- 💻 Unified workflow
+
+![screenshot](docs/screenshot.png)
+
+## Features
+
+### Available now
+
+| Feature | Description |
 |---|---|
-| `USN Journal` | Удаление и пересоздание журнала изменений NTFS |
-| `Очистка следов` | Shellbag, Explorer, Prefetch, Minidump |
-| `Память javaw.exe` | Поиск и затирание строк в памяти процесса |
-| `Симуляция папок` | Запуск внешнего инструмента симуляции |
-| `Глобальная очистка` | Event Log, Prefetch, Amcache, Jump Lists, Recent Files, Browser History, Temp |
+| 🔍 System Scanner | Analyze system by categories with size calculation |
+| 🎯 Selective Cleaning | Clean found files selectively |
+| 📊 Animated Results | Animated odometer for scan results |
 
-### Сеть
-- Сброс DNS кэша
-- Очистка ARP таблицы
-- Сброс NetBIOS кэша
-- Полный сброс сети (Winsock, IP, IPv6)
+### Tools
 
-### Система
-- Очистка реестра (RunMRU, RecentDocs, UserAssist, TypedPaths)
-- Удаление дампов памяти (Minidump, MEMORY.DMP, CrashDumps)
-- Очистка кэша Windows Update
-- Очистка Thumbnail кэша
+| Tool | Description |
+|---|---|
+| `USN Journal` | Delete and recreate NTFS change journal |
+| `Trace Cleaner` | Shellbag, Explorer, Prefetch, Minidump |
+| `Memory Wiper` | Find and wipe strings in javaw.exe process memory |
+| `Folder Simulation` | Launch external simulation tool |
+| `Global Cleanup` | Event Log, Prefetch, Amcache, Jump Lists, Browser History, Temp |
 
-### Приватность
-- Очистка буфера обмена + история (Win10+)
-- Кэш иконок
-- История поиска (WordWheelQuery)
-- История запуска (RunMRU)
+### Network
 
----
+| Feature | Description |
+|---|---|
+| 🌐 DNS Cache Reset | Clear DNS resolver cache |
+| 🔄 NetBIOS Reset | Clean NetBIOS cache |
+| 🌍 Full Network Reset | Reset Winsock, IP, IPv6 |
 
-## Сборка и запуск
+### System & Privacy
+
+| Feature | Description |
+|---|---|
+| 🧹 Registry Cleaner | RunMRU, RecentDocs, UserAssist, TypedPaths |
+| 💾 Memory Dumps | Remove Minidump, MEMORY.DMP, CrashDumps |
+| 🔧 Windows Update Cache | Clean update cache |
+| 🖼 Thumbnail Cache | Clear thumbnail cache |
+| 📋 Clipboard | Clipboard + history cleanup (Win10+) |
+| 🔎 Search History | WordWheelQuery cleanup |
+| 🚀 Run History | RunMRU cleanup |
+
+## Build
+
+### Prerequisites
+
+| Dependency | Minimum version |
+|---|---|
+| **Rust** | 1.70+ |
+| **WebView2** | Runtime (built-in on Win11) |
+| **Node.js** | Optional (for frontend development) |
+
+### Build from source
 
 ```bash
-# Запуск в dev-режиме
+git clone https://github.com/neverjoskiy/eliteclean.git
+cd eliteclean
+
+# Development mode
 cd src-tauri
 cargo run
 
-# Релизная сборка
-cd src-tauri
+# Release build
 cargo build --release
 ```
 
-> Бинарник: `src-tauri/target/release/elite-cleaner.exe`
+> Binary location: `src-tauri/target/release/elite-cleaner.exe`
 
----
-
-## Структура проекта
+## Project Structure
 
 ```
-elitecleaner/
-├── static/                  # Фронтенд
+eliteclean/
+├── static/                  # Frontend
 │   ├── index.html
 │   ├── css/styles.css
 │   └── js/app.js
-├── scripts/                 # Bat-скрипты очистки
-│   ├── вирус.bat            # Удаление USN журнала
-│   ├── не вирус.bat         # Создание USN журнала
-│   └── винлокер.bat         # Очистка следов (от администратора)
+├── scripts/                 # Batch cleanup scripts
+│   ├── вирус.bat            # Remove USN journal
+│   ├── не вирус.bat         # Create USN journal
+│   └── винлокер.bat         # Trace cleanup (admin)
 ├── src-tauri/
 │   └── src/
-│       ├── bin/main.rs      # Точка входа, регистрация команд
-│       ├── commands.rs      # Tauri-команды (invoke из JS)
-│       ├── services.rs      # Бизнес-логика
-│       ├── memory.rs        # Работа с памятью javaw.exe
-│       ├── models.rs        # Структуры данных (serde)
-│       ├── state.rs         # Глобальное состояние AppState
-│       └── utils.rs         # Пути, логирование
-├── release/                 # Готовый билд
+│       ├── bin/main.rs      # Entry point, command registration
+│       ├── commands.rs      # Tauri commands (invoke from JS)
+│       ├── services.rs      # Business logic
+│       ├── memory.rs        # javaw.exe memory operations
+│       ├── models.rs        # Data structures (serde)
+│       ├── state.rs         # AppState global state
+│       └── utils.rs         # Paths, logging
+├── docs/                    # Documentation assets
+├── release/                 # Ready-to-use build
 ├── CHANGELOG.md
 └── README.md
 ```
 
----
-
-## Требования
+## Requirements
 
 - **OS:** Windows 10 / 11
-- **Runtime:** [WebView2](https://developer.microsoft.com/microsoft-edge/webview2/) (на Win11 уже встроен)
-- **Для сборки:** [Rust](https://rustup.rs) 1.70+
-- **Права:** часть инструментов требует запуска от администратора
-
----
-
-## Релиз
-
-Папка `release/` содержит готовый exe и скрипты. Структура должна сохраняться:
-
-```
-release/
-├── elite-cleaner.exe
-└── scripts/
-    ├── вирус.bat
-    ├── не вирус.bat
-    └── винлокер.bat
-```
-
----
+- **Runtime:** [WebView2](https://developer.microsoft.com/microsoft-edge/webview2/) (built-in on Win11)
+- **Build:** [Rust](https://rustup.rs) 1.70+
+- **Rights:** Some tools require administrator privileges
 
 ## Changelog
 
-См. [CHANGELOG.md](./CHANGELOG.md)
+See [CHANGELOG.md](./CHANGELOG.md)
+
+## Contributing
+
+Contributions are **welcome and encouraged**.
+
+Feel free to open an issue or submit a pull request.
+
+## License
+
+Distributed under the terms described in [LICENSE](LICENSE).
 
 ---
 
