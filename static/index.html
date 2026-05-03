@@ -29,49 +29,54 @@
     <aside class="sidebar">
         <div class="logo">EC</div>
         <nav>
-            <button class="nav-btn active" data-tab="dashboard" data-tip="главная">
+            <button class="nav-btn active" data-tab="dashboard" data-tip="главная" data-tooltip="Главная панель|Обзор системы, быстрый доступ к инструментам очистки и сканеру. Не затрагивает файлы или реестр.">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
                     <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
                     <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
                 </svg>
             </button>
-            <button class="nav-btn" data-tab="tools" data-tip="инструменты">
+            <button class="nav-btn" data-tab="tools" data-tip="инструменты" data-tooltip="Инструменты|Расширенные утилиты: чистка USN Journal, очистка следов активности, работа с памятью javaw.exe, FunTime. Многие операции требуют прав администратора.">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
                     <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
                 </svg>
             </button>
-            <button class="nav-btn" data-tab="network" data-tip="сеть">
+            <button class="nav-btn" data-tab="network" data-tip="сеть" data-tooltip="Сеть|Сброс DNS, очистка ARP и NetBIOS кэша, полный сброс сетевых настроек. Выполняет команды ipconfig, nbtstat, netsh. Требует прав администратора.">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
                     <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
                     <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
                 </svg>
             </button>
-            <button class="nav-btn" data-tab="system" data-tip="система">
+            <button class="nav-btn" data-tab="system" data-tip="система" data-tooltip="Система|Очистка реестра (RunMRU, RecentDocs), дампов памяти, кэша Windows Update, thumbnail кэша. Затрагивает HKCU реестр и системные папки.">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
                     <rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/>
                     <line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/>
                 </svg>
             </button>
-            <button class="nav-btn" data-tab="privacy" data-tip="приватность">
+            <button class="nav-btn" data-tab="privacy" data-tip="приватность" data-tooltip="Приватность|Очистка буфера обмена, кэша иконок, истории поиска Windows и истории запуска программ. Удаляет данные из реестра HKCU.">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
                 </svg>
             </button>
-            <button class="nav-btn" data-tab="settings" data-tip="настройки">
+            <button class="nav-btn" data-tab="settings" data-tip="настройки" data-tooltip="Настройки|Параметры интерфейса, звуков, анимаций и поведения очистки. Изменения сохраняются в localStorage.">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
                     <circle cx="12" cy="12" r="3"/>
                     <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
                 </svg>
             </button>
-            <button class="nav-btn" data-tab="tweaks" data-tip="твики">
+            <button class="nav-btn" data-tab="tweaks" data-tip="твики" data-tooltip="Твики|Системные твики реестра для оптимизации Windows. Применяет и откатывает изменения в HKLM/HKCU. Требует прав администратора для некоторых твиков.">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
                     <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
                 </svg>
             </button>
-            <button class="nav-btn" data-tab="processes" data-tip="процессы">
+            <button class="nav-btn" data-tab="processes" data-tip="процессы" data-tooltip="Диспетчер задач|Просмотр запущенных процессов, изменение приоритета, заморозка и завершение процессов. Использует Win32 API. Требует прав администратора.">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
                     <rect x="1" y="3" width="15" height="13" rx="2"/><polygon points="16 8 22 3 22 16 16 11"/>
                     <line x1="23" y1="8" x2="23" y2="11"/>
+                </svg>
+            </button>
+            <button class="nav-btn" data-tab="startup" data-tip="автозагрузка">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
                 </svg>
             </button>
         </nav>
@@ -87,7 +92,7 @@
                         <span class="scan-title">сканирование системы</span>
                         <span class="scan-subtitle" id="scanSubtitle">нажмите для анализа</span>
                     </div>
-                    <button class="btn-scan-ring" id="scanBtn">
+                    <button class="btn-scan-ring" id="scanBtn" data-tooltip="Сканирование системы|Анализирует временные файлы, кэш, логи и находит объекты для очистки. Не удаляет файлы автоматически. Требует прав администратора для некоторых категорий.">
                         <svg class="scan-ring-svg" viewBox="0 0 36 36">
                             <circle class="scan-ring-bg" cx="18" cy="18" r="15" fill="none" stroke-width="2"/>
                             <circle class="scan-ring-fill" id="scanRingFill" cx="18" cy="18" r="15" fill="none" stroke-width="2" stroke-dasharray="94.25" stroke-dashoffset="94.25"/>
@@ -103,7 +108,7 @@
                     <div class="scan-categories" id="scanCategories"></div>
                     <div class="scan-actions">
                         <label class="scan-select-all"><input type="checkbox" id="scanSelectAll" checked><span>выбрать все</span></label>
-                        <button class="btn-run" id="scanCleanBtn">
+                        <button class="btn-run" id="scanCleanBtn" data-tooltip="Очистить выбранное|Удаляет файлы из выбранных категорий по результатам сканирования. Операция необратима. Требует прав администратора.">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                             очистить выбранное
                         </button>
@@ -123,11 +128,11 @@
                 </div>
                 <div class="launch-right">
                     <div class="launch-btns">
-                        <button class="btn-run" id="launchBtn">
+                        <button class="btn-run" id="launchBtn" data-tooltip="Запуск|Запускает внутреннее приложение с эмуляцией Steam окружения.">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                             запустить
                         </button>
-                        <button class="btn-icon" id="instructionBtn" title="инструкция">
+                        <button class="btn-icon" id="instructionBtn" title="инструкция" data-tooltip="Инструкция|Показывает пошаговую инструкцию по использованию внутреннего инструмента.">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
                         </button>
                     </div>
@@ -145,9 +150,9 @@
                         <button class="home-section-goto" data-tab="tools">открыть →</button>
                     </div>
                     <div class="home-quick-list">
-                        <div class="hql-item"><span class="hql-tag">usn</span><span class="hql-name">чистка строк</span><button class="hql-btn" id="hq-cleanStrings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><polygon points="5 3 19 12 5 21 5 3"/></svg></button><span class="hql-status" id="hq-cleanStrings-status"></span></div>
-                        <div class="hql-item"><span class="hql-tag">tracks</span><span class="hql-name">очистка следов</span><button class="hql-btn" id="hq-cleanTracks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><polygon points="5 3 19 12 5 21 5 3"/></svg></button><span class="hql-status" id="hq-cleanTracks-status"></span></div>
-                        <div class="hql-item"><span class="hql-tag">memory</span><span class="hql-name">javaw.exe</span><button class="hql-btn" id="hq-cleanJavaw"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><polygon points="5 3 19 12 5 21 5 3"/></svg></button><span class="hql-status" id="hq-cleanJavaw-status"></span></div>
+                        <div class="hql-item"><span class="hql-tag">usn</span><span class="hql-name">чистка строк</span><button class="hql-btn" id="hq-cleanStrings" data-tooltip="Чистка строк (USN)|Удаляет и пересоздаёт NTFS USN Journal. Журнал записывает все изменения файлов на диске. Полезно для удаления следов активности. Требует права администратора."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><polygon points="5 3 19 12 5 21 5 3"/></svg></button><span class="hql-status" id="hq-cleanStrings-status"></span></div>
+                        <div class="hql-item"><span class="hql-tag">tracks</span><span class="hql-name">очистка следов</span><button class="hql-btn" id="hq-cleanTracks" data-tooltip="Очистка следов|Удаляет Shellbag, Explorer MRU, Prefetch файлы, Minidump дампы. Очищает следы работы в системе. Рекомендуется перед проверкой на следы. Требует права администратора."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><polygon points="5 3 19 12 5 21 5 3"/></svg></button><span class="hql-status" id="hq-cleanTracks-status"></span></div>
+                        <div class="hql-item"><span class="hql-tag">memory</span><span class="hql-name">javaw.exe</span><button class="hql-btn" id="hq-cleanJavaw" data-tooltip="Очистка javaw.exe|Поиск и удаление строк из памяти процесса javaw.exe. Использует Win32 API для чтения/записи памяти процесса. Требует прав администратора."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><polygon points="5 3 19 12 5 21 5 3"/></svg></button><span class="hql-status" id="hq-cleanJavaw-status"></span></div>
                         <div class="hql-item"><span class="hql-tag">global</span><span class="hql-name">глобальная очистка</span><button class="hql-btn" id="hq-globalClean"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><polygon points="5 3 19 12 5 21 5 3"/></svg></button><span class="hql-status" id="hq-globalClean-status"></span></div>
                     </div>
                 </div>
@@ -196,7 +201,7 @@
             <div class="card logs-card">
                 <div class="logs-head">
                     <span class="label">журнал</span>
-                    <button class="btn-icon" id="clearLogsBtn" title="очистить">
+                    <button class="btn-icon" id="clearLogsBtn" title="очистить" data-tooltip="Очистить журнал|Удаляет все записи из журнала событий интерфейса. Не влияет на системные логи Windows.">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                     </button>
                 </div>
@@ -214,21 +219,21 @@
                         <div class="step" id="cleanStringsStep2"><span class="sn">2</span><span class="st">создание usn</span><span class="sb pending" id="cleanStringsStep2Status">—</span></div>
                     </div>
                     <div class="tool-result hidden" id="cleanStringsResult"><span class="result-message"></span></div>
-                    <button class="btn-tool" id="cleanStringsBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polygon points="5 3 19 12 5 21 5 3"/></svg><span class="btn-text">запустить</span></button>
+                    <button class="btn-tool" id="cleanStringsBtn" data-tooltip="Чистка строк (USN)|Удаляет и пересоздаёт NTFS USN Journal. Журнал записывает все изменения файлов на диске. Полезно для удаления следов активности. Требует права администратора."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polygon points="5 3 19 12 5 21 5 3"/></svg><span class="btn-text">запустить</span></button>
                 </div>
                 <div class="card tool-card">
                     <div class="tool-top"><span class="tag">tracks</span><span class="tool-name">очистка следов</span></div>
                     <p class="tool-desc">shellbag, explorer, prefetch, minidump</p>
                     <div class="tool-progress hidden" id="cleanTracksProgress"><div class="pbar"><div class="pfill" id="cleanTracksProgressFill"></div></div><span class="ptxt" id="cleanTracksProgressText">запуск...</span></div>
                     <div class="tool-result hidden" id="cleanTracksResult"><span class="result-message"></span></div>
-                    <button class="btn-tool" id="cleanTracksBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span class="btn-text">запустить</span></button>
+                    <button class="btn-tool" id="cleanTracksBtn" data-tooltip="Очистка следов|Удаляет Shellbag, Explorer MRU, Prefetch файлы, Minidump дампы. Очищает следы работы в системе. Рекомендуется перед проверкой на следы. Требует права администратора."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span class="btn-text">запустить</span></button>
                 </div>
                 <div class="card tool-card">
                     <div class="tool-top"><span class="tag">memory</span><span class="tool-name">очистка javaw.exe</span></div>
                     <p class="tool-desc">поиск и удаление строк из памяти процесса</p>
                     <div class="tool-progress hidden" id="cleanJavawProgress"><div class="pbar"><div class="pfill" id="cleanJavawProgressFill"></div></div><span class="ptxt" id="cleanJavawProgressText">сканирование...</span></div>
                     <div class="tool-result hidden" id="cleanJavawResult"><span class="result-message"></span></div>
-                    <button class="btn-tool" id="cleanJavawBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span class="btn-text">запустить</span></button>
+                    <button class="btn-tool" id="cleanJavawBtn" data-tooltip="Очистка javaw.exe|Поиск и удаление строк из памяти процесса javaw.exe. Использует Win32 API для чтения/записи памяти процесса. Требует прав администратора."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span class="btn-text">запустить</span></button>
                 </div>
                 <div class="card tool-card">
                     <div class="tool-top"><span class="tag">fun</span><span class="tool-name">FunTime</span></div>
@@ -236,21 +241,21 @@
                     <div class="tool-progress hidden" id="funTimeProgress"><div class="pbar"><div class="pfill" id="funTimeProgressFill"></div></div><span class="ptxt" id="funTimeProgressText">запуск...</span></div>
                     <div class="tool-result hidden" id="funTimeResult"><span class="result-message"></span></div>
                     <div class="hidden" id="funTimeLines" style="margin-top:8px;max-height:200px;overflow-y:auto;font-size:11px;font-family:monospace;color:var(--text-muted);"></div>
-                    <button class="btn-tool" id="funTimeBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polygon points="5 3 19 12 5 21 5 3"/></svg><span class="btn-text">запустить</span></button>
+                    <button class="btn-tool" id="funTimeBtn" data-tooltip="FunTime|Запускает 1fc.exe и очищает вывод. Внутренний инструмент. Результат зависит от конфигурации."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polygon points="5 3 19 12 5 21 5 3"/></svg><span class="btn-text">запустить</span></button>
                 </div>
                 <div class="card tool-card">
                     <div class="tool-top"><span class="tag">ext</span><span class="tool-name">симуляция папок</span></div>
                     <p class="tool-desc">запуск внешнего инструмента симуляции</p>
                     <div class="tool-progress hidden" id="simulateProgress"><div class="pbar"><div class="pfill" id="simulateProgressFill"></div></div><span class="ptxt" id="simulateProgressText">запуск...</span></div>
                     <div class="tool-result hidden" id="simulateResult"><span class="result-message"></span></div>
-                    <button class="btn-tool" id="simulateBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polygon points="5 3 19 12 5 21 5 3"/></svg><span class="btn-text">запустить</span></button>
+                    <button class="btn-tool" id="simulateBtn" data-tooltip="Симуляция папок|Запускает внешний инструмент simulate.exe. Создаёт тестовые папки для симуляции. Требует права администратора."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polygon points="5 3 19 12 5 21 5 3"/></svg><span class="btn-text">запустить</span></button>
                 </div>
                 <div class="card tool-card wide">
                     <div class="tool-top"><span class="tag">global</span><span class="tool-name">глобальная очистка</span></div>
                     <p class="tool-desc">event log, mft, amcache, jump lists, recent files, browser history, temp</p>
                     <div class="tool-progress hidden" id="globalCleanProgress"><div class="pbar"><div class="pfill" id="globalCleanProgressFill"></div></div><span class="ptxt" id="globalCleanProgressText">запуск...</span></div>
                     <div class="tool-result hidden" id="globalCleanResult"><span class="result-message"></span></div>
-                    <button class="btn-tool" id="globalCleanBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span class="btn-text">выбрать и запустить</span></button>
+                    <button class="btn-tool" id="globalCleanBtn" data-tooltip="Глобальная очистка|Комплексная очистка: event logs, MFT, amcache, jump lists, recent files, browser history, temp. Позволяет выбрать категории. Требует права администратора."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span class="btn-text">выбрать и запустить</span></button>
                 </div>
             </div>
         </div>
@@ -261,7 +266,7 @@
                     <div class="tool-top"><span class="tag">dns</span><span class="tool-name">сброс DNS кэша</span></div>
                     <p class="tool-desc">ipconfig /flushdns — очистка кэша резолвера</p>
                     <div class="tool-result hidden" id="flushDnsResult"><span class="result-message"></span></div>
-                    <button class="btn-tool" id="flushDnsBtn">
+                    <button class="btn-tool" id="flushDnsBtn" data-tooltip="Сброс DNS кэша|Выполняет ipconfig /flushdns. Очищает кэш DNS резолвера. Полезно после смены DNS серверов или при проблемах с доступом к сайтам. Требует права администратора.">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>
                         <span class="btn-text">сбросить</span>
                     </button>
@@ -270,7 +275,7 @@
                     <div class="tool-top"><span class="tag">arp</span><span class="tool-name">очистка ARP</span></div>
                     <p class="tool-desc">удаление таблицы ARP кэша</p>
                     <div class="tool-result hidden" id="clearArpResult"><span class="result-message"></span></div>
-                    <button class="btn-tool" id="clearArpBtn">
+                    <button class="btn-tool" id="clearArpBtn" data-tooltip="Очистка ARP|Удаляет записи из ARP таблицы (ipconfig /flushdns не чистит ARP, используется arp -d или netsh). Сбрасывает привязки IP к MAC адресам. Требует права администратора.">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                         <span class="btn-text">очистить</span>
                     </button>
@@ -279,7 +284,7 @@
                     <div class="tool-top"><span class="tag">netbios</span><span class="tool-name">очистка NetBIOS</span></div>
                     <p class="tool-desc">nbtstat -R / -RR — сброс кэша имён</p>
                     <div class="tool-result hidden" id="clearNetbiosResult"><span class="result-message"></span></div>
-                    <button class="btn-tool" id="clearNetbiosBtn">
+                    <button class="btn-tool" id="clearNetbiosBtn" data-tooltip="Очистка NetBIOS|Выполняет nbtstat -R и -RR. Сбрасывает кэш имён NetBIOS через удалённое имя. Полезно при сетевых проблемах. Требует прав администратора.">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                         <span class="btn-text">очистить</span>
                     </button>
@@ -290,7 +295,7 @@
                     <div class="tool-progress hidden" id="resetNetworkProgress"><div class="pbar"><div class="pfill" id="resetNetworkProgressFill"></div></div><span class="ptxt" id="resetNetworkProgressText">сброс...</span></div>
                     <div class="tool-result hidden" id="resetNetworkResult"><span class="result-message"></span></div>
                     <div class="details-list hidden" id="resetNetworkDetails"></div>
-                    <button class="btn-tool" id="resetNetworkBtn">
+                    <button class="btn-tool" id="resetNetworkBtn" data-tooltip="Полный сброс сети|Выполняет winsock reset, ip reset, ipv6 reset и flushdns через netsh. Полностью сбрасывает сетевые настройки Windows. Требует прав администратора и перезагрузки.">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>
                         <span class="btn-text">сбросить всё</span>
                     </button>
@@ -306,7 +311,7 @@
                     <p class="tool-desc">RunMRU, RecentDocs, UserAssist, TypedPaths</p>
                     <div class="tool-result hidden" id="cleanRegistryResult"><span class="result-message"></span></div>
                     <div class="details-list hidden" id="cleanRegistryDetails"></div>
-                    <button class="btn-tool" id="cleanRegistryBtn">
+                    <button class="btn-tool" id="cleanRegistryBtn" data-tooltip="Очистка реестра|Удаляет RunMRU, RecentDocs, UserAssist, TypedPaths из HKCU реестра. Очищает следы открытых файлов и запущенных программ.">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                         <span class="btn-text">очистить</span>
                     </button>
@@ -315,7 +320,7 @@
                     <div class="tool-top"><span class="tag">dump</span><span class="tool-name">дампы памяти</span></div>
                     <p class="tool-desc">Minidump, MEMORY.DMP, CrashDumps</p>
                     <div class="tool-result hidden" id="cleanDumpsResult"><span class="result-message"></span></div>
-                    <button class="btn-tool" id="cleanDumpsBtn">
+                    <button class="btn-tool" id="cleanDumpsBtn" data-tooltip="Очистка дампов памяти|Удаляет Minidump файлы, MEMORY.DMP и CrashDumps. Содержат состояние памяти при сбоях и могут включать конфиденциальные данные. Требует прав администратора.">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                         <span class="btn-text">удалить</span>
                     </button>
@@ -325,7 +330,7 @@
                     <p class="tool-desc">SoftwareDistribution\\Download</p>
                     <div class="tool-progress hidden" id="cleanWuProgress"><div class="pbar"><div class="pfill" id="cleanWuProgressFill"></div></div><span class="ptxt" id="cleanWuProgressText">очистка...</span></div>
                     <div class="tool-result hidden" id="cleanWuResult"><span class="result-message"></span></div>
-                    <button class="btn-tool" id="cleanWuBtn">
+                    <button class="btn-tool" id="cleanWuBtn" data-tooltip="Очистка кэша обновлений|Очищает папку SoftwareDistribution\\Download. Останавливает и запускает службы wuauserv и bits. Требует прав администратора.">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                         <span class="btn-text">очистить</span>
                     </button>
@@ -334,7 +339,7 @@
                     <div class="tool-top"><span class="tag">thumb</span><span class="tool-name">thumbnail кэш</span></div>
                     <p class="tool-desc">thumbcache_*.db из папки Explorer</p>
                     <div class="tool-result hidden" id="cleanThumbResult"><span class="result-message"></span></div>
-                    <button class="btn-tool" id="cleanThumbBtn">
+                    <button class="btn-tool" id="cleanThumbBtn" data-tooltip="Очистка thumbnail кэша|Удаляет файлы thumbcache_*.db из папки Explorer. Windows пересоздаст их при необходимости. Безопасная операция.">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                         <span class="btn-text">очистить</span>
                     </button>
@@ -349,7 +354,7 @@
                     <div class="tool-top"><span class="tag">clip</span><span class="tool-name">буфер обмена</span></div>
                     <p class="tool-desc">очистка clipboard + история буфера (Win10+)</p>
                     <div class="tool-result hidden" id="clearClipboardResult"><span class="result-message"></span></div>
-                    <button class="btn-tool" id="clearClipboardBtn">
+                    <button class="btn-tool" id="clearClipboardBtn" data-tooltip="Очистка буфера обмена|Очищает текущее содержимое clipboard и историю буфера (Windows 10+). Удаляет скопированные пароли, ссылки и текст.">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                         <span class="btn-text">очистить</span>
                     </button>
@@ -358,7 +363,7 @@
                     <div class="tool-top"><span class="tag">icon</span><span class="tool-name">кэш иконок</span></div>
                     <p class="tool-desc">IconCache.db + iconcache_*.db</p>
                     <div class="tool-result hidden" id="cleanIconResult"><span class="result-message"></span></div>
-                    <button class="btn-tool" id="cleanIconBtn">
+                    <button class="btn-tool" id="cleanIconBtn" data-tooltip="Очистка кэша иконок|Удаляет IconCache.db и iconcache_*.db. Решает проблемы с отображением иконок. Windows пересоздаст кэш автоматически.">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                         <span class="btn-text">очистить</span>
                     </button>
@@ -367,7 +372,7 @@
                     <div class="tool-top"><span class="tag">search</span><span class="tool-name">история поиска</span></div>
                     <p class="tool-desc">WordWheelQuery, Search реестр</p>
                     <div class="tool-result hidden" id="cleanSearchResult"><span class="result-message"></span></div>
-                    <button class="btn-tool" id="cleanSearchBtn">
+                    <button class="btn-tool" id="cleanSearchBtn" data-tooltip="Очистка истории поиска|Удаляет WordWheelQuery и записи поиска из реестра Windows. Очищает историю поиска в проводнике и меню Пуск.">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                         <span class="btn-text">очистить</span>
                     </button>
@@ -376,7 +381,7 @@
                     <div class="tool-top"><span class="tag">run</span><span class="tool-name">история запуска</span></div>
                     <p class="tool-desc">RunMRU, TypedPaths из реестра</p>
                     <div class="tool-result hidden" id="cleanRunResult"><span class="result-message"></span></div>
-                    <button class="btn-tool" id="cleanRunBtn">
+                    <button class="btn-tool" id="cleanRunBtn" data-tooltip="Очистка истории запуска|Удаляет RunMRU и TypedPaths из реестра. Очищает список недавно запущенных программ (Win+R) и набранных путей.">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                         <span class="btn-text">очистить</span>
                     </button>
@@ -391,7 +396,7 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                     <span class="tweaks-title">системные твики</span>
                     <span class="tweaks-subtitle">правки реестра для оптимизации</span>
-                    <button class="btn-icon" id="tweaksRefreshBtn" title="обновить статус" style="margin-left:auto">
+                    <button class="btn-icon" id="tweaksRefreshBtn" title="обновить статус" style="margin-left:auto" data-tooltip="Обновить статус|Повторно проверяет текущее состояние всех твиков в реестре.">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>
                     </button>
                 </div>
@@ -406,21 +411,21 @@
         <div class="settings-grid">
         <div class="card settings-section">
             <div class="settings-section-title">интерфейс</div>
-            <div class="settings-row">
+            <div class="settings-row" data-tooltip="Звуки|Включает звуковое сопровождение при навигации, кликах и завершении операций. Сохраняется в localStorage.">
                 <div class="settings-label">
                     <span class="settings-name">звуки</span>
                     <span class="settings-desc">звуковое сопровождение действий</span>
                 </div>
                 <label class="toggle"><input type="checkbox" id="settingSounds" checked><span class="toggle-track"><span class="toggle-thumb"></span></span></label>
             </div>
-            <div class="settings-row">
+            <div class="settings-row" data-tooltip="Анимации|Включает плавные переходы между вкладками, CSS анимации splash-экрана и ripple-эффекты.">
                 <div class="settings-label">
                     <span class="settings-name">анимации</span>
                     <span class="settings-desc">плавные переходы и эффекты</span>
                 </div>
                 <label class="toggle"><input type="checkbox" id="settingAnimations" checked><span class="toggle-track"><span class="toggle-thumb"></span></span></label>
             </div>
-            <div class="settings-row">
+            <div class="settings-row" data-tooltip="Компактный режим|Уменьшает отступы и размеры элементов интерфейса для максимальной плотности информации.">
                 <div class="settings-label">
                     <span class="settings-name">компактный режим</span>
                     <span class="settings-desc">уменьшить отступы и размеры</span>
@@ -430,21 +435,21 @@
         </div>
         <div class="card settings-section">
             <div class="settings-section-title">очистка</div>
-            <div class="settings-row">
+            <div class="settings-row" data-tooltip="Подтверждение очистки|Показывает диалог подтверждения перед удалением файлов или изменением реестра. Рекомендуется для избежания случайных операций.">
                 <div class="settings-label">
                     <span class="settings-name">подтверждение перед очисткой</span>
                     <span class="settings-desc">показывать диалог подтверждения</span>
                 </div>
                 <label class="toggle"><input type="checkbox" id="settingConfirm"><span class="toggle-track"><span class="toggle-thumb"></span></span></label>
             </div>
-            <div class="settings-row">
+            <div class="settings-row" data-tooltip="Автосканирование|Автоматически запускает сканирование системы при старте приложения. Результаты появляются на главной панели.">
                 <div class="settings-label">
                     <span class="settings-name">автосканирование при запуске</span>
                     <span class="settings-desc">запускать сканирование автоматически</span>
                 </div>
                 <label class="toggle"><input type="checkbox" id="settingAutoScan"><span class="toggle-track"><span class="toggle-thumb"></span></span></label>
             </div>
-            <div class="settings-row">
+            <div class="settings-row" data-tooltip="Лимит журнала|Максимальное количество записей в журнале событий интерфейса. При превышении старые записи удаляются.">
                 <div class="settings-label">
                     <span class="settings-name">лимит лога</span>
                     <span class="settings-desc">максимум записей в журнале</span>
@@ -480,7 +485,7 @@
                     <span class="proc-subtitle" id="procCount">0 процессов</span>
                     <div class="proc-header-actions">
                         <input type="text" class="proc-search" id="procSearch" placeholder="поиск...">
-                        <button class="btn-icon" id="procRefreshBtn" title="обновить">
+                        <button class="btn-icon" id="procRefreshBtn" title="обновить" data-tooltip="Обновить список|Повторно считывает список запущенных процессов из системы. Не завершает процессы.">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>
                         </button>
                     </div>
@@ -498,6 +503,40 @@
                 </div>
                 <div class="proc-table-body" id="procTableBody">
                     <div class="proc-loading">загрузка...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- АВТОЗАГРУЗКА -->
+        <div class="tab" id="startup">
+            <div class="card startup-header">
+                <div class="startup-header-inner">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                    <span class="startup-title">управление автозагрузкой</span>
+                    <span class="startup-subtitle" id="startupCount">0 записей</span>
+                    <div class="startup-header-actions">
+                        <input type="text" class="startup-search" id="startupSearch" placeholder="поиск...">
+                        <button class="btn-icon" id="startupRefreshBtn" title="обновить" data-tooltip="Обновить|Повторно считывает все точки автозагрузки из реестра, папок и планировщика задач.">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>
+                        </button>
+                        <button class="btn-run" id="startupAddBtn" data-tooltip="Добавить запись|Создаёт новую точку автозагрузки в выбранном расположении (реестр или папка).">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            добавить
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card startup-table-card">
+                <div class="startup-table-head">
+                    <span class="startup-col"></span>
+                    <span class="startup-col">имя</span>
+                    <span class="startup-col">путь / команда</span>
+                    <span class="startup-col">расположение</span>
+                    <span class="startup-col">статус</span>
+                    <span class="startup-col">действия</span>
+                </div>
+                <div class="startup-table-body" id="startupTableBody">
+                    <div class="startup-loading">загрузка...</div>
                 </div>
             </div>
         </div>
@@ -534,7 +573,40 @@
     </div>
 </div>
 
+<!-- Modal: Startup Add/Edit -->
+<div class="overlay hidden" id="startupModal">
+    <div class="modal">
+        <div class="modal-head"><span id="startupModalTitle">новая запись</span><button class="btn-icon" id="startupModalClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+        <div class="modal-body">
+            <div class="startup-form">
+                <div class="startup-form-row">
+                    <span class="startup-form-label">имя</span>
+                    <input type="text" class="startup-form-input" id="startupModalName" placeholder="Название программы">
+                </div>
+                <div class="startup-form-row">
+                    <span class="startup-form-label">путь или команда</span>
+                    <input type="text" class="startup-form-input" id="startupModalPath" placeholder="C:\\Program Files\\app.exe">
+                </div>
+                <div class="startup-form-row">
+                    <span class="startup-form-label">расположение</span>
+                    <select class="startup-form-select" id="startupModalLocation">
+                        <option value="hkcu_run">HKCU\\Run</option>
+                        <option value="hklm_run">HKLM\\Run</option>
+                        <option value="startup_folder">Папка автозагрузки</option>
+                    </select>
+                    <span class="startup-form-hint">HKCU — текущий пользователь. HKLM — все пользователи. Требует права администратора.</span>
+                </div>
+            </div>
+        </div>
+        <div class="modal-foot">
+            <button class="btn-ghost" id="startupModalCancel">отмена</button>
+            <button class="btn-run" id="startupModalSave"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="20 6 9 17 4 12"/></svg>сохранить</button>
+        </div>
+    </div>
+</div>
+
 <div class="toasts" id="toastContainer"></div>
+<div id="tooltipContainer" class="tooltip"></div>
 <script src="/js/app.js"></script>
 </body>
 </html>

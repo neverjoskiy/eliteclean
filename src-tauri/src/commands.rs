@@ -3,7 +3,7 @@
 use tauri::State;
 use crate::state::{SharedAppState, OpGuard};
 use crate::models::*;
-use crate::services::{CleanupService, NetworkService, PrivacyService, ProcessService, SystemService, TweaksService};
+use crate::services::{CleanupService, NetworkService, PrivacyService, ProcessService, SystemService, TweaksService, StartupService};
 
 /// Статус приложения
 #[tauri::command]
@@ -237,4 +237,31 @@ pub async fn resume_process(pid: u32, state: State<'_, SharedAppState>) -> Resul
 #[tauri::command]
 pub async fn kill_process(pid: u32, state: State<'_, SharedAppState>) -> Result<ProcessActionResponse, String> {
     Ok(ProcessService::kill_process(pid, state).await)
+}
+
+#[tauri::command]
+pub async fn list_startup_entries() -> Result<StartupListResponse, String> {
+    Ok(StartupListResponse {
+        entries: StartupService::list_entries(),
+    })
+}
+
+#[tauri::command]
+pub async fn toggle_startup_entry(id: String) -> Result<ApiResponse, String> {
+    Ok(StartupService::toggle_entry(&id))
+}
+
+#[tauri::command]
+pub async fn delete_startup_entry(id: String) -> Result<ApiResponse, String> {
+    Ok(StartupService::delete_entry(&id))
+}
+
+#[tauri::command]
+pub async fn add_startup_entry(entry: StartupEntryRequest) -> Result<ApiResponse, String> {
+    Ok(StartupService::add_entry(entry))
+}
+
+#[tauri::command]
+pub async fn edit_startup_entry(id: String, entry: StartupEntryRequest) -> Result<ApiResponse, String> {
+    Ok(StartupService::edit_entry(&id, entry))
 }

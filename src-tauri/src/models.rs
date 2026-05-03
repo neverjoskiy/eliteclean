@@ -268,3 +268,27 @@ pub struct ProcessActionResponse {
     pub success: bool,
     pub message: String,
 }
+
+/// Запись автозагрузки
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct StartupEntry {
+    pub id: String,
+    pub name: String,
+    pub path: String,
+    pub location: String,
+    pub enabled: bool,
+}
+
+/// Запрос добавления/редактирования записи автозагрузки
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct StartupEntryRequest {
+    pub name: String,
+    pub path: String,
+    pub location: String,
+}
+
+/// Ответ списка записей автозагрузки
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct StartupListResponse {
+    pub entries: Vec<StartupEntry>,
+}

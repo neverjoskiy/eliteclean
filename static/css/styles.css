@@ -736,3 +736,153 @@ body.no-anim *, body.no-anim *::before, body.no-anim *::after {
 .proc-row.critical { border-left: 2px solid rgba(158,74,74,.5); }
 .proc-row.suspended { opacity: .65; }
 .proc-row.suspended .proc-col-name { color: var(--tx2); text-decoration: line-through; }
+
+/* ── Tooltip ── */
+.tooltip {
+    position: absolute;
+    background: var(--bg3);
+    border: 1px solid var(--bh);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 11px;
+    max-width: 280px;
+    z-index: 9999;
+    pointer-events: none;
+    color: var(--tx);
+    line-height: 1.5;
+    box-shadow: 0 4px 16px rgba(0,0,0,.4);
+    opacity: 0;
+    transition: opacity .15s ease;
+}
+.tooltip.visible { opacity: 1; }
+.tooltip-title {
+    font-weight: 600;
+    font-size: 12px;
+    color: var(--tx);
+    margin-bottom: 4px;
+    display: block;
+}
+.tooltip-desc {
+    color: var(--tx2);
+    display: block;
+    margin-bottom: 4px;
+}
+.tooltip-meta {
+    color: var(--tx3);
+    font-size: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    display: block;
+}
+.tooltip-admin {
+    color: var(--warn);
+    font-size: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    display: block;
+    margin-top: 4px;
+}
+
+/* ── Startup Tab ── */
+.startup-header { padding: 10px 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.startup-header-inner { display: flex; align-items: center; gap: 8px; flex: 1; }
+.startup-title { font-size: .78rem; font-weight: 600; color: var(--tx); }
+.startup-subtitle { font-size: .68rem; color: var(--tx3); font-family: 'JetBrains Mono', monospace; }
+.startup-header-actions { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+.startup-search {
+    background: var(--bg2); border: 1px solid var(--b); border-radius: var(--r);
+    color: var(--tx2); font-family: 'Inter', sans-serif; font-size: .7rem;
+    padding: 4px 8px; outline: none; width: 160px;
+    transition: border-color var(--t);
+}
+.startup-search::placeholder { color: var(--tx3); }
+.startup-search:focus { border-color: var(--bh); }
+
+.startup-table-card { overflow: hidden; }
+.startup-table-head {
+    display: grid;
+    grid-template-columns: 28px 1fr 1.5fr 120px 72px 140px;
+    align-items: center; gap: 0;
+    padding: 6px 12px; border-bottom: 1px solid var(--b);
+    background: var(--bg2); font-size: .62rem; font-weight: 600;
+    color: var(--tx3); text-transform: uppercase; letter-spacing: .06em;
+}
+.startup-col { padding: 0 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.startup-table-body { max-height: 480px; overflow-y: auto; }
+.startup-row {
+    display: grid;
+    grid-template-columns: 28px 1fr 1.5fr 120px 72px 140px;
+    align-items: center; gap: 0;
+    padding: 5px 12px; border-bottom: 1px solid rgba(255,255,255,.02);
+    transition: background var(--t); font-size: .72rem;
+}
+.startup-row:hover { background: var(--bg2); }
+.startup-row:last-child { border-bottom: none; }
+.startup-row.disabled .startup-name,
+.startup-row.disabled .startup-path { opacity: .4; }
+
+.startup-icon {
+    width: 16px; height: 16px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--tx3);
+}
+.startup-icon svg { width: 14px; height: 14px; }
+
+.startup-name {
+    color: var(--tx); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    padding: 0 6px; font-weight: 500;
+}
+.startup-path {
+    color: var(--tx2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    padding: 0 6px; font-family: 'JetBrains Mono', monospace; font-size: .65rem;
+}
+.startup-location {
+    color: var(--tx3); padding: 0 6px; font-size: .62rem;
+    font-family: 'JetBrains Mono', monospace;
+}
+.startup-status {
+    padding: 0 6px; font-size: .62rem; font-weight: 500;
+}
+.startup-status.enabled { color: var(--ok); }
+.startup-status.disabled { color: var(--tx3); }
+
+.startup-actions {
+    display: flex; align-items: center; gap: 4px; padding: 0 6px;
+}
+.startup-btn {
+    width: 22px; height: 22px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg3); border: 1px solid var(--b);
+    border-radius: 3px; cursor: pointer; color: var(--tx3);
+    transition: background var(--t), color var(--t), border-color var(--t);
+}
+.startup-btn:hover { color: var(--tx); border-color: var(--bh); }
+.startup-btn.toggle-on { color: var(--ok); border-color: rgba(90,158,90,.25); }
+.startup-btn.toggle-on:hover { background: rgba(90,158,90,.1); border-color: rgba(90,158,90,.5); }
+.startup-btn.toggle-off { color: var(--warn); border-color: rgba(160,120,48,.25); }
+.startup-btn.toggle-off:hover { background: rgba(160,120,48,.1); border-color: rgba(160,120,48,.5); }
+.startup-btn.delete { color: var(--err); border-color: rgba(158,74,74,.2); }
+.startup-btn.delete:hover { background: rgba(158,74,74,.1); border-color: rgba(158,74,74,.5); }
+.startup-btn.edit { color: var(--tx2); }
+.startup-btn.edit:hover { background: var(--bg2); }
+
+.startup-loading { padding: 20px; text-align: center; font-size: .72rem; color: var(--tx3); font-family: 'JetBrains Mono', monospace; }
+.startup-empty { padding: 20px; text-align: center; font-size: .72rem; color: var(--tx3); }
+
+/* ── Startup Add/Edit Modal ── */
+.startup-form { display: flex; flex-direction: column; gap: 10px; }
+.startup-form-row { display: flex; flex-direction: column; gap: 4px; }
+.startup-form-label { font-size: .72rem; color: var(--tx2); font-weight: 500; }
+.startup-form-input {
+    background: var(--bg2); border: 1px solid var(--b); border-radius: var(--r);
+    color: var(--tx); font-family: 'Inter', sans-serif; font-size: .75rem;
+    padding: 6px 8px; outline: none;
+    transition: border-color var(--t);
+}
+.startup-form-input:focus { border-color: var(--bh); }
+.startup-form-select {
+    background: var(--bg2); border: 1px solid var(--b); border-radius: var(--r);
+    color: var(--tx); font-family: 'Inter', sans-serif; font-size: .75rem;
+    padding: 6px 8px; outline: none; cursor: pointer;
+    transition: border-color var(--t);
+}
+.startup-form-select:focus { border-color: var(--bh); }
+.startup-form-hint { font-size: .65rem; color: var(--tx3); line-height: 1.4; }

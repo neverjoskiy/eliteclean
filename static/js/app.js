@@ -287,6 +287,44 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target.closest('.btn-tool, .btn-run, .hql-btn')) sfx.click();
     });
 
+    // Tooltip system
+    const tooltipEl = document.getElementById('tooltipContainer');
+    let tooltipTimer = null;
+    document.addEventListener('mouseover', e => {
+        const el = e.target.closest('[data-tooltip]');
+        if (!el) return;
+        const raw = el.dataset.tooltip;
+        if (!raw) return;
+        tooltipTimer = setTimeout(() => {
+            const parts = raw.split('|');
+            const title = parts[0] || '';
+            const desc = parts[1] || '';
+            let html = '';
+            if (title) html += `<span class="tooltip-title">${title}</span>`;
+            if (desc) html += `<span class="tooltip-desc">${desc}</span>`;
+            if (raw.includes('реестр')) html += '<span class="tooltip-meta">Затрагивает: реестр Windows</span>';
+            if (raw.includes('папки') || raw.includes('файлы') || raw.includes('SoftwareDistribution') || raw.includes('Prefetch')) html += '<span class="tooltip-meta">Затрагивает: файловая система</span>';
+            if (raw.includes('памяти') || raw.includes('javaw')) html += '<span class="tooltip-meta">Затрагивает: память процесса</span>';
+            if (raw.includes('Требует права администратора')) html += '<span class="tooltip-admin">Требует права администратора</span>';
+            tooltipEl.innerHTML = html;
+            const rect = el.getBoundingClientRect();
+            let left = rect.left + rect.width / 2 - tooltipEl.offsetWidth / 2;
+            let top = rect.top - tooltipEl.offsetHeight - 8;
+            if (left < 8) left = 8;
+            if (left + tooltipEl.offsetWidth > window.innerWidth - 8) left = window.innerWidth - tooltipEl.offsetWidth - 8;
+            if (top < 8) top = rect.bottom + 8;
+            tooltipEl.style.left = left + 'px';
+            tooltipEl.style.top = top + 'px';
+            tooltipEl.classList.add('visible');
+        }, 300);
+    });
+    document.addEventListener('mouseout', e => {
+        if (e.target.closest('[data-tooltip]')) {
+            clearTimeout(tooltipTimer);
+            tooltipEl.classList.remove('visible');
+        }
+    });
+
     // Tabs
     document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -730,9 +768,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const cats = document.getElementById('scanCategories');
             cats.innerHTML = '';
+            const catTooltips = {
+                temp: 'Временные файлы|Файлы в %TEMP%, %TMP% и системных временных папках. Безопасно удалять.',
+                browser_cache: 'Кэш браузеров|Кэш Chrome, Firefox, Edge. Удаляет сохранённые страницы, изображения и скрипты.',
+                logs: 'Логи приложений|Журналы событий, логи установщиков и кэш отчётов. Не влияет на работу программ.',
+                thumbnails: 'Thumbnail кэш|Миниатюры изображений Windows Explorer. Windows пересоздаст при необходимости.',
+                recycle_bin: 'Корзина|Удалённые файлы из корзины. Операция необратима — файлы восстановить нельзя.',
+                windows_update: 'Кэш обновлений|Файлы загруженных обновлений Windows. Экономит десятки гигабайт.',
+                prefetch: 'Prefetch файлы|Кэш запуска программ для ускорения старта. Удаление замедлит первый запуск.',
+                error_reports: 'Отчёты об ошибках|WER и DrWatson дампы. Могут содержать конфиденциальные данные.',
+            };
             scanData.categories.forEach(cat => {
                 const row = document.createElement('label');
                 row.className = 'scan-cat-row';
+                const tip = catTooltips[cat.id] || `${cat.name}|${cat.description}`;
+                row.dataset.tooltip = tip;
                 row.innerHTML = `
                     <input type="checkbox" class="scan-cat-cb" value="${cat.id}" ${cat.selected ? 'checked' : ''}>
                     <span class="scan-cat-name">${cat.name}</span>
@@ -1021,6 +1071,163 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('procSearch').addEventListener('input', e => {
         procFilter = e.target.value;
         renderProcesses();
+    });
+
+    // ── Startup Tab ──
+    api.listStartup = () => invoke('list_startup_entries');
+    api.toggleStartup = (id) => invoke('toggle_startup_entry', { id });
+    api.deleteStartup = (id) => invoke('delete_startup_entry', { id });
+    api.addStartup = (entry) => invoke('add_startup_entry', { entry });
+    api.editStartup = (id, entry) => invoke('edit_startup_entry', { id, entry });
+
+    let startupData = [];
+    let startupFilter = '';
+    let startupEditId = null;
+
+    async function loadStartup() {
+        const body = document.getElementById('startupTableBody');
+        body.innerHTML = '<div class="startup-loading">загрузка...</div>';
+        try {
+            const r = await api.listStartup();
+            startupData = r.entries || [];
+            renderStartup();
+        } catch (e) {
+            body.innerHTML = `<div class="startup-loading">ошибка: ${e.message}</div>`;
+        }
+    }
+
+    function renderStartup() {
+        const body = document.getElementById('startupTableBody');
+        const filter = startupFilter.toLowerCase();
+        const filtered = filter
+            ? startupData.filter(e => e.name.toLowerCase().includes(filter) || e.path.toLowerCase().includes(filter))
+            : startupData;
+
+        document.getElementById('startupCount').textContent = `${filtered.length} записей`;
+
+        if (!filtered.length) {
+            body.innerHTML = '<div class="startup-empty">нет записей</div>';
+            return;
+        }
+
+        body.innerHTML = filtered.map(e => {
+            const isDisabled = !e.enabled;
+            const locLabels = {
+                hkcu_run: 'HKCU\\Run',
+                hklm_run: 'HKLM\\Run',
+                hkcu_runonce: 'HKCU\\RunOnce',
+                hklm_runonce: 'HKLM\\RunOnce',
+                hkcu_runservicesonce: 'HKCU\\RunServicesOnce',
+                hklm_runservicesonce: 'HKLM\\RunServicesOnce',
+                winlogon_shell: 'Winlogon Shell',
+                winlogon_userinit: 'Winlogon Userinit',
+                startup_folder_user: 'Startup (user)',
+                startup_folder_common: 'Startup (common)',
+                task_scheduler: 'Task Scheduler',
+            };
+            return `<div class="startup-row${isDisabled ? ' disabled' : ''}" data-id="${e.id}">
+                <span class="startup-col startup-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></span>
+                <span class="startup-col startup-name" title="${e.name}">${e.name}</span>
+                <span class="startup-col startup-path" title="${e.path}">${e.path}</span>
+                <span class="startup-col startup-location">${locLabels[e.location] || e.location}</span>
+                <span class="startup-col startup-status ${e.enabled ? 'enabled' : 'disabled'}">${e.enabled ? 'вкл' : 'выкл'}</span>
+                <span class="startup-col startup-actions">
+                    <button class="startup-btn ${e.enabled ? 'toggle-on' : 'toggle-off'}" data-id="${e.id}" data-action="toggle" title="${e.enabled ? 'выключить' : 'включить'}" data-tooltip="${e.enabled ? 'Выключить' : 'Включить'}|${e.enabled ? 'Перемещает запись в backup-ключ реестра или отключает задачу' : 'Восстанавливает запись из backup-ключа или включает задачу'}${e.location.startsWith('hklm') || e.location === 'task_scheduler' ? ' • Требует права администратора' : ''}">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11">${e.enabled ? '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>' : '<polygon points="5 3 19 12 5 21 5 3"/>'}</svg>
+                    </button>
+                    <button class="startup-btn edit" data-id="${e.id}" data-action="edit" title="изменить" data-tooltip="Изменить|Редактирует путь или команду запуска.">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </button>
+                    <button class="startup-btn delete" data-id="${e.id}" data-action="delete" title="удалить" data-tooltip="Удалить|Безвозвратно удаляет запись из реестра, папки или планировщика. ${e.location.startsWith('hklm') || e.location === 'task_scheduler' ? 'Требует права администратора.' : ''}">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    </button>
+                </span>
+            </div>`;
+        }).join('');
+
+        body.querySelectorAll('.startup-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const id = btn.dataset.id;
+                const action = btn.dataset.action;
+                if (action === 'toggle') {
+                    addLog(`переключение автозагрузки ${id}...`, 'info');
+                    try {
+                        const r = await api.toggleStartup(id);
+                        showToast(r.message, r.success ? 'success' : 'error');
+                        addLog(r.message, r.success ? 'success' : 'error');
+                        if (r.success) loadStartup();
+                    } catch (e) { showToast(e.message, 'error'); }
+                } else if (action === 'delete') {
+                    addLog(`удаление записи автозагрузки ${id}...`, 'info');
+                    try {
+                        const r = await api.deleteStartup(id);
+                        showToast(r.message, r.success ? 'success' : 'error');
+                        addLog(r.message, r.success ? 'success' : 'error');
+                        if (r.success) loadStartup();
+                    } catch (e) { showToast(e.message, 'error'); }
+                } else if (action === 'edit') {
+                    const entry = startupData.find(e => e.id === id);
+                    if (!entry) return;
+                    startupEditId = id;
+                    document.getElementById('startupModalTitle').textContent = 'изменить запись';
+                    document.getElementById('startupModalName').value = entry.name;
+                    document.getElementById('startupModalPath').value = entry.path;
+                    const sel = document.getElementById('startupModalLocation');
+                    sel.value = entry.location;
+                    sel.disabled = true;
+                    openModal('startupModal');
+                }
+            });
+        });
+    }
+
+    document.querySelector('.nav-btn[data-tab="startup"]').addEventListener('click', () => {
+        loadStartup();
+    });
+
+    document.getElementById('startupRefreshBtn').addEventListener('click', () => loadStartup());
+
+    document.getElementById('startupSearch').addEventListener('input', e => {
+        startupFilter = e.target.value;
+        renderStartup();
+    });
+
+    document.getElementById('startupAddBtn').addEventListener('click', () => {
+        startupEditId = null;
+        document.getElementById('startupModalTitle').textContent = 'новая запись';
+        document.getElementById('startupModalName').value = '';
+        document.getElementById('startupModalPath').value = '';
+        document.getElementById('startupModalLocation').value = 'hkcu_run';
+        document.getElementById('startupModalLocation').disabled = false;
+        openModal('startupModal');
+    });
+
+    document.getElementById('startupModalClose').addEventListener('click', () => closeModal('startupModal'));
+    document.getElementById('startupModalCancel').addEventListener('click', () => closeModal('startupModal'));
+    document.getElementById('startupModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal('startupModal'); });
+
+    document.getElementById('startupModalSave').addEventListener('click', async () => {
+        const name = document.getElementById('startupModalName').value.trim();
+        const path = document.getElementById('startupModalPath').value.trim();
+        const location = document.getElementById('startupModalLocation').value;
+        if (!name || !path) { showToast('заполните все поля', 'warning'); return; }
+        const btn = document.getElementById('startupModalSave');
+        setBtnLoading(btn, true);
+        try {
+            if (startupEditId) {
+                const r = await api.editStartup(startupEditId, { name, path, location });
+                showToast(r.message, r.success ? 'success' : 'error');
+                addLog(r.message, r.success ? 'success' : 'error');
+            } else {
+                const r = await api.addStartup({ name, path, location });
+                showToast(r.message, r.success ? 'success' : 'error');
+                addLog(r.message, r.success ? 'success' : 'error');
+            }
+            closeModal('startupModal');
+            loadStartup();
+        } catch (e) {
+            showToast(e.message, 'error');
+        } finally { setBtnLoading(btn, false); }
     });
 
 });

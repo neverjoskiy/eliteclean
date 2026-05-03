@@ -67,6 +67,12 @@ fn main() {
             elite_cleaner_lib::commands::suspend_process,
             elite_cleaner_lib::commands::resume_process,
             elite_cleaner_lib::commands::kill_process,
+            // автозагрузка
+            elite_cleaner_lib::commands::list_startup_entries,
+            elite_cleaner_lib::commands::toggle_startup_entry,
+            elite_cleaner_lib::commands::delete_startup_entry,
+            elite_cleaner_lib::commands::add_startup_entry,
+            elite_cleaner_lib::commands::edit_startup_entry,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
