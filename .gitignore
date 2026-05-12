@@ -5,6 +5,8 @@ target/
 .vscode/
 .idea/
 .kiro/
+.opencode/
+.opencode
 
 # Logs and temp
 *.log

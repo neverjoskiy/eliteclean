@@ -1,217 +1,1125 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="color-scheme" content="dark">
-    <title>EliteClean — быстрый клинер для Windows</title>
-    <meta name="description" content="EliteClean — компактная Windows-утилита для очистки временных файлов, системного кэша, истории и следов активности.">
-    <meta name="keywords" content="EliteClean, Windows cleaner, очистка Windows, Tauri, Rust">
-    <meta name="author" content="neverjoskiy">
-    <meta property="og:title" content="EliteClean — быстрый клинер для Windows">
-    <meta property="og:description" content="Сканирование мусора, очистка кэша, приватность, сетевые инструменты и системные твики.">
-    <meta property="og:type" content="website">
-    <meta name="theme-color" content="#111111">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23151515' stroke='%233a3a3a' stroke-width='1.0'/><text x='50%25' y='58%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-weight='700' font-size='14' fill='%23e8e8e8'>EC</text></svg>">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    <style>
-        :root{--bg:#111;--p:#171717;--p2:#1e1e1e;--p3:#262626;--b:#2c2c2c;--bh:#3a3a3a;--tx:#e8e8e8;--mut:#969696;--dim:#555;--ok:#5a9e5a;--wr:#a07830;--r:22px;--t:.2s ease;--sh:0 34px 100px rgba(0,0,0,.42)}
-        *{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}body{min-height:100vh;overflow-x:hidden;background:radial-gradient(circle at 50% -8%,rgba(90,158,90,.13),transparent 34rem),radial-gradient(circle at 12% 24%,rgba(255,255,255,.035),transparent 18rem),linear-gradient(180deg,#111,#0f0f0f);color:var(--tx);font-family:Manrope,system-ui,sans-serif;-webkit-font-smoothing:antialiased}body:before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.035;background-image:linear-gradient(rgba(255,255,255,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.08) 1px,transparent 1px);background-size:64px 64px;mask-image:radial-gradient(circle at 50% 6%,#000,transparent 70%)}a{color:inherit;text-decoration:none}.shell{position:relative;z-index:1}.container{width:min(1120px,calc(100% - 40px));margin:0 auto}
-        [id]{scroll-margin-top:82px}
-        :focus-visible{outline:2px solid var(--ok);outline-offset:3px;border-radius:4px}
-        .nav{position:sticky;top:0;z-index:20;background:rgba(17,17,17,.76);border-bottom:1px solid rgba(44,44,44,.86);backdrop-filter:blur(18px)}.nav-inner{height:68px;display:flex;align-items:center;justify-content:space-between;gap:20px}.brand{display:inline-flex;align-items:center;gap:12px;min-width:max-content;border-radius:14px}.brand-mark{width:38px;height:38px;display:grid;place-items:center;border-radius:13px;border:1px solid var(--bh);background:linear-gradient(145deg,var(--p3),var(--p));font:600 12px "IBM Plex Mono",monospace}.brand-name{display:block;font-size:15px;font-weight:800;letter-spacing:-.04em;line-height:1}.brand-sub{display:block;margin-top:4px;color:var(--dim);font:10px "IBM Plex Mono",monospace}.nav-links{display:flex;gap:4px}.nav-links a{padding:8px 13px;border-radius:999px;color:var(--mut);font-size:13px;font-weight:700;transition:var(--t)}.nav-links a:hover,.nav-links a.active{color:var(--tx);background:var(--p2)}.nav-action{padding:9px 14px;border-radius:999px;border:1px solid var(--b);background:var(--p2);font-size:13px;font-weight:800;transition:var(--t)}.nav-action:hover{border-color:var(--bh);background:var(--p3);transform:translateY(-1px)}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>EliteClean // Windows optimization toolkit</title>
+<meta name="description" content="EliteClean — инструмент для оптимизации Windows. Сканирование мусора, приватность, сетевые операции и системные твики в нативном Rust + Tauri приложении.">
+<meta name="keywords" content="EliteClean, Windows cleaner, очистка Windows, Tauri, Rust, оптимизация">
+<meta name="author" content="neverjoskiy">
+<meta property="og:title" content="EliteClean // Windows optimization toolkit">
+<meta property="og:description" content="Нативная утилита на Rust + Tauri: сканирование, очистка, приватность, сеть, твики.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#05070a">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%23050810'/><path d='M8 10L16 6L24 10V22L16 26L8 22V10Z' stroke='%2300d4ff' stroke-width='1.5' fill='none'/><circle cx='16' cy='16' r='3' fill='%2300d4ff'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#05070a;
+  --bg2:#0a0d12;
+  --surf:#0f1319;
+  --surf2:#141922;
+  --line:#1e2530;
+  --line-hi:#2b3544;
+  --tx:#e6edf3;
+  --mut:#7a8699;
+  --dim:#434e5f;
+  --cy:#00d4ff;
+  --cy-dim:#0891b2;
+  --mg:#ff3864;
+  --lm:#a6e22e;
+  --yl:#ffb020;
+  --r:3px;
+  --t:.18s ease;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth;scroll-padding-top:70px}
+body{
+  background:var(--bg);
+  color:var(--tx);
+  font-family:"Space Grotesk",system-ui,sans-serif;
+  font-weight:400;
+  line-height:1.5;
+  overflow-x:hidden;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+  background:
+    radial-gradient(800px 400px at 85% -10%,rgba(0,212,255,.08),transparent 60%),
+    radial-gradient(600px 300px at 10% 30%,rgba(255,56,100,.04),transparent 70%),
+    linear-gradient(180deg,transparent 0%,rgba(0,0,0,.4) 100%);
+}
+body::after{
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+  background-image:
+    linear-gradient(rgba(30,37,48,.4) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(30,37,48,.4) 1px,transparent 1px);
+  background-size:48px 48px;
+  background-position:0 0;
+  mask-image:radial-gradient(ellipse 100% 80% at 50% 0%,#000 20%,transparent 80%);
+  opacity:.5;
+}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+code,.mono{font-family:"JetBrains Mono",ui-monospace,monospace}
+.wrap{position:relative;z-index:1}
+.container{width:min(1280px,calc(100% - 32px));margin:0 auto}
+:focus-visible{outline:2px solid var(--cy);outline-offset:3px;border-radius:2px}
+::selection{background:var(--cy);color:#000}
 
-        .hamburger{display:none;width:40px;height:40px;align-items:center;justify-content:center;border:1px solid var(--b);border-radius:11px;background:var(--p2);cursor:pointer;transition:var(--t)}.hamburger:hover{border-color:var(--bh);background:var(--p3)}.hamburger span,.hamburger:after,.hamburger:before{content:"";display:block;position:absolute;width:18px;height:1.5px;border-radius:2px;background:var(--tx);transition:.25s cubic-bezier(.34,1.56,.64,1)}.hamburger{position:relative}.hamburger:before{transform:translateY(-5px)}.hamburger:after{transform:translateY(5px)}.hamburger.open span{opacity:0;transform:scaleX(0)}.hamburger.open:before{transform:rotate(-45deg) translate(0,0)}.hamburger.open:after{transform:rotate(45deg) translate(0,0)}
+/* ========== NAV ========== */
+.nav{
+  position:sticky;top:0;z-index:40;
+  background:rgba(5,7,10,.72);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--line);
+}
+.nav-row{
+  height:64px;
+  display:flex;align-items:center;justify-content:space-between;gap:24px;
+}
+.logo{display:flex;align-items:center;gap:12px;min-width:max-content}
+.logo-mark{
+  width:34px;height:34px;
+  display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--cy) 0%,var(--cy-dim) 100%);
+  color:#000;
+  font-family:"JetBrains Mono",monospace;
+  font-weight:700;font-size:12px;
+  border-radius:var(--r);
+  box-shadow:0 0 24px rgba(0,212,255,.25);
+  clip-path:polygon(0 0,100% 0,100% 85%,85% 100%,0 100%);
+}
+.logo-txt{line-height:1}
+.logo-name{font-weight:700;font-size:15px;letter-spacing:-.02em}
+.logo-ver{font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--dim);margin-top:3px;display:block}
+.nav-links{display:flex;gap:2px;align-items:center;font-family:"JetBrains Mono",monospace;font-size:12px}
+.nav-links a{
+  padding:8px 14px;
+  color:var(--mut);
+  border-radius:var(--r);
+  transition:var(--t);
+  position:relative;
+}
+.nav-links a::before{content:"[ ";opacity:0;transition:var(--t)}
+.nav-links a::after{content:" ]";opacity:0;transition:var(--t)}
+.nav-links a:hover,.nav-links a.active{color:var(--cy)}
+.nav-links a:hover::before,.nav-links a.active::before,
+.nav-links a:hover::after,.nav-links a.active::after{opacity:1}
+.nav-cta{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 14px;
+  background:var(--surf);
+  border:1px solid var(--line-hi);
+  border-radius:var(--r);
+  font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:500;
+  transition:var(--t);
+}
+.nav-cta:hover{border-color:var(--cy);color:var(--cy);background:rgba(0,212,255,.05)}
+.nav-cta svg{width:14px;height:14px}
+.burger{
+  display:none;
+  width:38px;height:38px;
+  align-items:center;justify-content:center;
+  border:1px solid var(--line-hi);
+  background:var(--surf);
+  border-radius:var(--r);
+  position:relative;
+}
+.burger span,.burger::before,.burger::after{
+  content:"";position:absolute;
+  width:16px;height:1.5px;background:var(--tx);
+  transition:.25s cubic-bezier(.4,0,.2,1);
+}
+.burger::before{transform:translateY(-5px)}
+.burger::after{transform:translateY(5px)}
+.burger.open span{opacity:0}
+.burger.open::before{transform:rotate(45deg)}
+.burger.open::after{transform:rotate(-45deg)}
 
-        .mobile-overlay{position:fixed;inset:0;z-index:50;background:rgba(9,9,9,.94);backdrop-filter:blur(32px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .35s cubic-bezier(.16,1,.3,1)}.mobile-overlay.open{opacity:1;pointer-events:auto}.mobile-nav{display:flex;flex-direction:column;align-items:center;gap:8px}.mobile-nav a{padding:14px 28px;border-radius:999px;font-size:20px;font-weight:700;color:var(--mut);transition:var(--t)}.mobile-nav a:hover,.mobile-nav a.active{color:var(--tx);background:var(--p2)}.mobile-nav .nav-action{margin-top:16px}
+/* mobile menu */
+.m-menu{
+  position:fixed;inset:64px 0 0 0;z-index:35;
+  background:rgba(5,7,10,.96);
+  backdrop-filter:blur(24px);
+  padding:24px 16px;
+  display:flex;flex-direction:column;gap:4px;
+  opacity:0;pointer-events:none;
+  transform:translateY(-8px);
+  transition:.3s cubic-bezier(.16,1,.3,1);
+}
+.m-menu.open{opacity:1;pointer-events:auto;transform:translateY(0)}
+.m-menu a{
+  padding:14px 16px;
+  font-family:"JetBrains Mono",monospace;
+  font-size:14px;color:var(--mut);
+  border-bottom:1px solid var(--line);
+}
+.m-menu a:hover,.m-menu a.active{color:var(--cy)}
+.m-menu .nav-cta{margin-top:16px;justify-content:center}
 
-        .hero{min-height:calc(100vh - 68px);display:grid;place-items:center;text-align:center;padding:72px 0 90px}.hero-box{width:min(980px,100%);display:flex;flex-direction:column;align-items:center;gap:28px}.pill{display:inline-flex;align-items:center;gap:10px;padding:9px 14px;border-radius:999px;border:1px solid var(--b);background:rgba(23,23,23,.78);color:var(--mut);font:12px "IBM Plex Mono",monospace}.pulse{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 0 rgba(90,158,90,.45);animation:pulse 1.8s infinite}@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(90,158,90,.45)}70%{box-shadow:0 0 0 10px transparent}100%{box-shadow:0 0 0 0 transparent}}h1{max-width:920px;font-size:clamp(4rem,10vw,8.8rem);line-height:.84;font-weight:800;letter-spacing:-.09em}h1 span{display:block;color:transparent;-webkit-text-stroke:1px rgba(232,232,232,.34)}.hero-copy{max-width:720px;color:var(--mut);font-size:clamp(1.08rem,2vw,1.36rem);line-height:1.75;font-weight:500}.hero-copy strong{color:var(--tx);font-weight:800}.hero-actions{display:flex;justify-content:center;flex-wrap:wrap;gap:12px;margin-top:4px}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:50px;padding:0 22px;border-radius:999px;border:1px solid transparent;font-size:14px;font-weight:800;transition:var(--t)}.btn:active{transform:scale(.97);transition:transform .08s ease}.btn-primary{background:var(--tx);color:#111;box-shadow:0 16px 48px rgba(232,232,232,.08)}.btn-secondary{background:var(--p2);border-color:var(--bh);color:var(--tx)}.btn-soft{background:transparent;color:var(--mut);border-color:var(--b)}.btn:hover{transform:translateY(-2px)}.btn:hover:active{transform:translateY(-1px) scale(.97)}
-        .hero-panel{width:min(780px,100%);margin-top:22px;overflow:hidden;text-align:left;border:1px solid var(--b);border-radius:var(--r);background:linear-gradient(180deg,rgba(30,30,30,.86),rgba(23,23,23,.86));box-shadow:var(--sh)}.panel-head{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid var(--b);background:rgba(38,38,38,.45)}.dots{display:flex;gap:7px}.dots i{display:block;width:9px;height:9px;border-radius:50%;background:#3a3a3a}.panel-title{font:12px "IBM Plex Mono",monospace;color:var(--dim)}.panel-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--b)}.metric{background:rgba(23,23,23,.96);padding:22px 18px}.metric-value{font-size:26px;font-weight:800;letter-spacing:-.05em}.metric-label{margin-top:4px;color:var(--dim);font:11px "IBM Plex Mono",monospace}
-        .section{padding:95px 0}.section-head{display:flex;align-items:end;justify-content:space-between;gap:30px;margin-bottom:34px}.eyebrow{display:inline-flex;align-items:center;gap:9px;color:var(--ok);font:600 12px "IBM Plex Mono",monospace;letter-spacing:.04em;text-transform:uppercase;margin-bottom:14px}.eyebrow:before{content:"";width:28px;height:1px;background:var(--ok)}.section-title{max-width:640px;font-size:clamp(2.1rem,4vw,4.2rem);line-height:.96;font-weight:800;letter-spacing:-.07em}.section-text{max-width:360px;color:var(--mut);font-size:15px;line-height:1.75;font-weight:500}.feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.feature-card{position:relative;min-height:240px;display:flex;flex-direction:column;justify-content:space-between;border:1px solid var(--b);border-radius:var(--r);background:rgba(23,23,23,.82);padding:24px;transition:var(--t);overflow:hidden}.feature-card:after{content:"";position:absolute;inset:-2px -2px 80% -2px;border-radius:var(--r) var(--r) 0 0;background:radial-gradient(ellipse at 50% 0%,rgba(90,158,90,.07),transparent 70%);opacity:0;transition:opacity .45s ease;pointer-events:none;z-index:0}.feature-card:hover:after{opacity:1}.feature-card:hover{transform:translateY(-4px);border-color:var(--bh);background:rgba(30,30,30,.9)}.feature-card.big{grid-column:span 2}.feature-card>*{position:relative;z-index:1}.card-index{font:12px "IBM Plex Mono",monospace;color:var(--dim)}.feature-card h3{margin-top:26px;font-size:22px;line-height:1.08;letter-spacing:-.04em}.feature-card p{margin-top:14px;color:var(--mut);font-size:14px;line-height:1.7}.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}.chip{border:1px solid var(--b);border-radius:999px;padding:6px 10px;background:var(--p2);color:var(--dim);font:11px "IBM Plex Mono",monospace}
+/* ========== HERO ========== */
+.hero{padding:60px 0 100px;position:relative}
+.hero-grid{
+  display:grid;
+  grid-template-columns:1.15fr 1fr;
+  gap:48px;align-items:center;
+}
+.hero-tag{
+  display:inline-flex;align-items:center;gap:10px;
+  padding:6px 12px;
+  background:var(--surf);
+  border:1px solid var(--line);
+  border-radius:var(--r);
+  font-family:"JetBrains Mono",monospace;
+  font-size:11px;color:var(--mut);
+  margin-bottom:28px;
+}
+.dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--lm);
+  box-shadow:0 0 8px var(--lm);
+  animation:pulse 2s infinite;
+}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+h1{
+  font-family:"Space Grotesk",sans-serif;
+  font-size:clamp(2.8rem,7vw,6rem);
+  font-weight:700;
+  line-height:.95;
+  letter-spacing:-.04em;
+  margin-bottom:24px;
+}
+h1 .accent{color:var(--cy);font-style:italic;font-weight:500}
+h1 .cursor{
+  display:inline-block;width:.5em;height:.9em;
+  background:var(--cy);margin-left:6px;
+  vertical-align:-2px;
+  animation:blink 1s step-end infinite;
+}
+@keyframes blink{0%,50%{opacity:1}51%,100%{opacity:0}}
+.hero-sub{
+  color:var(--mut);
+  font-size:clamp(1rem,1.5vw,1.1rem);
+  line-height:1.7;
+  max-width:520px;
+  margin-bottom:32px;
+}
+.hero-sub strong{color:var(--tx);font-weight:600}
+.hero-actions{display:flex;flex-wrap:wrap;gap:10px}
+.btn{
+  display:inline-flex;align-items:center;gap:10px;
+  padding:13px 20px;
+  font-family:"JetBrains Mono",monospace;
+  font-size:13px;font-weight:500;
+  border-radius:var(--r);
+  transition:var(--t);
+  border:1px solid transparent;
+  white-space:nowrap;
+}
+.btn svg{width:14px;height:14px;flex-shrink:0}
+.btn-primary{
+  background:var(--cy);color:#000;
+  box-shadow:0 0 0 0 rgba(0,212,255,.4),0 8px 24px rgba(0,212,255,.15);
+  font-weight:700;
+}
+.btn-primary:hover{box-shadow:0 0 0 3px rgba(0,212,255,.15),0 12px 32px rgba(0,212,255,.25);transform:translateY(-1px)}
+.btn-ghost{
+  background:var(--surf);color:var(--tx);
+  border-color:var(--line-hi);
+}
+.btn-ghost:hover{border-color:var(--cy);color:var(--cy);background:rgba(0,212,255,.05)}
+.btn-link{color:var(--mut);padding:13px 8px;border:1px solid transparent}
+.btn-link:hover{color:var(--cy)}
 
-        [data-reveal]{opacity:0;transform:translateY(28px);transition:opacity .65s cubic-bezier(.16,1,.3,1),transform .65s cubic-bezier(.16,1,.3,1)}[data-reveal].revealed{opacity:1;transform:translateY(0)}
+/* ========== TERMINAL ========== */
+.term{
+  background:var(--bg2);
+  border:1px solid var(--line-hi);
+  border-radius:calc(var(--r) + 2px);
+  overflow:hidden;
+  box-shadow:
+    0 0 0 1px rgba(0,212,255,.06),
+    0 32px 80px rgba(0,0,0,.6),
+    0 0 120px rgba(0,212,255,.08);
+  font-family:"JetBrains Mono",monospace;
+  font-size:12.5px;
+  line-height:1.65;
+}
+.term-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px;
+  background:var(--surf);
+  border-bottom:1px solid var(--line);
+}
+.term-dots{display:flex;gap:6px}
+.term-dots i{width:10px;height:10px;border-radius:50%;display:block}
+.term-dots i:nth-child(1){background:#ff5f56}
+.term-dots i:nth-child(2){background:#ffbd2e}
+.term-dots i:nth-child(3){background:#27c93f}
+.term-title{font-size:11px;color:var(--dim)}
+.term-body{padding:20px 18px;min-height:320px;overflow:hidden}
+.term-line{margin-bottom:4px;white-space:pre-wrap;word-break:break-word}
+.term-line .pr{color:var(--cy)}
+.term-line .cmd{color:var(--tx)}
+.term-line .ok{color:var(--lm)}
+.term-line .wr{color:var(--yl)}
+.term-line .er{color:var(--mg)}
+.term-line .mu{color:var(--dim)}
+.term-line .hi{color:#fff;font-weight:500}
+.term-caret::after{
+  content:"▊";color:var(--cy);
+  animation:blink 1s step-end infinite;margin-left:2px;
+}
 
-        .download-layout{display:grid;grid-template-columns:1.1fr .9fr;gap:12px}.download-card{border:1px solid var(--bh);border-radius:calc(var(--r) + 6px);background:radial-gradient(circle at 20% 0%,rgba(90,158,90,.13),transparent 22rem),linear-gradient(145deg,rgba(38,38,38,.9),rgba(23,23,23,.95));padding:34px;box-shadow:var(--sh)}.download-card h2{font-size:clamp(2rem,4vw,4rem);line-height:.98;letter-spacing:-.07em}.download-card p{margin-top:16px;max-width:520px;color:var(--mut);font-size:15px;line-height:1.75}.download-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}.release-list{border:1px solid var(--b);border-radius:calc(var(--r) + 6px);background:rgba(23,23,23,.82);overflow:hidden}.release-item{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px;border-bottom:1px solid var(--b)}.release-item:last-child{border-bottom:0}.release-name{font-weight:800;letter-spacing:-.03em}.release-meta{margin-top:4px;color:var(--dim);font:11px "IBM Plex Mono",monospace}.mini-link{min-width:max-content;padding:8px 12px;border-radius:999px;border:1px solid var(--b);background:var(--p2);color:var(--mut);font-size:12px;font-weight:800;transition:var(--t)}.mini-link:hover{color:var(--tx);border-color:var(--bh);background:var(--p3)}.note{margin-top:14px;border:1px solid rgba(160,120,48,.28);border-radius:14px;background:rgba(160,120,48,.055);padding:14px 16px;color:var(--mut);font-size:13px;line-height:1.6}.note strong{color:var(--tx)}footer{border-top:1px solid var(--b);padding:30px 0;color:var(--dim);font-size:13px}.footer-inner{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap}.footer-links{display:flex;gap:16px}.footer-links a:hover{color:var(--mut)}
+/* ========== MARQUEE ========== */
+.marquee{
+  border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+  background:var(--surf);
+  overflow:hidden;
+  padding:18px 0;
+  mask-image:linear-gradient(90deg,transparent 0%,#000 10%,#000 90%,transparent 100%);
+}
+.marquee-track{
+  display:flex;gap:48px;
+  animation:slide 40s linear infinite;
+  white-space:nowrap;
+  width:max-content;
+}
+.marquee-item{
+  display:inline-flex;align-items:center;gap:12px;
+  font-family:"JetBrains Mono",monospace;
+  font-size:14px;color:var(--mut);
+  font-weight:500;
+}
+.marquee-item .st{color:var(--cy);opacity:.6;font-size:10px}
+@keyframes slide{to{transform:translateX(-50%)}}
 
-        .scroll-top{position:fixed;bottom:28px;right:28px;z-index:30;width:44px;height:44px;border-radius:14px;border:1px solid var(--bh);background:rgba(30,30,30,.88);backdrop-filter:blur(12px);cursor:pointer;display:grid;place-items:center;opacity:0;pointer-events:none;transform:translateY(12px);transition:opacity .35s ease,transform .35s cubic-bezier(.34,1.56,.64,1)}.scroll-top:before{content:"";display:block;width:16px;height:16px;border-left:2px solid var(--mut);border-top:2px solid var(--mut);transform:rotate(45deg) translate(2px,2px);transition:border-color .2s ease}.scroll-top.visible{opacity:1;pointer-events:auto;transform:translateY(0)}.scroll-top:hover{border-color:var(--ok);background:var(--p3)}.scroll-top:hover:before{border-color:var(--tx)}
+/* ========== FEATURES ========== */
+.section{padding:100px 0}
+.s-head{
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  gap:24px;align-items:end;
+  margin-bottom:48px;
+  padding-bottom:24px;
+  border-bottom:1px solid var(--line);
+}
+.s-num{
+  font-family:"JetBrains Mono",monospace;
+  font-size:11px;color:var(--cy);
+  letter-spacing:.08em;
+}
+.s-title{
+  font-size:clamp(1.8rem,4vw,3rem);
+  font-weight:700;
+  letter-spacing:-.03em;
+  line-height:1;
+  grid-column:1/-1;
+  margin-top:8px;
+}
+.s-title em{color:var(--cy);font-style:italic;font-weight:500}
+.s-desc{
+  grid-column:1/-1;
+  color:var(--mut);
+  font-size:15px;
+  max-width:580px;
+  line-height:1.65;
+}
 
-        @media(max-width:900px){.nav-links{display:none}.hamburger{display:inline-flex}.nav-action.desktop{display:none}.hero{min-height:auto;padding-top:76px}.panel-grid{grid-template-columns:repeat(2,1fr)}.section-head{align-items:flex-start;flex-direction:column}.feature-grid{grid-template-columns:1fr}.feature-card.big{grid-column:auto}.download-layout{grid-template-columns:1fr}.scroll-top{bottom:20px;right:20px;width:42px;height:42px;border-radius:13px}}@media(max-width:560px){.container{width:min(100% - 28px,1120px)}.nav-inner{height:62px}.brand-sub{display:none}.nav-action{padding:8px 11px;font-size:12px}h1{font-size:clamp(3.4rem,19vw,6rem)}.hero-copy{font-size:1rem}.btn{width:100%}.hero-panel{margin-top:10px}.panel-grid{grid-template-columns:1fr}.section{padding:70px 0}.download-card{padding:24px}.release-item{align-items:flex-start;flex-direction:column}.mini-link{width:100%;text-align:center}}
-    </style>
+.bento{
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  grid-auto-rows:minmax(180px,auto);
+  gap:12px;
+}
+.card{
+  position:relative;
+  background:var(--surf);
+  border:1px solid var(--line);
+  border-radius:calc(var(--r) + 2px);
+  padding:24px;
+  overflow:hidden;
+  transition:var(--t);
+  display:flex;flex-direction:column;
+  min-height:180px;
+}
+.card::before{
+  content:"";
+  position:absolute;inset:0;
+  background:radial-gradient(500px 200px at var(--mx,50%) var(--my,0%),rgba(0,212,255,.08),transparent 60%);
+  opacity:0;transition:opacity .3s;
+  pointer-events:none;
+}
+.card:hover::before{opacity:1}
+.card:hover{border-color:var(--line-hi);transform:translateY(-2px)}
+.card.wide{grid-column:span 4}
+.card.half{grid-column:span 3}
+.card.third{grid-column:span 2}
+.card-head{display:flex;justify-content:space-between;align-items:start;gap:16px;margin-bottom:auto;padding-bottom:24px}
+.card-ix{font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--dim);letter-spacing:.08em}
+.card-icon{
+  width:36px;height:36px;
+  display:grid;place-items:center;
+  background:var(--bg2);
+  border:1px solid var(--line);
+  border-radius:var(--r);
+  color:var(--cy);
+}
+.card-icon svg{width:18px;height:18px}
+.card h3{
+  font-size:19px;font-weight:600;
+  letter-spacing:-.02em;
+  margin-bottom:10px;
+}
+.card p{color:var(--mut);font-size:13.5px;line-height:1.65}
+.card-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:18px}
+.tag{
+  font-family:"JetBrains Mono",monospace;
+  font-size:10.5px;color:var(--mut);
+  padding:4px 8px;
+  background:var(--bg2);
+  border:1px solid var(--line);
+  border-radius:var(--r);
+}
+.tag.on{color:var(--cy);border-color:rgba(0,212,255,.25)}
+
+/* visual card with animated bars */
+.scan-vis{
+  position:relative;
+  height:100%;
+  display:flex;flex-direction:column;justify-content:space-between;
+}
+.scan-rows{display:flex;flex-direction:column;gap:10px;margin-top:20px}
+.scan-row{
+  display:grid;grid-template-columns:80px 1fr 48px;align-items:center;gap:12px;
+  font-family:"JetBrains Mono",monospace;font-size:11px;
+}
+.scan-row .lb{color:var(--mut)}
+.scan-bar{height:4px;background:var(--bg2);border-radius:2px;overflow:hidden;position:relative}
+.scan-bar span{
+  display:block;height:100%;
+  background:linear-gradient(90deg,var(--cy-dim),var(--cy));
+  animation:grow 3s ease-in-out infinite;
+  transform-origin:left;
+}
+.scan-row .vl{color:var(--cy);text-align:right;font-size:10.5px}
+@keyframes grow{
+  0%{transform:scaleX(0)}
+  50%{transform:scaleX(var(--w,.7))}
+  100%{transform:scaleX(0)}
+}
+
+/* ========== STATS ========== */
+.stats{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  border:1px solid var(--line);
+  border-radius:calc(var(--r) + 2px);
+  overflow:hidden;
+  background:var(--surf);
+}
+.stat{
+  padding:28px 24px;
+  border-right:1px solid var(--line);
+  position:relative;
+}
+.stat:last-child{border-right:0}
+.stat-k{
+  font-family:"JetBrains Mono",monospace;
+  font-size:10.5px;color:var(--dim);
+  letter-spacing:.08em;text-transform:uppercase;
+  margin-bottom:14px;
+}
+.stat-v{
+  font-size:clamp(1.8rem,3vw,2.4rem);
+  font-weight:700;
+  letter-spacing:-.03em;
+  line-height:1;
+  color:var(--tx);
+}
+.stat-v em{font-style:normal;color:var(--cy)}
+.stat-d{
+  margin-top:8px;
+  font-family:"JetBrains Mono",monospace;
+  font-size:11px;color:var(--mut);
+}
+
+/* ========== DOWNLOAD ========== */
+.dl-wrap{
+  display:grid;
+  grid-template-columns:1.3fr 1fr;
+  gap:12px;
+  align-items:stretch;
+}
+.dl-main{
+  background:
+    linear-gradient(135deg,rgba(0,212,255,.08) 0%,transparent 50%),
+    var(--surf);
+  border:1px solid var(--line-hi);
+  border-radius:calc(var(--r) + 2px);
+  padding:40px;
+  position:relative;
+  overflow:hidden;
+}
+.dl-main::before{
+  content:"";position:absolute;
+  top:-1px;left:-1px;right:-1px;height:2px;
+  background:linear-gradient(90deg,transparent,var(--cy),transparent);
+}
+.dl-main h2{
+  font-size:clamp(1.6rem,3vw,2.4rem);
+  font-weight:700;
+  letter-spacing:-.03em;
+  line-height:1.05;
+  margin:20px 0 18px;
+}
+.dl-main p{color:var(--mut);font-size:14.5px;line-height:1.7;max-width:460px}
+.dl-cmd{
+  margin:28px 0 24px;
+  padding:14px 16px;
+  background:var(--bg2);
+  border:1px solid var(--line);
+  border-left:3px solid var(--cy);
+  border-radius:var(--r);
+  font-family:"JetBrains Mono",monospace;
+  font-size:13px;
+  display:flex;align-items:center;gap:10px;
+}
+.dl-cmd .pr{color:var(--cy);flex-shrink:0}
+.dl-cmd .tx{color:var(--tx)}
+.dl-cmd .cp{
+  margin-left:auto;
+  font-size:10.5px;color:var(--dim);
+  padding:4px 8px;
+  border:1px solid var(--line);
+  border-radius:2px;
+  transition:var(--t);
+}
+.dl-cmd .cp:hover{color:var(--cy);border-color:var(--cy)}
+.dl-buttons{display:flex;flex-wrap:wrap;gap:10px}
+
+.dl-list{
+  display:flex;flex-direction:column;gap:8px;
+}
+.dl-row{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:18px 20px;
+  background:var(--surf);
+  border:1px solid var(--line);
+  border-radius:calc(var(--r) + 2px);
+  transition:var(--t);
+}
+.dl-row:hover{border-color:var(--line-hi);background:var(--surf2)}
+.dl-row-tx{min-width:0}
+.dl-row-name{font-weight:600;font-size:14px;letter-spacing:-.01em}
+.dl-row-meta{
+  margin-top:4px;
+  font-family:"JetBrains Mono",monospace;
+  font-size:10.5px;color:var(--dim);
+}
+.dl-row-arr{
+  width:36px;height:36px;
+  display:grid;place-items:center;
+  background:var(--bg2);
+  border:1px solid var(--line);
+  border-radius:var(--r);
+  color:var(--mut);
+  transition:var(--t);
+  flex-shrink:0;
+}
+.dl-row-arr svg{width:14px;height:14px;transition:var(--t)}
+.dl-row:hover .dl-row-arr{background:var(--cy);border-color:var(--cy);color:#000}
+.dl-row:hover .dl-row-arr svg{transform:translate(2px,-2px)}
+
+.warn{
+  margin-top:24px;
+  padding:14px 18px;
+  background:rgba(255,176,32,.05);
+  border:1px solid rgba(255,176,32,.2);
+  border-radius:var(--r);
+  font-size:13px;color:var(--mut);
+  line-height:1.6;
+}
+.warn strong{color:var(--yl);font-family:"JetBrains Mono",monospace;font-size:11px;text-transform:uppercase;letter-spacing:.05em;display:inline-block;margin-right:6px}
+
+/* ========== FOOTER ========== */
+footer{
+  border-top:1px solid var(--line);
+  padding:40px 0 30px;
+  margin-top:60px;
+}
+.foot{
+  display:grid;
+  grid-template-columns:2fr 1fr 1fr 1fr;
+  gap:32px;
+  align-items:start;
+}
+.foot-brand{max-width:320px}
+.foot-brand p{
+  color:var(--mut);font-size:13px;line-height:1.65;
+  margin-top:14px;
+}
+.foot-col h4{
+  font-family:"JetBrains Mono",monospace;
+  font-size:10.5px;color:var(--dim);
+  text-transform:uppercase;letter-spacing:.08em;
+  margin-bottom:14px;
+}
+.foot-col a{
+  display:block;
+  font-size:13px;color:var(--mut);
+  padding:4px 0;
+  transition:var(--t);
+}
+.foot-col a:hover{color:var(--cy)}
+.foot-btm{
+  margin-top:40px;padding-top:20px;
+  border-top:1px solid var(--line);
+  display:flex;justify-content:space-between;align-items:center;gap:16px;
+  font-family:"JetBrains Mono",monospace;
+  font-size:11px;color:var(--dim);
+  flex-wrap:wrap;
+}
+
+/* reveal anim */
+[data-r]{opacity:0;transform:translateY(20px);transition:opacity .7s cubic-bezier(.16,1,.3,1),transform .7s cubic-bezier(.16,1,.3,1)}
+[data-r].in{opacity:1;transform:translateY(0)}
+
+/* back to top */
+.top{
+  position:fixed;bottom:24px;right:24px;z-index:30;
+  width:42px;height:42px;
+  background:var(--surf);
+  border:1px solid var(--line-hi);
+  border-radius:var(--r);
+  display:grid;place-items:center;
+  color:var(--mut);
+  opacity:0;pointer-events:none;
+  transform:translateY(8px);
+  transition:.3s cubic-bezier(.16,1,.3,1);
+}
+.top.show{opacity:1;pointer-events:auto;transform:translateY(0)}
+.top:hover{border-color:var(--cy);color:var(--cy);background:rgba(0,212,255,.05)}
+.top svg{width:16px;height:16px}
+
+/* ========== RESPONSIVE ========== */
+@media(max-width:980px){
+  .nav-links{display:none}
+  .burger{display:inline-flex}
+  .nav-cta.desktop{display:none}
+  .hero{padding:40px 0 70px}
+  .hero-grid{grid-template-columns:1fr;gap:36px}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .stat:nth-child(2){border-right:0}
+  .stat:nth-child(1),.stat:nth-child(2){border-bottom:1px solid var(--line)}
+  .bento{grid-template-columns:repeat(2,1fr)}
+  .card.wide,.card.half,.card.third{grid-column:span 2}
+  .dl-wrap{grid-template-columns:1fr}
+  .foot{grid-template-columns:1fr 1fr;gap:32px 24px}
+  .foot-brand{grid-column:1/-1;max-width:100%}
+}
+@media(max-width:560px){
+  .container{width:min(100% - 24px,1280px)}
+  .nav-row{height:58px}
+  .logo-ver{display:none}
+  .section{padding:70px 0}
+  .s-head{margin-bottom:32px}
+  .bento{grid-template-columns:1fr;gap:10px}
+  .card.wide,.card.half,.card.third{grid-column:auto}
+  .stats{grid-template-columns:1fr}
+  .stat{border-right:0!important;border-bottom:1px solid var(--line)}
+  .stat:last-child{border-bottom:0}
+  .dl-main{padding:28px 24px}
+  .btn{width:100%;justify-content:center}
+  .hero-actions{flex-direction:column}
+  .hero-actions .btn{width:100%}
+  .foot{grid-template-columns:1fr}
+  .foot-btm{flex-direction:column;align-items:flex-start}
+  .top{bottom:16px;right:16px;width:40px;height:40px}
+}
+</style>
 </head>
 <body>
-    <div class="mobile-overlay" id="mobile-overlay" aria-hidden="true">
-        <nav class="mobile-nav" aria-label="Мобильное меню">
-            <a href="#home" class="active" data-mobile-link>Главная</a>
-            <a href="#features" data-mobile-link>Возможности</a>
-            <a href="#download" data-mobile-link>Скачать</a>
-            <a class="nav-action" href="https://github.com/neverjoskiy/eliteclean" target="_blank" rel="noopener noreferrer">GitHub</a>
-        </nav>
+<div class="wrap">
+
+<header class="nav">
+  <div class="container nav-row">
+    <a class="logo" href="#home" aria-label="EliteClean">
+      <span class="logo-mark">EC</span>
+      <span class="logo-txt">
+        <span class="logo-name">EliteClean</span>
+        <span class="logo-ver">v1.0 · stable</span>
+      </span>
+    </a>
+    <nav class="nav-links" aria-label="Навигация">
+      <a href="#home" class="active">./home</a>
+      <a href="#features">./features</a>
+      <a href="#stats">./stats</a>
+      <a href="#download">./download</a>
+    </nav>
+    <a class="nav-cta desktop" href="https://github.com/neverjoskiy/eliteclean" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.58v-2.03c-3.34.73-4.04-1.61-4.04-1.61-.54-1.39-1.33-1.76-1.33-1.76-1.09-.74.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.83 2.81 1.3 3.5.99.1-.77.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.53.12-3.18 0 0 1-.32 3.3 1.23a11.44 11.44 0 0 1 6 0c2.3-1.55 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.77.84 1.23 1.91 1.23 3.22 0 4.61-2.8 5.62-5.47 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.22.71.83.58A12 12 0 0 0 12 .3Z"/></svg>
+      GitHub
+    </a>
+    <button class="burger" id="burger" aria-label="Меню" aria-expanded="false"><span></span></button>
+  </div>
+  <div class="m-menu" id="mmenu" aria-hidden="true">
+    <a href="#home" data-mlink>./home</a>
+    <a href="#features" data-mlink>./features</a>
+    <a href="#stats" data-mlink>./stats</a>
+    <a href="#download" data-mlink>./download</a>
+    <a class="nav-cta" href="https://github.com/neverjoskiy/eliteclean" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.58v-2.03c-3.34.73-4.04-1.61-4.04-1.61-.54-1.39-1.33-1.76-1.33-1.76-1.09-.74.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.83 2.81 1.3 3.5.99.1-.77.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.53.12-3.18 0 0 1-.32 3.3 1.23a11.44 11.44 0 0 1 6 0c2.3-1.55 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.77.84 1.23 1.91 1.23 3.22 0 4.61-2.8 5.62-5.47 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.22.71.83.58A12 12 0 0 0 12 .3Z"/></svg>
+      GitHub
+    </a>
+  </div>
+</header>
+
+<main>
+
+<section class="hero" id="home">
+  <div class="container hero-grid">
+    <div>
+      <div class="hero-tag">
+        <span class="dot"></span>
+        <span>rust · tauri · windows 10/11</span>
+      </div>
+      <h1>
+        Очисти Windows<br>
+        <span class="accent">без лишнего</span>.<span class="cursor"></span>
+      </h1>
+      <p class="hero-sub">
+        Нативный тулкит для чистки кэша, приватности и системных твиков. <strong>Сканируй, выбирай категории, получай результат</strong>. Без облака, без телеметрии, без лишних кликов.
+      </p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="https://github.com/neverjoskiy/eliteclean/releases/download/setupus/ec-standalone-x86.exe" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          download standalone.exe
+        </a>
+        <a class="btn btn-link" href="#features">see what's inside →</a>
+      </div>
     </div>
 
-    <div class="shell">
-        <header class="nav">
-            <div class="container nav-inner">
-                <a class="brand" href="#home" aria-label="EliteClean">
-                    <span class="brand-mark">EC</span>
-                    <span><span class="brand-name">EliteClean</span><span class="brand-sub">windows cleaner</span></span>
-                </a>
-                <nav class="nav-links" aria-label="Навигация">
-                    <a href="#home" class="active">Главная</a>
-                    <a href="#features">Возможности</a>
-                    <a href="#download">Скачать</a>
-                </nav>
-                <a class="nav-action desktop" href="https://github.com/neverjoskiy/eliteclean" target="_blank" rel="noopener noreferrer">GitHub</a>
-                <button class="hamburger" id="hamburger" aria-label="Открыть меню" aria-expanded="false"><span></span></button>
-            </div>
-        </header>
+    <div class="term" aria-hidden="true">
+      <div class="term-bar">
+        <div class="term-dots"><i></i><i></i><i></i></div>
+        <div class="term-title">eliteclean ~ windows_scan.exe</div>
+        <div class="term-title">● live</div>
+      </div>
+      <div class="term-body" id="term-body">
+        <div class="term-line"><span class="pr">$</span> <span class="cmd">elitec scan --all</span></div>
+        <div class="term-line mu">[info] initializing scanner...</div>
+        <div class="term-line mu">[info] target: C:\ · user: %USER%</div>
+        <div class="term-line"></div>
+        <div class="term-line"><span class="ok">✓</span> temp files         <span class="hi">1.4 GB</span>  <span class="mu">(8,234 files)</span></div>
+        <div class="term-line"><span class="ok">✓</span> prefetch           <span class="hi">92 MB</span>   <span class="mu">(412 files)</span></div>
+        <div class="term-line"><span class="ok">✓</span> thumbnail cache    <span class="hi">384 MB</span>  <span class="mu">(1,028 files)</span></div>
+        <div class="term-line"><span class="ok">✓</span> memory dumps       <span class="hi">712 MB</span>  <span class="mu">(4 files)</span></div>
+        <div class="term-line"><span class="ok">✓</span> browser cache      <span class="hi">2.1 GB</span>  <span class="mu">(12,048 files)</span></div>
+        <div class="term-line"><span class="ok">✓</span> windows update     <span class="hi">3.2 GB</span>  <span class="mu">(216 files)</span></div>
+        <div class="term-line"></div>
+        <div class="term-line"><span class="wr">➜</span> total: <span class="hi">7.98 GB</span> can be freed</div>
+        <div class="term-line"></div>
+        <div class="term-line"><span class="pr">$</span> <span class="cmd">elitec clean --selected</span><span class="term-caret"></span></div>
+      </div>
+    </div>
+  </div>
+</section>
 
-        <main>
-            <section class="hero" id="home">
-                <div class="container hero-box">
-                    <div class="pill"><span class="pulse"></span> Rust + Tauri · Windows 10/11</div>
-                    <h1>Elite<span>Clean</span></h1>
-                    <p class="hero-copy">Быстрая и аккуратная утилита для Windows: <strong>сканирование мусора</strong>, очистка кэша, приватность, сетевые инструменты и системные твики в одном компактном приложении.</p>
-                    <div class="hero-actions">
-                        <a class="btn btn-primary" href="https://github.com/neverjoskiy/eliteclean/releases/download/setupus/setup.exe" target="_blank" rel="noopener noreferrer">Скачать setup.exe</a>
-                        <a class="btn btn-secondary" href="https://github.com/neverjoskiy/eliteclean/releases/download/setupus/ec-standalone-x86.exe" target="_blank" rel="noopener noreferrer">Windows x86.exe</a>
-                        <a class="btn btn-soft" href="#features">Что внутри</a>
-                    </div>
-                    <div class="hero-panel" aria-label="Краткая сводка возможностей">
-                        <div class="panel-head"><div class="dots"><i></i><i></i><i></i></div><div class="panel-title">eliteclean / overview</div></div>
-                        <div class="panel-grid">
-                            <div class="metric"><div class="metric-value">8+</div><div class="metric-label">категорий очистки</div></div>
-                            <div class="metric"><div class="metric-value">1-click</div><div class="metric-label">быстрый запуск</div></div>
-                            <div class="metric"><div class="metric-value">Tauri</div><div class="metric-label">нативный интерфейс</div></div>
-                            <div class="metric"><div class="metric-value">Rust</div><div class="metric-label">быстрое ядро</div></div>
-                        </div>
-                    </div>
-                </div>
-            </section>
+<section class="marquee" aria-hidden="true">
+  <div class="marquee-track" id="marquee">
+    <span class="marquee-item">USN journal<span class="st">◆</span></span>
+    <span class="marquee-item">prefetch<span class="st">◆</span></span>
+    <span class="marquee-item">amcache<span class="st">◆</span></span>
+    <span class="marquee-item">DNS flush<span class="st">◆</span></span>
+    <span class="marquee-item">ARP reset<span class="st">◆</span></span>
+    <span class="marquee-item">NetBIOS<span class="st">◆</span></span>
+    <span class="marquee-item">clipboard<span class="st">◆</span></span>
+    <span class="marquee-item">icon cache<span class="st">◆</span></span>
+    <span class="marquee-item">thumbnails<span class="st">◆</span></span>
+    <span class="marquee-item">search history<span class="st">◆</span></span>
+    <span class="marquee-item">run history<span class="st">◆</span></span>
+    <span class="marquee-item">memory dumps<span class="st">◆</span></span>
+    <span class="marquee-item">registry<span class="st">◆</span></span>
+    <span class="marquee-item">HAGS<span class="st">◆</span></span>
+    <span class="marquee-item">telemetry<span class="st">◆</span></span>
+    <span class="marquee-item">cortana<span class="st">◆</span></span>
+    <span class="marquee-item">game bar<span class="st">◆</span></span>
+    <span class="marquee-item">CPU parking<span class="st">◆</span></span>
+    <span class="marquee-item">power throttling<span class="st">◆</span></span>
+    <span class="marquee-item">timer resolution<span class="st">◆</span></span>
+  </div>
+</section>
 
-            <section class="section" id="features">
-                <div class="container">
-                    <div class="section-head" data-reveal>
-                        <div><div class="eyebrow">Возможности</div><h2 class="section-title">Чистый интерфейс. Сильные инструменты.</h2></div>
-                        <p class="section-text">EliteClean показывает категории, помогает быстро убрать лишнее и оставляет контроль за пользователем. Ничего лишнего — только понятные действия и результат.</p>
-                    </div>
-                    <div class="feature-grid">
-                        <article class="feature-card big" data-reveal><div><div class="card-index">01 / scanner</div><h3>Сканирование системы перед очисткой</h3><p>Анализ временных файлов, кэша, дампов, недавних элементов и других категорий перед удалением.</p></div><div class="chips"><span class="chip">Temp</span><span class="chip">Prefetch</span><span class="chip">Thumbnails</span><span class="chip">Dumps</span></div></article>
-                        <article class="feature-card" data-reveal><div><div class="card-index">02 / privacy</div><h3>Приватность</h3><p>Очистка буфера обмена, истории поиска, истории запуска, recent files и jump lists.</p></div><div class="chips"><span class="chip">history</span><span class="chip">cache</span></div></article>
-                        <article class="feature-card" data-reveal><div><div class="card-index">03 / network</div><h3>Сеть</h3><p>DNS, ARP, NetBIOS и полный сетевой reset для проблем с подключением.</p></div><div class="chips"><span class="chip">DNS</span><span class="chip">ARP</span></div></article>
-                        <article class="feature-card" data-reveal><div><div class="card-index">04 / system</div><h3>Системная очистка</h3><p>Кэш обновлений Windows, thumbnail cache, дампы памяти и следы активности в реестре.</p></div><div class="chips"><span class="chip">Windows</span><span class="chip">Registry</span></div></article>
-                        <article class="feature-card big" data-reveal><div><div class="card-index">05 / tweaks</div><h3>Расширенные твики</h3><p>Дополнительные настройки Windows для производительности, приватности и управления системным поведением.</p></div><div class="chips"><span class="chip">Game Bar</span><span class="chip">Telemetry</span><span class="chip">Power</span><span class="chip">GPU</span></div></article>
-                    </div>
-                </div>
-            </section>
-
-            <section class="section" id="download">
-                <div class="container download-layout">
-                    <div class="download-card" data-reveal>
-                        <div class="eyebrow">Скачать</div>
-                        <h2>Выбери удобную сборку для Windows.</h2>
-                        <p>Можно установить через setup.exe или скачать standalone x86-версию одним файлом. Для части системных операций могут понадобиться права администратора.</p>
-                        <div class="download-actions">
-                            <a class="btn btn-primary" href="https://github.com/neverjoskiy/eliteclean/releases/download/setupus/setup.exe" target="_blank" rel="noopener noreferrer">setup.exe</a>
-                            <a class="btn btn-secondary" href="https://github.com/neverjoskiy/eliteclean/releases/download/setupus/ec-standalone-x86.exe" target="_blank" rel="noopener noreferrer">Windows x86.exe</a>
-                        </div>
-                        <div class="note"><strong>Совет:</strong> если SmartScreen показывает предупреждение, проверь ссылку на GitHub Releases и запускай файл только из официального релиза.</div>
-                    </div>
-                    <div class="release-list" aria-label="Файлы релиза" data-reveal>
-                        <div class="release-item"><div><div class="release-name">Setup installer</div><div class="release-meta">setup.exe · рекомендуемый вариант</div></div><a class="mini-link" href="https://github.com/neverjoskiy/eliteclean/releases/download/setupus/setup.exe" target="_blank" rel="noopener noreferrer">скачать</a></div>
-                        <div class="release-item"><div><div class="release-name">Windows x86 standalone</div><div class="release-meta">ec-standalone-x86.exe · без установки</div></div><a class="mini-link" href="https://github.com/neverjoskiy/eliteclean/releases/download/setupus/ec-standalone-x86.exe" target="_blank" rel="noopener noreferrer">скачать</a></div>
-                        <div class="release-item"><div><div class="release-name">Исходный код</div><div class="release-meta">GitHub repository</div></div><a class="mini-link" href="https://github.com/neverjoskiy/eliteclean" target="_blank" rel="noopener noreferrer">открыть</a></div>
-                    </div>
-                </div>
-            </section>
-        </main>
-
-        <footer>
-            <div class="container footer-inner"><span>EliteClean · Rust + Tauri · Windows utility</span><div class="footer-links"><a href="https://github.com/neverjoskiy/eliteclean" target="_blank" rel="noopener noreferrer">GitHub</a><a href="https://github.com/neverjoskiy/eliteclean/releases" target="_blank" rel="noopener noreferrer">Releases</a><a href="#home">Наверх</a></div></div>
-        </footer>
+<section class="section" id="features">
+  <div class="container">
+    <div class="s-head" data-r>
+      <span class="s-num">// section 01</span>
+      <h2 class="s-title">Инструменты <em>разложены</em> по категориям.</h2>
+      <p class="s-desc">Каждый модуль решает свою задачу. Запускай выборочно или целиком — контроль за пользователем, не за приложением.</p>
     </div>
 
-    <button class="scroll-top" id="scroll-top" aria-label="Наверх"></button>
+    <div class="bento">
+      <article class="card wide" data-r style="min-height:280px">
+        <div class="card-head">
+          <div>
+            <div class="card-ix">01 // SCANNER</div>
+            <h3 style="margin-top:16px;font-size:22px">Сканирование с разбивкой по категориям</h3>
+            <p style="max-width:380px;margin-top:10px">Показывает что и сколько занимает до удаления. Никаких сюрпризов.</p>
+          </div>
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3" stroke-linecap="round"/></svg>
+          </div>
+        </div>
+        <div class="scan-vis">
+          <div class="scan-rows">
+            <div class="scan-row"><span class="lb">temp</span><div class="scan-bar"><span style="--w:.85;animation-delay:0s"></span></div><span class="vl">1.4G</span></div>
+            <div class="scan-row"><span class="lb">prefetch</span><div class="scan-bar"><span style="--w:.35;animation-delay:.3s"></span></div><span class="vl">92M</span></div>
+            <div class="scan-row"><span class="lb">thumbs</span><div class="scan-bar"><span style="--w:.55;animation-delay:.6s"></span></div><span class="vl">384M</span></div>
+            <div class="scan-row"><span class="lb">dumps</span><div class="scan-bar"><span style="--w:.7;animation-delay:.9s"></span></div><span class="vl">712M</span></div>
+          </div>
+        </div>
+      </article>
 
-    <script>
-        (function(){
-            var hamburger = document.getElementById('hamburger');
-            var overlay = document.getElementById('mobile-overlay');
-            var mobileLinks = document.querySelectorAll('[data-mobile-link]');
-            var scrollTop = document.getElementById('scroll-top');
+      <article class="card third" data-r>
+        <div class="card-head">
+          <div class="card-ix">02 // PRIVACY</div>
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 4 6v6c0 5 3.5 8 8 10 4.5-2 8-5 8-10V6l-8-4Z" stroke-linejoin="round"/></svg>
+          </div>
+        </div>
+        <h3>Приватность</h3>
+        <p>Clipboard, history, jump lists, recent files.</p>
+        <div class="card-tags">
+          <span class="tag">clipboard</span>
+          <span class="tag">history</span>
+        </div>
+      </article>
 
-            function toggleMenu() {
-                var open = hamburger.classList.contains('open');
-                if (open) {
-                    hamburger.classList.remove('open');
-                    overlay.classList.remove('open');
-                    hamburger.setAttribute('aria-expanded', 'false');
-                    overlay.setAttribute('aria-hidden', 'true');
-                    hamburger.setAttribute('aria-label', 'Открыть меню');
-                } else {
-                    hamburger.classList.add('open');
-                    overlay.classList.add('open');
-                    hamburger.setAttribute('aria-expanded', 'true');
-                    overlay.setAttribute('aria-hidden', 'false');
-                    hamburger.setAttribute('aria-label', 'Закрыть меню');
-                }
-            }
+      <article class="card third" data-r>
+        <div class="card-head">
+          <div class="card-ix">03 // NETWORK</div>
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 4 6.4 4 9s-1.5 6.3-4 9c-2.5-2.7-4-6.4-4-9s1.5-6.3 4-9Z"/></svg>
+          </div>
+        </div>
+        <h3>Сеть</h3>
+        <p>DNS flush, Winsock reset, ARP, NetBIOS.</p>
+        <div class="card-tags">
+          <span class="tag on">DNS</span>
+          <span class="tag">ARP</span>
+          <span class="tag">reset</span>
+        </div>
+      </article>
 
-            hamburger.addEventListener('click', toggleMenu);
+      <article class="card third" data-r>
+        <div class="card-head">
+          <div class="card-ix">04 // SYSTEM</div>
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6v6H9z"/><path d="M9 3v3M15 3v3M9 18v3M15 18v3M3 9h3M3 15h3M18 9h3M18 15h3"/></svg>
+          </div>
+        </div>
+        <h3>Системная очистка</h3>
+        <p>Update cache, дампы, thumbnails, реестр.</p>
+        <div class="card-tags">
+          <span class="tag">registry</span>
+          <span class="tag">dumps</span>
+        </div>
+      </article>
 
-            mobileLinks.forEach(function(link) {
-                link.addEventListener('click', function() {
-                    toggleMenu();
-                });
-            });
+      <article class="card wide" data-r>
+        <div class="card-head">
+          <div>
+            <div class="card-ix">05 // TWEAKS</div>
+            <h3 style="margin-top:16px;font-size:22px">Десять твиков через реестр Windows</h3>
+            <p style="max-width:420px;margin-top:10px">HAGS, telemetry, Game Bar, CPU parking, timer resolution — применяй и откатывай одним кликом.</p>
+          </div>
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 10v6m11-11h-6M7 12H1m15.5-6.5-4.3 4.3M9.8 14.2l-4.3 4.3m0-13 4.3 4.3m4.4 4.4 4.3 4.3"/></svg>
+          </div>
+        </div>
+        <div class="card-tags">
+          <span class="tag on">HAGS</span>
+          <span class="tag on">Telemetry</span>
+          <span class="tag">Game Bar</span>
+          <span class="tag">Cortana</span>
+          <span class="tag">CPU Parking</span>
+          <span class="tag">Power Throttling</span>
+          <span class="tag">Timer Res</span>
+          <span class="tag">UWP BG</span>
+        </div>
+      </article>
 
-            /* Active nav link tracking */
-            var sections = document.querySelectorAll('section[id]');
-            var desktopLinks = document.querySelectorAll('.nav-links a');
-            var currentActive = null;
-            var observer = new IntersectionObserver(function(entries) {
-                entries.forEach(function(entry) {
-                    if (!entry.isIntersecting) return;
-                    var id = entry.target.id;
-                    var activeDesktop = document.querySelector('.nav-links a[href="#' + id + '"]');
-                    var activeMobile = document.querySelector('.mobile-nav a[href="#' + id + '"]');
-                    if (activeDesktop && activeDesktop !== currentActive) {
-                        desktopLinks.forEach(function(l) { l.classList.remove('active'); });
-                        activeDesktop.classList.add('active');
-                        currentActive = activeDesktop;
-                    }
-                    if (activeMobile) {
-                        document.querySelectorAll('.mobile-nav a').forEach(function(l) { l.classList.remove('active'); });
-                        activeMobile.classList.add('active');
-                    }
-                });
-            }, { threshold: 0.45 });
-            sections.forEach(function(s) { observer.observe(s); });
+      <article class="card half" data-r>
+        <div class="card-head">
+          <div class="card-ix">06 // MEMORY</div>
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="10" rx="1.5"/><path d="M6 11v2M10 11v2M14 11v2M18 11v2"/></svg>
+          </div>
+        </div>
+        <h3>Очистка памяти javaw.exe</h3>
+        <p>Сканирует процессы javaw.exe и зануляет найденные строки. FunTime через 1fc.exe.</p>
+        <div class="card-tags">
+          <span class="tag">javaw</span>
+          <span class="tag">1fc.exe</span>
+        </div>
+      </article>
 
-            /* Scroll-to-top */
-            function updateScrollTop() {
-                var scrolled = window.scrollY > 400;
-                scrollTop.classList.toggle('visible', scrolled);
-            }
-            scrollTop.addEventListener('click', function() {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            });
-            window.addEventListener('scroll', updateScrollTop, { passive: true });
-            updateScrollTop();
+      <article class="card half" data-r>
+        <div class="card-head">
+          <div class="card-ix">07 // GLOBAL</div>
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" stroke-linejoin="round"/></svg>
+          </div>
+        </div>
+        <h3>Глобальная очистка</h3>
+        <p>Event Logs, Prefetch, Amcache, Jump Lists, USN Journal — одной операцией.</p>
+        <div class="card-tags">
+          <span class="tag on">1-click</span>
+          <span class="tag">batch</span>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
 
-            /* Scroll reveal */
-            var revealElements = document.querySelectorAll('[data-reveal]');
-            var revealObserver = new IntersectionObserver(function(entries) {
-                entries.forEach(function(entry) {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('revealed');
-                        revealObserver.unobserve(entry.target);
-                    }
-                });
-            }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
-            revealElements.forEach(function(el) { revealObserver.observe(el); });
-        })();
-    </script>
+<section class="section" id="stats">
+  <div class="container">
+    <div class="s-head" data-r>
+      <span class="s-num">// section 02</span>
+      <h2 class="s-title">Числа, которые <em>важны</em>.</h2>
+      <p class="s-desc">Компактно. Нативно. Без зависимостей от Electron. Работает на Windows 10 и 11.</p>
+    </div>
+
+    <div class="stats" data-r>
+      <div class="stat">
+        <div class="stat-k">// categories</div>
+        <div class="stat-v"><em>8</em>+</div>
+        <div class="stat-d">scan targets</div>
+      </div>
+      <div class="stat">
+        <div class="stat-k">// tweaks</div>
+        <div class="stat-v"><em>10</em></div>
+        <div class="stat-d">registry-based</div>
+      </div>
+      <div class="stat">
+        <div class="stat-k">// runtime</div>
+        <div class="stat-v">Rust</div>
+        <div class="stat-d">tauri v2 core</div>
+      </div>
+      <div class="stat">
+        <div class="stat-k">// size</div>
+        <div class="stat-v">&lt;10<em>mb</em></div>
+        <div class="stat-d">native binary</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="download">
+  <div class="container">
+    <div class="s-head" data-r>
+      <span class="s-num">// section 03</span>
+      <h2 class="s-title">Забирай <em>последнюю</em> сборку.</h2>
+      <p class="s-desc">Портативная сборка — один файл, без установки. Часть системных операций потребует прав администратора.</p>
+    </div>
+
+    <div class="dl-wrap">
+      <div class="dl-main" data-r>
+        <div class="card-ix">// recommended</div>
+        <h2>Standalone build.<br>Запустил и работаешь.</h2>
+        <p>Один исполняемый файл без установщика. Не трогает реестр, запускается откуда угодно. Автообновления не предусмотрены — проверяй GitHub Releases вручную.</p>
+        <div class="dl-cmd">
+          <span class="pr">$</span>
+          <span class="tx" id="dl-cmd-tx">.\ec-standalone-x86.exe</span>
+          <button class="cp" id="cp-btn" type="button" aria-label="Скопировать">copy</button>
+        </div>
+        <div class="dl-buttons">
+          <a class="btn btn-primary" href="https://github.com/neverjoskiy/eliteclean/releases/download/setupus/ec-standalone-x86.exe" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            download standalone.exe
+          </a>
+          <a class="btn btn-ghost" href="https://github.com/neverjoskiy/eliteclean/releases" target="_blank" rel="noopener">все релизы</a>
+        </div>
+        <div class="warn">
+          <strong>note</strong>
+          Если SmartScreen предупреждает, проверь ссылку на GitHub Releases и запускай только файл из официального релиза.
+        </div>
+      </div>
+
+      <div class="dl-list">
+        <a class="dl-row" data-r href="https://github.com/neverjoskiy/eliteclean/releases/download/setupus/ec-standalone-x86.exe" target="_blank" rel="noopener">
+          <div class="dl-row-tx">
+            <div class="dl-row-name">Windows x86 standalone</div>
+            <div class="dl-row-meta">ec-standalone-x86.exe · portable</div>
+          </div>
+          <div class="dl-row-arr">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17 17 7M8 7h9v9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </a>
+        <a class="dl-row" data-r href="https://github.com/neverjoskiy/eliteclean/releases" target="_blank" rel="noopener">
+          <div class="dl-row-tx">
+            <div class="dl-row-name">All releases</div>
+            <div class="dl-row-meta">changelog & older builds</div>
+          </div>
+          <div class="dl-row-arr">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17 17 7M8 7h9v9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </a>
+        <a class="dl-row" data-r href="https://github.com/neverjoskiy/eliteclean" target="_blank" rel="noopener">
+          <div class="dl-row-tx">
+            <div class="dl-row-name">Исходный код</div>
+            <div class="dl-row-meta">github.com/neverjoskiy/eliteclean</div>
+          </div>
+          <div class="dl-row-arr">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17 17 7M8 7h9v9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </a>
+        <a class="dl-row" data-r href="https://github.com/neverjoskiy/eliteclean/issues" target="_blank" rel="noopener">
+          <div class="dl-row-tx">
+            <div class="dl-row-name">Issue tracker</div>
+            <div class="dl-row-meta">bugs & feature requests</div>
+          </div>
+          <div class="dl-row-arr">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17 17 7M8 7h9v9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="container">
+    <div class="foot">
+      <div class="foot-brand">
+        <a class="logo" href="#home">
+          <span class="logo-mark">EC</span>
+          <span class="logo-txt">
+            <span class="logo-name">EliteClean</span>
+            <span class="logo-ver">v1.0 · stable</span>
+          </span>
+        </a>
+        <p>Windows optimization toolkit. Rust + Tauri, без телеметрии и облачных сервисов.</p>
+      </div>
+      <div class="foot-col">
+        <h4>// project</h4>
+        <a href="#features">features</a>
+        <a href="#download">download</a>
+        <a href="https://github.com/neverjoskiy/eliteclean/releases" target="_blank" rel="noopener">releases</a>
+      </div>
+      <div class="foot-col">
+        <h4>// source</h4>
+        <a href="https://github.com/neverjoskiy/eliteclean" target="_blank" rel="noopener">github</a>
+        <a href="https://github.com/neverjoskiy/eliteclean/issues" target="_blank" rel="noopener">issues</a>
+        <a href="https://github.com/neverjoskiy/eliteclean/blob/main/LICENSE" target="_blank" rel="noopener">license</a>
+      </div>
+      <div class="foot-col">
+        <h4>// tech</h4>
+        <a href="https://tauri.app" target="_blank" rel="noopener">tauri</a>
+        <a href="https://www.rust-lang.org" target="_blank" rel="noopener">rust</a>
+      </div>
+    </div>
+    <div class="foot-btm">
+      <span>© 2026 EliteClean · built with rust + tauri</span>
+      <span>made by @neverjoskiy</span>
+    </div>
+  </div>
+</footer>
+
+<button class="top" id="top" aria-label="Наверх">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m6 15 6-6 6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+</button>
+
+</div>
+
+<script>
+(function(){
+  // mobile menu
+  var burger=document.getElementById('burger');
+  var mmenu=document.getElementById('mmenu');
+  var mlinks=document.querySelectorAll('[data-mlink]');
+  function toggle(open){
+    var o = typeof open==='boolean'?open:!burger.classList.contains('open');
+    burger.classList.toggle('open',o);
+    mmenu.classList.toggle('open',o);
+    burger.setAttribute('aria-expanded',o);
+    mmenu.setAttribute('aria-hidden',!o);
+    document.body.style.overflow=o?'hidden':'';
+  }
+  burger.addEventListener('click',function(){toggle()});
+  mlinks.forEach(function(l){l.addEventListener('click',function(){toggle(false)})});
+
+  // active section tracking
+  var sections=document.querySelectorAll('section[id]');
+  var navA=document.querySelectorAll('.nav-links a');
+  var mnavA=document.querySelectorAll('.m-menu a[href^="#"]');
+  var io=new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(!e.isIntersecting)return;
+      var id=e.target.id;
+      navA.forEach(function(a){a.classList.toggle('active',a.getAttribute('href')==='#'+id)});
+      mnavA.forEach(function(a){a.classList.toggle('active',a.getAttribute('href')==='#'+id)});
+    });
+  },{threshold:.35});
+  sections.forEach(function(s){io.observe(s)});
+
+  // reveal
+  var rio=new IntersectionObserver(function(es){
+    es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');rio.unobserve(e.target)}});
+  },{threshold:.12,rootMargin:'0px 0px -40px 0px'});
+  document.querySelectorAll('[data-r]').forEach(function(el){rio.observe(el)});
+
+  // scroll top
+  var top=document.getElementById('top');
+  window.addEventListener('scroll',function(){top.classList.toggle('show',window.scrollY>500)},{passive:true});
+  top.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'})});
+
+  // parallax glow on cards
+  document.querySelectorAll('.card').forEach(function(c){
+    c.addEventListener('mousemove',function(e){
+      var r=c.getBoundingClientRect();
+      c.style.setProperty('--mx',((e.clientX-r.left)/r.width*100)+'%');
+      c.style.setProperty('--my',((e.clientY-r.top)/r.height*100)+'%');
+    });
+  });
+
+  // duplicate marquee for seamless loop
+  var mq=document.getElementById('marquee');
+  if(mq){mq.innerHTML+=mq.innerHTML}
+
+  // copy command
+  var cpBtn=document.getElementById('cp-btn');
+  var cmdTx=document.getElementById('dl-cmd-tx');
+  if(cpBtn&&cmdTx){
+    cpBtn.addEventListener('click',function(){
+      var txt=cmdTx.textContent;
+      if(navigator.clipboard){navigator.clipboard.writeText(txt)}
+      var o=cpBtn.textContent;
+      cpBtn.textContent='copied';
+      cpBtn.style.color='var(--lm)';
+      cpBtn.style.borderColor='var(--lm)';
+      setTimeout(function(){cpBtn.textContent=o;cpBtn.style.color='';cpBtn.style.borderColor=''},1500);
+    });
+  }
+})();
+</script>
 </body>
 </html>
