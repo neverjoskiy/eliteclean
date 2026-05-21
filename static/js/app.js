@@ -210,6 +210,19 @@ function hideResult(id) {
 function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
 function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
+// ── First Run Notice ──
+function checkFirstRun() {
+    try {
+        if (!localStorage.getItem('ec_first_run_shown')) {
+            openModal('firstRunModal');
+        }
+    } catch {}
+}
+function markFirstRunShown() {
+    try { localStorage.setItem('ec_first_run_shown', '1'); } catch {}
+    closeModal('firstRunModal');
+}
+
 // ── Button loading ──
 function setBtnLoading(btn, on) {
     btn.classList.toggle('loading', on);
@@ -280,7 +293,7 @@ async function init() {
 document.addEventListener('DOMContentLoaded', () => {
 
     // Splash
-    runSplash().then(() => { loadSettings(); init(); });
+    runSplash().then(() => { loadSettings(); init(); checkFirstRun(); });
 
     // Звук на все кнопки действий
     document.addEventListener('click', e => {
@@ -371,6 +384,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('instructionCloseBtn').addEventListener('click', () => closeModal('instructionModal'));
     document.getElementById('instructionOkBtn').addEventListener('click', () => closeModal('instructionModal'));
     document.getElementById('instructionModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal('instructionModal'); });
+
+    // First Run modal
+    document.getElementById('firstRunOkBtn').addEventListener('click', markFirstRunShown);
+    document.getElementById('firstRunCloseBtn').addEventListener('click', markFirstRunShown);
+    document.getElementById('firstRunModal').addEventListener('click', e => { if (e.target === e.currentTarget) markFirstRunShown(); });
 
     // Clear logs
     document.getElementById('clearLogsBtn').addEventListener('click', async () => {

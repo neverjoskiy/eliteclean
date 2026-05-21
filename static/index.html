@@ -25,6 +25,39 @@
     </div>
 </div>
 
+<!-- ── First Run Notice ── -->
+<div id="firstRunModal" class="overlay hidden" style="z-index:10000">
+    <div class="modal" style="max-width:420px">
+        <div class="modal-head" style="border-bottom-color:rgba(158,74,74,.3)">
+            <span style="color:var(--err)">Внимание</span>
+            <button class="btn-icon" id="firstRunCloseBtn" title="закрыть">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="modal-body" style="gap:10px">
+            <div class="instr-note" style="border-color:rgba(158,74,74,.25);background:rgba(158,74,74,.06)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="color:var(--err);flex-shrink:0;margin-top:2px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <span><strong style="color:var(--err)">Если вы купили эту программу — вас обманули.</strong><br>Это бесплатное открытое ПО.</span>
+            </div>
+            <div class="instr-step">
+                <span class="isn">1</span>
+                <span>Программа создана <strong>t.me/eliteclean</strong></span>
+            </div>
+            <div class="instr-step">
+                <span class="isn">2</span>
+                <span>Исходный код программы открыт по лицензии <strong>GNU AGPL v3</strong></span>
+            </div>
+            <div class="instr-note">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                <span>Любая продажа этой программы — мошенничество. Официальный канал: <strong>t.me/eliteclean</strong></span>
+            </div>
+        </div>
+        <div class="modal-foot" style="justify-content:center">
+            <button class="btn-run" id="firstRunOkBtn">Я понимаю</button>
+        </div>
+    </div>
+</div>
+
 <div class="app" id="appRoot" style="opacity:0">
     <aside class="sidebar">
         <div class="logo">EC</div>
